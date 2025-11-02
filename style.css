@@ -76,7 +76,7 @@ body {
     background: rgba(47, 49, 54, 0.9); /* Discord Koyu Arkaplan rengi */
     border-radius: 10px;
     padding: 15px;
-    margin: 0 auto 30px; 
+    margin: 0 auto 30px; /* Alttan boşluğu azalttık */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);
     
@@ -165,7 +165,7 @@ body {
     display: flex;
     justify-content: center;
     gap: 25px;
-    margin-top: 20px; 
+    margin-top: 20px; /* Sayacın altına biraz boşluk */
 }
 .social-icon {
     font-size: 30px;
@@ -179,38 +179,35 @@ body {
     color: #5865f2;
 }
 
-/* 7. ZİYARETÇİ SAYACI STİLİ (TAMAMEN ŞEFFAF YAPILDI) */
+/* 7. ZİYARETÇİ SAYACI STİLİ (Font Awesome Göz İkonu) */
 .visitor-counter-display {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: -15px; 
-    margin-bottom: 20px; 
+    margin-top: -15px; /* Discord kartına daha yakın */
+    margin-bottom: 20px; /* Sosyal ikonlardan ayırma */
     font-size: 0.95em;
     color: #b9bbbe;
-    
-    /* ARKA PLAN VE GÖLGELER KALDIRILDI */
-    background: transparent; 
-    box-shadow: none;
+    background: rgba(47, 49, 54, 0.7); /* Discord kartı gibi hafif şeffaf arka plan */
+    border-radius: 8px;
     padding: 8px 15px;
     width: fit-content;
     margin-left: auto;
     margin-right: auto;
-    
-    transition: none; /* Hover animasyonları kaldırıldı */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
 }
 
-/* Şeffaf olduğu için hover efekti de kaldırıldı */
 .visitor-counter-display:hover {
-    background: transparent;
-    transform: none; 
+    background: rgba(47, 49, 54, 0.9); /* Hover'da biraz daha koyu */
+    transform: translateY(-2px); /* Hafifçe yukarı kaydırma */
 }
 
 .visitor-icon {
-    font-size: 1.1em; 
-    margin-right: 5px; /* Boşluğu azalt */
+    font-size: 1.1em; /* Göz ikonunu boyutu */
+    margin-right: 8px;
     vertical-align: middle;
-    color: #fff; 
+    color: #fff; /* İkon rengini beyaz yap */
 }
 
 #visitor-count-text {
@@ -252,7 +249,7 @@ body {
 #volume-slider {
     width: 100px;
     margin-left: 10px;
-    /* Slider görünümünü özelleştirme */
+    /* Slider görünümünü özelleştirme (Tarayıcıya göre farklılık gösterebilir) */
     -webkit-appearance: none;
     appearance: none;
     height: 5px;
