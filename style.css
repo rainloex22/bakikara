@@ -178,20 +178,6 @@ body {
     color: #5865f2;
 }
 
-
-/* 7. ZİYARETÇİ SAYACI STİLİ */
-.visitor-counter-wrapper {
-    margin-bottom: 20px; 
-    text-align: center;
-}
-
-.visitor-badge {
-    /* Bu, sayacı ortalar ve kutu gölgesi ekler */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    border-radius: 5px;
-}
-
-
 /* 6. MÜZİK KONTROLLERİ */
 #music-controls-wrapper {
     position: absolute;
