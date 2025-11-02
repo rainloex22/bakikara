@@ -69,13 +69,13 @@ body {
 }
 
 
-/* 4. DİSCORD KARTI STİLİ - BÜYÜK PANEL */
+/* 4. DİSCORD KARTI STİLİ */
 .discord-info {
-    width: 550px; /* Panel DAHA DA BÜYÜTÜLDÜ (550px) */
+    width: 550px; 
     min-height: 200px;
     background: rgba(47, 49, 54, 0.98); 
     border-radius: 15px;
-    padding: 30px; /* İç boşluk artırıldı */
+    padding: 30px; 
     margin: 0 auto 15px; 
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7); 
     border: 3px solid rgba(255, 255, 255, 0.15); 
@@ -97,61 +97,65 @@ body {
 .discord-header {
     display: flex;
     align-items: center;
-    margin-bottom: 30px; /* Aktivite ile arasına büyük boşluk */
+    margin-bottom: 30px; 
 }
 .discord-avatar {
-    width: 90px; /* Avatar büyütüldü */
+    width: 90px; 
     height: 90px;
-    border-radius: 50%; /* Kare değil, yuvarlak */
+    border-radius: 50%; 
     margin-right: 25px;
     position: relative;
     border: 4px solid #1e2024;
 }
 
-/* KULLANICI ADI STİLİ - BÜYÜK */
+/* KULLANICI ADI STİLİ */
 .username-and-tag {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
 }
 .discord-username {
-    font-size: 2.5em; /* KULLANICI ADI ÇOK BÜYÜTÜLDÜ */
+    font-size: 2.5em; 
     font-weight: 800;
     line-height: 1.1;
     color: #fff;
     margin-bottom: 5px;
 }
 .discord-tag {
-    font-size: 1.2em; /* Tag boyutu artırıldı */
+    font-size: 1.2em; 
     font-weight: 400;
     color: #b9bbbe;
 }
 
 /* Durum Noktaları */
 .status-dot {
-    width: 18px; /* Nokta büyütüldü */
+    width: 18px; 
     height: 18px;
+    /* Durum rengi JS tarafından veriliyor. */
     border: 5px solid #1e2024; 
     box-shadow: 0 0 10px rgba(0, 0, 0, 1.0);
 }
+/* Aktivite Noktası (Spotify, Oyun vb.) - Artık durumu da simgeliyor. */
 .activity-dot {
-    width: 18px; /* Nokta büyütüldü */
+    width: 18px; 
     height: 18px;
+    /* Aktivite rengi JS tarafından veriliyor. */
     border: 5px solid #1e2024;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 1.0);
 }
 
-/* AKTİVİTE METNİ - BÜYÜK */
+/* AKTİVİTE METNİ */
 .status-indicator-wrapper {
     display: flex;
     align-items: center;
     padding: 10px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.1); /* Ayırıcı çizgi */
+    border-top: 1px solid rgba(255, 255, 255, 0.1); 
     width: 100%;
     box-sizing: border-box;
 }
 
 .discord-status {
-    font-size: 1.4em; /* AKTİVİTE METNİ BÜYÜTÜLDÜ */
+    font-size: 1.4em; 
     color: #b9bbbe;
 }
 .discord-status strong {
@@ -160,7 +164,7 @@ body {
 }
 
 
-/* 6. MÜZİK KONTROLLERİ (Değişmedi - Sol Üstte Sabit) */
+/* 6. MÜZİK KONTROLLERİ - ZARİF VE ARKA PLANSIZ */
 #music-controls-wrapper {
     position: fixed; 
     top: 30px;
@@ -168,18 +172,55 @@ body {
     display: flex;
     align-items: center;
     z-index: 10;
-    padding: 10px;
-    background-color: rgba(0, 0, 0, 0.6); 
+    /* ARKA PLAN VE GÖLGE KALDIRILDI */
+    padding: 0; 
+    background-color: transparent; 
+    box-shadow: none;
+    transition: all 0.3s ease;
+}
+
+/* Zarif bir hover efekti ekleyelim */
+#music-controls-wrapper:hover {
+    padding: 5px 10px;
+    background-color: rgba(0, 0, 0, 0.3); /* Hover'da hafif bir arka plan gelsin */
     border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
 }
 
 .music-button {
-    font-size: 24px; 
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 28px; /* İkon büyütüldü */
+    padding: 5px; /* Daha zarif bir padding */
+    transition: color 0.3s, transform 0.3s;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.7); /* İkona hafif parlaklık */
+}
+
+.music-button:hover {
+    color: #9400D3; /* Hafif mor vurgu */
+    transform: scale(1.1);
 }
 
 #volume-slider {
     width: 150px; 
+    margin-left: 15px;
+    height: 5px; /* Slider inceltildi */
+    background: #5865f2;
+    -webkit-appearance: none; /* Varsayılan tarayıcı stilini kaldır */
+    appearance: none;
+    border-radius: 5px;
+}
+
+#volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px; /* Thumb küçültüldü */
+    height: 15px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    box-shadow: 0 0 8px #fff; 
 }
 
 
@@ -192,7 +233,6 @@ body {
     margin-bottom: 20px; 
     font-size: 1.2em; 
     color: #fff;
-    /* Panel genişliğine uyum sağlaması için güncellendi */
     width: 550px; 
     box-sizing: border-box; 
 }
@@ -212,7 +252,7 @@ body {
     margin-top: 40px; 
 }
 .social-icon {
-    font-size: 70px; /* Daha da büyütüldü */
+    font-size: 70px; 
     transition: color 0.4s, transform 0.4s, filter 0.4s;
 }
 
