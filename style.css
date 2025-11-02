@@ -58,9 +58,9 @@ body {
 
 /* 3. BAŞLIK STİLİ - NEON ETKİSİ */
 .title {
-    font-size: 6em; /* Biraz daha büyük */
+    font-size: 6em; 
     font-weight: 800;
-    letter-spacing: 7px; /* Harf aralığı artırıldı */
+    letter-spacing: 7px; 
     margin-bottom: 40px;
     
     /* Neon Gölge Efekti (Mavi/Camgöbeği Tonlarında) */
@@ -80,8 +80,8 @@ body {
 
 /* 4. DİSCORD BİLGİ KARTI */
 .discord-info {
-    background: rgba(18, 18, 18, 0.85); /* Daha az şeffaf */
-    backdrop-filter: blur(12px); /* Daha yoğun buzlu cam efekti */
+    background: rgba(18, 18, 18, 0.85); 
+    backdrop-filter: blur(12px); 
     padding: 20px 30px;
     border-radius: 15px;
     max-width: 380px;
@@ -92,7 +92,7 @@ body {
     transition: all 0.5s ease;
     opacity: 0;
     transform: translateY(20px);
-    position: relative; /* Alt çizgiyi konumlandırmak için */
+    position: relative; 
 }
 .discord-info.active {
     opacity: 1;
@@ -107,7 +107,7 @@ body {
     left: 0;
     width: 100%;
     height: 3px;
-    background: linear-gradient(90deg, #7289DA, #4e5d94); /* Discord renk geçişi */
+    background: linear-gradient(90deg, #7289DA, #4e5d94); 
     border-bottom-left-radius: 15px;
     border-bottom-right-radius: 15px;
     transform-origin: left;
@@ -128,11 +128,11 @@ body {
     height: 60px;
     border-radius: 50%;
     margin-right: 15px;
-    border: 4px solid #5865F2; /* Daha kalın Discord Mavi Çerçeve */
+    border: 4px solid #5865F2; 
     object-fit: cover;
 }
 .discord-username {
-    font-size: 1.6em; /* Biraz daha büyük kullanıcı adı */
+    font-size: 1.6em; 
     font-weight: 700;
 }
 .discord-tag {
@@ -143,7 +143,7 @@ body {
 .discord-status {
     font-size: 1em;
     padding-top: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.15); /* Daha belirgin çizgi */
+    border-top: 1px solid rgba(255, 255, 255, 0.15); 
     color: #d1d1d1;
     margin-top: 8px;
 }
@@ -151,6 +151,53 @@ body {
     color: #7289DA; 
 }
 
+/* 7. SOSYAL MEDYA LİNKLERİ STİLİ */
+.social-links {
+    margin-top: 30px;
+    display: flex;
+    gap: 20px; 
+    animation: fadeIn 2s ease-out 0.5s forwards; 
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.social-icon {
+    color: white;
+    font-size: 1.8em; 
+    transition: all 0.3s ease-in-out;
+    padding: 10px;
+    border-radius: 50%;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); 
+}
+
+.social-icon:hover {
+    transform: scale(1.2) translateY(-3px); 
+}
+
+/* İkona Özgü Renkler ve Gölgeleme (Hover) */
+.instagram:hover {
+    color: #E1306C; 
+    box-shadow: 0 0 15px #E1306C;
+}
+
+.twitter:hover {
+    color: #1DA1F2; 
+    box-shadow: 0 0 15px #1DA1F2;
+}
+
+.twitch:hover {
+    color: #6441A4; 
+    box-shadow: 0 0 15px #6441A4;
+}
+
+.youtube:hover {
+    color: #FF0000; 
+    box-shadow: 0 0 15px #FF0000;
+}
 
 /* 5. MÜZİK KONTROL DÜĞMESİ */
 .music-controls {
@@ -162,18 +209,18 @@ body {
 .music-button {
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(8px);
-    border: 2px solid #5865F2; /* Discord mavisi kenarlık */
+    border: 2px solid #5865F2; 
     color: white;
-    width: 65px; /* Biraz daha büyük düğme */
+    width: 65px; 
     height: 65px;
     border-radius: 50%;
     cursor: pointer;
     font-size: 2em;
     transition: all 0.3s ease;
-    box-shadow: 0 0 20px rgba(88, 101, 242, 0.5); /* Mavi parıltı efekti */
+    box-shadow: 0 0 20px rgba(88, 101, 242, 0.5); 
 }
 .music-button:hover {
-    background: rgba(88, 101, 242, 0.3); /* Hover'da hafif mavi ton */
+    background: rgba(88, 101, 242, 0.3); 
     transform: scale(1.15);
 }
 .music-button.paused .icon::after {
