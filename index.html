@@ -12,6 +12,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    
+    <div id="music-controls-wrapper">
+        <button id="music-toggle" class="music-button paused" aria-label="Sesi Aç/Kapat">
+            <span id="volume-icon">🔇</span>
+        </button>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0" aria-label="Ses seviyesi">
+    </div>
 
     <div class="video-background">
         <video id="bg-video" autoplay muted loop playsinline poster="poster.jpg">
@@ -40,12 +47,6 @@
             <a href="https://youtube.com/c/SİZİN_YOUTUBE_ADRESİNİZ" target="_blank" class="social-icon youtube" aria-label="YouTube">
                 <i class="fab fa-youtube"></i>
             </a>
-        </div>
-
-        <div class="music-controls">
-            <button id="music-toggle" class="music-button paused" aria-label="Sesi Aç/Kapat">
-                <span class="icon">🔇</span>
-            </button>
         </div>
 
     </div>
