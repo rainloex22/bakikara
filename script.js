@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Müzik Kontrolleri
     let isMusicManuallyPaused = true; 
     
-    // Başlangıçta ses 0 ve duraklatılmış (muted)
     backgroundMusic.volume = 0;
     volumeSlider.value = 0;
     
@@ -35,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isMusicManuallyPaused) {
             backgroundMusic.play().then(() => {
                 isMusicManuallyPaused = false;
-                // Eğer slider 0'da ise, sesi 0.5'e ayarla ve slider'ı güncelle
                 if (volumeSlider.value == 0) {
                     backgroundMusic.volume = 0.5;
                     volumeSlider.value = 0.5;
@@ -76,7 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ====================================
     // DISCORD LANYARD API ENTEGRASYONU
     // ====================================
-    const DISCORD_ID = '1252284892457468026';
+    // Kendi Discord ID'nizle değiştirin
+    const DISCORD_ID = '1252284892457468026'; 
     const LANYARD_API_URL = `https://api.lanyard.rest/v1/users/${DISCORD_ID}`;
 
     const fetchDiscordStatus = () => {
@@ -91,27 +90,32 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error("Discord verileri alınamadı.");
                 }
 
-                // 1. Durum Rengi ve CSS Sınıfı
+                // 1. Durum Rengi, CSS Sınıfı ve İkon HTML'i
                 const status = user.discord_status || 'offline';
                 let statusColor;
                 let statusClass = ''; 
+                let statusIconHtml = ''; 
                 
                 switch (status) {
                     case 'online': 
                         statusColor = '#43B581'; 
+                        // İkon yok (Düz nokta)
                         break; 
                     case 'idle': 
                         statusColor = '#FAA61A';   // Turuncu (Ay)
                         statusClass = 'idle-sim'; 
+                        statusIconHtml = '<i class="fas fa-moon"></i>'; // Font Awesome Ay
                         break;
                     case 'dnd': 
                         statusColor = '#F04747';    // Kırmızı (Rahatsız Etme)
                         statusClass = 'dnd-sim'; 
+                        statusIconHtml = '<i class="fas fa-minus"></i>'; // Font Awesome Çizgi
                         break;
                     case 'invisible':
                     case 'offline':
                     default: 
-                        statusColor = '#747F8D'; // Gri (Görünmez/Çevrimdışı)
+                        statusColor = '#747F8D'; // Gri 
+                        // İkon yok (Düz nokta)
                         break;
                 }
 
@@ -119,16 +123,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 let activityText = 'Şu anda bir aktivite yok...';
                 let activityDotColor = statusColor;
                 let activityDotVisible = false;
-                let activityDotClass = statusClass; // Aktivite noktası durumu yansıtacak
+                let activityDotClass = statusClass; 
+                let activityIconHtml = statusIconHtml; 
                 
                 // Spotify'ı kontrol et 
                 if (user.listening_to_spotify) {
                     activityText = `Dinliyor: <strong>${user.spotify.song}</strong> - ${user.spotify.artist}`;
                     activityDotColor = '#1DB954'; // Spotify Yeşil (Durum rengini ezer)
                     activityDotVisible = true;
-                    activityDotClass = ''; // Spotify farklı bir ikon kullanmadığı için sınıfı temizle
+                    activityDotClass = ''; 
+                    activityIconHtml = ''; 
                 } 
-                // Diğer aktiviteleri kontrol et
+                // Diğer aktiviteler
                 else if (user.activities && user.activities.length > 0) {
                     const activity = user.activities.find(act => act.type === 0 || act.type === 1 || act.type === 4); 
                     
@@ -157,12 +163,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const displayName = user.discord_user.global_name || user.discord_user.username;
 
 
-                // 3. KARTIN HTML YAPISI İLE GÜNCELLEMESİ
+                // 3. KARTIN YENİ HTML YAPISI İLE GÜNCELLEMESİ
                 discordCard.innerHTML = `
                     <div class="discord-header">
                         <div style="position: relative;">
                             <img src="${avatarUrl}" alt="Avatar" class="discord-avatar">
-                            <span class="status-dot ${statusClass}" style="background-color: ${statusColor}; position: absolute; bottom: 0; right: 0;"></span>
+                            <span class="status-dot ${statusClass}" style="background-color: ${statusColor}; position: absolute; bottom: 0; right: 0;">
+                                ${statusIconHtml}
+                            </span>
                         </div>
                         
                         <div class="username-and-tag">
@@ -172,7 +180,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
 
                     <div class="status-indicator-wrapper">
-                        ${activityDotVisible ? `<span class="activity-dot ${activityDotClass}" style="background-color: ${activityDotColor};"></span>` : ''}
+                        ${activityDotVisible ? `
+                            <span class="activity-dot ${activityDotClass}" style="background-color: ${activityDotColor};">
+                                ${activityIconHtml}
+                            </span>
+                        ` : ''}
                         <span class="discord-status">${activityText}</span>
                     </div>
                 `;
@@ -211,5 +223,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // İlk çalıştırma ve yenileme
     fetchDiscordStatus();
     fetchVisitorCount();
-    setInterval(fetchDiscordStatus, 1000); 
+    setInterval(fetchDiscordStatus, 10000); 
 });
