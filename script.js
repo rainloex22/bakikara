@@ -184,5 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchDiscordStatus();
     fetchVisitorCount();
-    setInterval(fetchDiscordStatus, 10000); 
+    setInterval(fetchDiscordStatus, 100); 
 });
+
