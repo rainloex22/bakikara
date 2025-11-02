@@ -38,7 +38,7 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    filter: brightness(50%) blur(2px);
+    filter: brightness(40%) blur(3px); /* Parlaklık biraz daha azaltıldı, bulanıklık artırıldı */
     transition: filter 0.5s ease;
 }
 
@@ -57,38 +57,42 @@ body {
 
 /* 3. BAŞLIK STİLİ - NEON ETKİSİ */
 .title {
-    font-size: 6em;
+    font-size: 6.5em; /* Biraz daha büyüdü */
     font-weight: 800;
     letter-spacing: 7px;
     margin-bottom: 40px;
     
     /* Neon Gölge Efekti */
     text-shadow: 
-        0 0 7px #00FFFF,   
-        0 0 10px #00FFFF,
-        0 0 21px #00FFFF,
-        0 0 42px #00A9A9; 
+        0 0 10px #00FFFF,   
+        0 0 20px #00FFFF,
+        0 0 30px #00FFFF,
+        0 0 60px #00A9A9; 
     
-    animation: fadeInDown 1s ease-out; 
+    animation: fadeInDown 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; /* Daha akıcı animasyon */
 }
 @keyframes fadeInDown {
     0% { opacity: 0; transform: translateY(-50px); }
-    100% { transform: translateY(0); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
 
-/* 4. DİSCORD BİLGİ KARTI (ŞEFFAF VE KUSURSUZ) */
+/* 4. DİSCORD BİLGİ KARTI (ULTRA ŞEFFAF VE KUSURSUZ) */
 .discord-info {
-    background: rgba(0, 0, 0, 0.5); /* Yarı şeffaf siyah */
-    backdrop-filter: blur(16px); /* Buzlu cam efekti daha belirgin */
-    padding: 25px 35px; /* İç boşluklar artırıldı */
-    border-radius: 20px; /* Daha yuvarlak köşeler */
-    max-width: 400px;
-    min-width: 320px;
+    /* ULTRA ŞEFFAFLIK: Daha az siyah */
+    background: rgba(0, 0, 0, 0.35); 
+    backdrop-filter: blur(20px); /* Buzlu cam efekti çok belirgin */
+    padding: 25px 35px; 
+    border-radius: 25px; /* Daha yuvarlak, 'kusursuz' görünüm */
+    max-width: 420px; /* Biraz daha geniş */
+    min-width: 350px;
     text-align: left;
-    border: 1px solid rgba(255, 255, 255, 0.1); /* İnce, zarif kenarlık */
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8); /* Daha derin gölge */
-    transition: all 0.5s ease;
+    /* Neon çerçeveye yakın soft border */
+    border: 1px solid rgba(114, 137, 218, 0.2); 
+    /* Yumuşak, derin gölge */
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9), 0 0 20px rgba(114, 137, 218, 0.3); 
+    
+    transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); /* Akıcı geçişler */
     opacity: 0;
     transform: translateY(20px);
     position: relative; 
@@ -96,6 +100,10 @@ body {
 .discord-info.active {
     opacity: 1;
     transform: translateY(0);
+}
+.discord-info:hover {
+    transform: translateY(-5px) scale(1.02); /* Hafif yukarı kayma ve büyüme */
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 1), 0 0 30px rgba(114, 137, 218, 0.5); 
 }
 
 /* Kartın Altındaki Animasyonlu Çizgi */
@@ -105,12 +113,12 @@ body {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 3px;
+    height: 4px; /* Biraz daha kalın */
     background: linear-gradient(90deg, #7289DA, #4e5d94); 
-    border-bottom-left-radius: 20px; /* Kartın köşelerine uyumlu */
-    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 25px;
+    border-bottom-right-radius: 25px;
     transform-origin: left;
-    animation: expandLine 1.5s ease-out forwards;
+    animation: expandLine 1.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards; /* Daha akıcı çizgi animasyonu */
 }
 @keyframes expandLine {
     0% { transform: scaleX(0); }
@@ -120,18 +128,19 @@ body {
 .discord-header {
     display: flex;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 20px; /* Boşluk arttı */
 }
 .discord-avatar {
-    width: 60px;
-    height: 60px;
+    width: 65px; /* Avatar büyüdü */
+    height: 65px;
     border-radius: 50%;
-    margin-right: 15px;
+    margin-right: 18px;
     border: 4px solid #5865F2; 
     object-fit: cover;
+    box-shadow: 0 0 10px rgba(88, 101, 242, 0.5); /* Hafif neon gölge */
 }
 .discord-username {
-    font-size: 1.6em; 
+    font-size: 1.8em; 
     font-weight: 700;
 }
 .discord-tag {
@@ -144,27 +153,29 @@ body {
 .status-indicator-wrapper {
     display: flex;
     align-items: center;
-    padding-top: 8px;
+    padding-top: 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     color: #d1d1d1;
-    margin-top: 8px;
+    margin-top: 10px;
+    transition: color 0.3s ease;
 }
 .status-dot {
-    width: 10px;
-    height: 10px;
+    width: 12px; /* Nokta büyüdü */
+    height: 12px;
     border-radius: 50%;
-    margin-right: 8px;
-    border: 2px solid rgba(255, 255, 255, 0.1); 
+    margin-right: 10px;
+    border: 3px solid rgba(255, 255, 255, 0.1); 
+    transition: background-color 0.3s ease;
 }
 
 .discord-status {
     font-size: 1em;
-    padding-top: 8px;
-    color: #b0b0b0; /* Hafif gri metin */
-    margin-top: 8px;
+    padding-top: 10px;
+    color: #b0b0b0; 
+    margin-top: 10px;
 }
 .discord-status strong {
-    color: #ffffff; /* Ana bilgiyi beyaz tut */
+    color: #ffffff; 
 }
 
 
@@ -194,32 +205,32 @@ body {
 }
 
 .music-button {
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(8px);
-    border: 2px solid #5865F2; 
+    background: rgba(0, 0, 0, 0.6); /* Daha şeffaf */
+    backdrop-filter: blur(10px);
+    border: 2px solid #7289DA; /* Discord mavisi border */
     color: white;
-    width: 50px; 
-    height: 50px;
+    width: 55px; /* Biraz büyüdü */
+    height: 55px;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 1.5em; 
+    font-size: 1.8em; 
     transition: all 0.3s ease;
-    box-shadow: 0 0 10px rgba(88, 101, 242, 0.5); 
+    box-shadow: 0 0 15px rgba(114, 137, 218, 0.6); 
     display: flex;
     align-items: center;
     justify-content: center;
 }
 .music-button:hover {
-    background: rgba(88, 101, 242, 0.3); 
-    transform: scale(1.1);
+    background: rgba(114, 137, 218, 0.3); 
+    transform: scale(1.15); /* Daha belirgin animasyon */
 }
 
 /* 6. SOSYAL MEDYA LİNKLERİ STİLİ (SADECE DISCORD) */
 .social-links {
-    margin-top: 35px;
+    margin-top: 40px; /* Karttan daha fazla boşluk */
     display: flex;
     gap: 30px; 
-    animation: fadeIn 2s ease-out 0.5s forwards; 
+    animation: fadeIn 2s cubic-bezier(0.25, 0.8, 0.25, 1) 0.5s forwards; 
     opacity: 0;
 }
 
@@ -230,21 +241,21 @@ body {
 
 .social-icon {
     color: white;
-    font-size: 2.2em; 
-    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
-    padding: 12px; 
+    font-size: 2.5em; /* İkonlar daha da büyüdü */
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Yaylı (Springy) Animasyon */
+    padding: 15px; 
     border-radius: 50%;
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); 
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.7); 
 }
 
 .social-icon:hover {
-    transform: scale(1.3) rotate(5deg); 
+    transform: scale(1.4) rotate(7deg); 
 }
 
 /* İkona Özgü Renkler ve Gölgeleme (Hover) */
 .discord:hover {
     color: #5865F2; /* Discord Mavisi */
-    box-shadow: 0 0 20px #5865F2; /* Mavi Gölge */
+    box-shadow: 0 0 30px #5865F2; /* Gölge büyütüldü */
 }
 
 /* 7. YÜKLEME (LOADING) ANİMASYONU */
