@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error("Discord verileri alınamadı.");
                 }
 
-                // 1. Durum Rengi (Sadece nokta rengi için kullanılır)
+                // 1. Durum Rengi (Sadece yuvarlak nokta rengi için kullanılır)
                 const status = user.discord_status || 'offline';
                 let statusColor;
                 
@@ -98,10 +98,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         statusColor = '#43B581'; // Yeşil 
                         break; 
                     case 'idle': 
-                        statusColor = '#FAA61A';   // Turuncu (Ay)
+                        statusColor = '#FAA61A';   // Turuncu 
                         break;
                     case 'dnd': 
-                        statusColor = '#F04747';    // Kırmızı (Rahatsız Etme)
+                        statusColor = '#F04747';    // Kırmızı 
                         break;
                     case 'invisible':
                     case 'offline':
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const displayName = user.discord_user.global_name || user.discord_user.username;
 
 
-                // 3. KARTIN HTML YAPISI İLE GÜNCELLEMESİ (Aktivite dotu kaldırıldı)
+                // 3. KARTIN HTML YAPISI İLE GÜNCELLEMESİ (Sadece status-dot kaldı)
                 discordCard.innerHTML = `
                     <div class="discord-header">
                         <div style="position: relative;">
