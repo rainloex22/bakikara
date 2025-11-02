@@ -178,9 +178,10 @@ body {
     color: #5865f2;
 }
 
-/* 7. ZİYARETÇİ SAYACI STİLİ (YENİ) */
+
+/* 7. ZİYARETÇİ SAYACI STİLİ */
 .visitor-counter-wrapper {
-    margin-bottom: 20px; /* Sosyal ikonlardan biraz yukarıda boşluk bırakır */
+    margin-bottom: 20px; 
     text-align: center;
 }
 
