@@ -1,5 +1,5 @@
 // ** Ayarlar **
-const DISCORD_USER_ID = '1252284892457468026'; // KENDİ DISCORD ID'NİZİ BURAYA YAZMALISINIZ
+const DISCORD_USER_ID = '1252284892457468026'; // Lütfen bu ID'nin doğru olduğundan emin olun!
 const LANYARD_API_URL = `https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`;
 const cardElement = document.getElementById('discord-card');
 
