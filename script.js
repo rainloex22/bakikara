@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const musicToggle = document.getElementById('music-toggle');
     const volumeSlider = document.getElementById('volume-slider');
     const volumeIcon = document.getElementById('volume-icon');
+    const visitorCountElement = document.getElementById('visitor-count'); // Yeni: Sayaç elemanı
 
     // Müzik Kontrolleri
     let isPlaying = false;
@@ -69,10 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Discord API'den verileri çekme (Buraya kendi API URL'nizi girin)
     // Örnek: 'https://api.lanyard.rest/v1/users/YOUR_DISCORD_ID'
     const DISCORD_ID = '1252284892457468026';
-    const API_URL = `https://api.lanyard.rest/v1/users/${DISCORD_ID}`;
+    const LANYARD_API_URL = `https://api.lanyard.rest/v1/users/${DISCORD_ID}`;
 
     const fetchDiscordStatus = () => {
-        fetch(API_URL)
+        fetch(LANYARD_API_URL)
             .then(response => response.json())
             .then(data => {
                 const user = data.data;
@@ -118,18 +119,15 @@ document.addEventListener('DOMContentLoaded', () => {
                             activityText = `Dinliyor: <strong>${user.spotify.song}</strong> - ${user.spotify.artist}`;
                             activityDotColor = '#1DB954'; // Spotify yeşili
                         } else {
-                             // Aktivite metni boşluksuz olarak düzeltildi
                             activityText = 'Şu anda bir aktivite yok...';
                             activityDotVisible = false;
                         }
                     } else {
-                        // Aktivite metni boşluksuz olarak düzeltildi
                         activityText = 'Şu anda bir aktivite yok...';
                         activityDotVisible = false;
                     }
 
                 } else {
-                    // Aktivite metni boşluksuz olarak düzeltildi
                     activityText = 'Şu anda bir aktivite yok...';
                     activityDotVisible = false;
                 }
@@ -152,13 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${activityDotVisible ? `<span class="activity-dot" style="background-color: ${activityDotColor}; border-color: ${activityDotColor};"></span>` : ''}
                         <span class="discord-status">${activityText}</span>
                     </div>
-
-                    <div class="status-indicator-wrapper" style="margin-bottom: 0;">
-                        <span style="font-size: 1.1em;">👁️‍🗨️</span>
-                        <span style="font-size: 0.95em; color: #b9bbbe; margin-left: 10px;">
-                            kaç kişi baktıysa
-                        </span>
-                    </div>
                 `;
                 discordCard.style.display = 'block';
                 discordCard.classList.remove('loading');
@@ -172,7 +163,34 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     };
 
-    // İlk yüklemede ve ardından her 10 saniyede bir çek
+
+    // Sayaç için CountAPI.xyz entegrasyonu
+    // Kendi namespace'inizi ve key'inizi belirlemeniz önemlidir.
+    // Örnek: `https://api.countapi.xyz/hit/YOUR_GITHUB_USERNAME.github.io/BAKI-S2`
+    const COUNT_API_NAMESPACE = 'your_github_username.github.io'; // Burayı kendi GitHub kullanıcı adınız.github.io ile değiştirin!
+    const COUNT_API_KEY = 'BAKI-S2'; // Burayı projenizin adı (repo adı) ile değiştirin
+
+    const fetchVisitorCount = () => {
+        fetch(`https://api.countapi.xyz/hit/${COUNT_API_NAMESPACE}/${COUNT_API_KEY}`)
+            .then(response => response.json())
+            .then(data => {
+                if (visitorCountElement) {
+                    visitorCountElement.textContent = data.value;
+                }
+            })
+            .catch(error => {
+                console.error("Sayaç verileri çekilirken hata oluştu:", error);
+                if (visitorCountElement) {
+                    visitorCountElement.textContent = '?'; // Hata durumunda soru işareti
+                }
+            });
+    };
+
+    // İlk yüklemede Discord ve Sayaç verilerini çek
     fetchDiscordStatus();
+    fetchVisitorCount(); // Sayacı da başlatıyoruz
+
+    // Ardından her 10 saniyede bir Discord verilerini güncelle
     setInterval(fetchDiscordStatus, 10000); 
+    // Sayaç değeri her sayfa yüklendiğinde bir artar, yenilemeye gerek yok.
 });
