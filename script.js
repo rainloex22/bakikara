@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(error => {
                 console.error("Sayaç verileri çekilirken hata oluştu:", error);
                 if (visitorCountTextElement) {
-                    visitorCountTextElement.textContent = '???';
+                    visitorCountTextElement.textContent = '0';
                 }
             });
     };
@@ -218,5 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // İlk çalıştırma ve yenileme
     fetchDiscordStatus();
     fetchVisitorCount();
-    setInterval(fetchDiscordStatus, 10000); 
+    setInterval(fetchDiscordStatus, 1000); 
 });
+
