@@ -50,20 +50,21 @@ body {
     letter-spacing: 7px;
     margin-bottom: 40px;
     
-    /* İstenen: Sadece kırmızı bulanık parlaklıkta kalacak */
+    /* YENİLENDİ: Yazı rengi saf kırmızı yapıldı */
+    color: #FF0000; 
+    
+    /* İstenen: Kırmızı bulanık parlaklık */
     text-shadow: 
         0 0 7px rgba(255, 0, 0, 0.7), 
         0 0 15px rgba(255, 0, 0, 0.5);
         
-    transition: none; /* Transition kaldırıldı */
+    transition: none; 
     animation: fadeInDown 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; 
     
-    /* Gerekli olan diğer tüm stil ayarları sıfırlandı */
     background: none;
     -webkit-background-clip: unset;
     background-clip: unset;
     -webkit-text-fill-color: initial;
-    color: #fff; /* Beyaz metin rengi */
     position: static; 
     overflow: visible; 
 }
@@ -75,9 +76,9 @@ body {
         0 0 7px rgba(255, 0, 0, 0.7), 
         0 0 15px rgba(255, 0, 0, 0.5); 
     cursor: default; 
+    /* Yazı rengi hover'da da kırmızı kalır */
+    color: #FF0000; 
 }
-
-/* Başlık RGB ve Çerçeve Animasyonları Kaldırıldı */
 
 
 @keyframes fadeInDown {
@@ -108,13 +109,10 @@ body {
     overflow: hidden; 
 }
 
-/* İstenen: RGB Çerçeve (::before) tamamen kaldırıldı */
+/* RGB Çerçeve (::before) tamamen iptal */
 .discord-info::before {
-    content: none; /* Animasyonlu çerçeve tamamen iptal */
+    content: none; 
 }
-
-/* RGB Çerçeve Animasyonları Kaldırıldı */
-
 
 .discord-info:hover {
     transform: scale(1.02); 
@@ -205,7 +203,6 @@ body {
 }
 
 .social-icon.discord {
-    /* Parlama animasyonu ve RGB kaldırıldı */
     filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
 }
 
