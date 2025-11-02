@@ -34,35 +34,34 @@ body {
     background-color: rgba(0, 0, 0, 0.0);
     padding: 20px;
     border-radius: 15px;
-    /* Hafif bir bulanıklık ekleyebiliriz, videonun arka planda daha sakin durması için */
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
+    /* İçeriğin yukarıdan aşağıya yığılmasını sağlamak için flex'i kullanıyoruz */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-/* 3. BAŞLIK STİLİ - Normalde Kırmızımsı, Hover'da Mavi Parlıyor */
+/* 3. BAŞLIK STİLİ (Değişmedi) */
 .title {
     font-size: 6.5em; 
     font-weight: 800;
     letter-spacing: 7px;
     margin-bottom: 40px;
-    
-    /* Kırmızımsı parlaklık */
     text-shadow: 
         0 0 7px rgba(255, 0, 0, 0.7), 
         0 0 15px rgba(255, 0, 0, 0.5);
-    
     transition: text-shadow 0.4s ease-in-out;
-    
     animation: fadeInDown 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; 
 }
 
-/* Fare Üzerine Gelince Mavi/Cyan Parlaklık Ekle */
 .title:hover {
     text-shadow: 
         0 0 8px #00FFFF, 
         0 0 15px #00FFFF,
         0 0 25px #00FFFF,
-        0 0 60px #00A9A9; /* Daha yoğun mavi/cyan parlaklık */
+        0 0 60px #00A9A9; 
     cursor: default; 
 }
 
@@ -71,107 +70,154 @@ body {
     100% { opacity: 1; transform: translateY(0); }
 }
 
-/* 4. DİSCORD KARTI STİLİ */
+
+/* 4. DİSCORD KARTI STİLİ - BÜYÜTÜLDÜ */
 .discord-info {
-    width: 350px; /* BÜYÜTÜLDÜ (300px'den 350px'e) */
-    min-height: 150px; /* İçerik yüklenene kadar yer tutması için */
-    background: rgba(47, 49, 54, 0.95); /* Daha az şeffaf arkaplan */
-    border-radius: 15px; /* Daha yumuşak köşeler */
-    padding: 20px;
-    margin: 0 auto 30px; 
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6); /* Daha belirgin gölge */
-    border: 2px solid rgba(255, 255, 255, 0.1); /* Hafif beyaz çerçeve */
+    width: 450px; /* DAHA DA BÜYÜTÜLDÜ (450px) */
+    min-height: 150px;
+    background: rgba(47, 49, 54, 0.98); /* Daha opak yapıldı */
+    border-radius: 15px;
+    padding: 25px; /* İç boşluk artırıldı */
+    margin: 0 auto 15px; /* Sayacı altına almak için alt boşluk azaltıldı */
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7); 
+    border: 3px solid rgba(255, 255, 255, 0.15); /* Çerçeve belirginleştirildi */
     
     transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-    display: flex; /* Yüklenirken bile ortalamak için */
-    justify-content: center;
-    align-items: center;
+    display: flex;
+    flex-direction: column; /* İçeriği dikey sırala */
+    align-items: flex-start; /* İçeriği sola hizala */
     position: relative;
+    text-align: left; /* Metin hizalamasını sola çek */
 }
 
-/* Kartın Üzerine Gelince Büyütme Efekti */
 .discord-info:hover {
-    transform: scale(1.03); /* %3 oranında yakınlaştırma */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    transform: scale(1.02); /* Hafif yakınlaştırma */
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 1.0);
 }
 
-/* Discord Header ve Avatar */
-.discord-header {
+.discord-avatar {
+    width: 70px; /* Avatar daha da büyütüldü */
+    height: 70px;
+    border: 4px solid #1e2024;
+}
+
+.status-dot {
+    width: 16px; /* Nokta büyütüldü */
+    height: 16px;
+    border: 5px solid #1e2024; /* Border kalınlaştırıldı */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 1.0);
+}
+
+.activity-dot {
+    width: 16px; /* Nokta büyütüldü */
+    height: 16px;
+    border: 5px solid #1e2024;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 1.0);
+}
+
+/* 6. MÜZİK KONTROLLERİ - Büyütüldü ve Sol Üste Sabitlendi */
+#music-controls-wrapper {
+    position: fixed; /* Absolute yerine Fixed, her zaman görünür olması için */
+    top: 30px;
+    left: 30px;
     display: flex;
     align-items: center;
-    margin-bottom: 15px; /* Boşluk artırıldı */
-}
-.discord-avatar {
-    width: 60px; /* Avatar büyütüldü */
-    height: 60px;
-    border-radius: 50%;
-    margin-right: 15px;
-    position: relative;
-    border: 3px solid #1e2024;
+    z-index: 10;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.6); /* Arkaplan daha belirgin */
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
 }
 
-/* Durum Noktası (Çevrimiçi, Boşta vb.) */
-.status-dot {
-    width: 14px; /* Nokta büyütüldü */
-    height: 14px;
-    border-radius: 50%;
-    border: 4px solid #1e2024; /* Border kalınlaştırıldı */
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
-}
-
-/* Aktivite Noktası (Oynuyor/Oynamıyor) */
-.activity-dot {
-    width: 14px; /* Nokta büyütüldü */
-    height: 14px;
-    border-radius: 50%;
-    margin-right: 10px;
-    border: 4px solid #1e2024;
-    transition: background-color 0.3s ease;
-    display: inline-block;
-    vertical-align: middle; 
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
-}
-
-
-/* Aktivite Metni */
-.discord-status {
-    font-size: 1em; /* Okunurluk artırıldı */
-    color: #b9bbbe;
-}
-.discord-status strong {
-    color: #fff; 
-}
-
-
-/* 5. SOSYAL LİNKLER (Değişmedi) */
-.social-icon.discord:hover {
-    color: #5865f2;
-    filter: drop-shadow(0 0 10px #5865f2); /* Parlaklık efekti eklendi */
-}
-
-/* 7. ZİYARETÇİ SAYACI STİLİ (Göz İkonu Kontrolü) */
-.visitor-icon {
-    font-size: 1.2em; /* İkon büyütüldü */
-    margin-right: 8px;
-    color: #fff; /* HER ZAMAN BEYAZ VE GÖRÜNÜR */
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Hafif parlaklık eklendi */
-}
-
-/* 6. MÜZİK KONTROLLERİ */
 .music-button {
-    background-color: rgba(0, 0, 0, 0.3); /* Arkaplana koyu bir renk eklendi */
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 24px; /* Buton ikonu büyütüldü */
+    padding: 10px;
+    transition: color 0.3s, transform 0.3s;
 }
 
 .music-button:hover {
-    background-color: rgba(0, 0, 0, 0.6); /* Hover'da daha koyu */
+    color: #5865f2; /* Mavi/Mor vurgu */
+    transform: scale(1.1);
 }
 
 #volume-slider {
-    width: 120px; /* Slider uzatıldı */
+    width: 150px; /* Slider uzatıldı */
+    margin-left: 15px;
+    height: 8px; /* Kalınlaştırıldı */
     background: #5865f2;
 }
 
 #volume-slider::-webkit-slider-thumb {
+    width: 18px;
+    height: 18px;
     background: #fff;
-    box-shadow: 0 0 5px #fff; /* Thumb'a parlaklık eklendi */
+    box-shadow: 0 0 8px #fff;
+}
+
+
+/* 7. ZİYARETÇİ SAYACI STİLİ - Discord Kartının Altına */
+.visitor-counter-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 5px; /* Discord kartına yakın */
+    margin-bottom: 20px; 
+    font-size: 1.1em; /* Büyütüldü */
+    color: #fff;
+    /* Panelle aynı genişliği alması için */
+    width: 450px; 
+    box-sizing: border-box; /* Paddingi dahil et */
+}
+
+.visitor-icon {
+    font-size: 1.3em; /* İkon büyütüldü */
+    margin-right: 10px;
+    color: #fff; 
+    text-shadow: 0 0 7px rgba(255, 255, 255, 0.7); 
+}
+
+/* 5. SOSYAL LİNKLER - BÜYÜK ve ANİMASYONLU DİSCORD İKONU */
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 40px; /* Sayaçtan büyük boşluk */
+}
+.social-icon {
+    font-size: 60px; /* İkon devasa yapıldı */
+    color: #fff;
+    transition: color 0.4s, transform 0.4s, filter 0.4s;
+}
+
+.social-icon:hover {
+    transform: scale(1.2); /* Büyük hover efekti */
+}
+
+/* Discord Mavi Parlama Animasyonu */
+.social-icon.discord {
+    animation: neon-pulse 2s infinite alternate; /* Animasyon eklendi */
+}
+
+.social-icon.discord:hover {
+    color: #5865f2;
+    filter: drop-shadow(0 0 30px #5865f2); /* Yoğun parlaklık */
+    animation-play-state: paused; /* Hover'da pulsing dursun */
+}
+
+@keyframes neon-pulse {
+    0% {
+        filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5)) drop-shadow(0 0 10px rgba(88, 101, 242, 0.3));
+    }
+    100% {
+        filter: drop-shadow(0 0 15px rgba(255, 255, 255, 1.0)) drop-shadow(0 0 25px rgba(88, 101, 242, 0.8));
+    }
+}
+
+/* Yüklenme Durumu (Değişmedi) */
+.loading {
+    /* ... */
 }
