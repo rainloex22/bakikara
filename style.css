@@ -179,7 +179,7 @@ body {
     color: #5865f2;
 }
 
-/* 7. ZİYARETÇİ SAYACI STİLİ (YENİ GÖZ İKONLU SAYAÇ) */
+/* 7. ZİYARETÇİ SAYACI STİLİ (Font Awesome Göz İkonu) */
 .visitor-counter-display {
     display: flex;
     align-items: center;
@@ -204,13 +204,13 @@ body {
 }
 
 .visitor-icon {
-    font-size: 1.2em; /* Göz ikonunu biraz büyüt */
+    font-size: 1.1em; /* Göz ikonunu boyutu */
     margin-right: 8px;
     vertical-align: middle;
-    cursor: help; /* Tooltip olduğunu belirtir */
+    color: #fff; /* İkon rengini beyaz yap */
 }
 
-#visitor-count {
+#visitor-count-text {
     font-weight: 600;
     color: #fff;
     vertical-align: middle;
