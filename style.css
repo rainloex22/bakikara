@@ -50,7 +50,7 @@ body {
     letter-spacing: 7px;
     margin-bottom: 40px;
     
-    /* YENİLENDİ: Yazı rengi saf kırmızı yapıldı */
+    /* İstenen: Yazı rengi saf kırmızı */
     color: #FF0000; 
     
     /* İstenen: Kırmızı bulanık parlaklık */
@@ -71,12 +71,10 @@ body {
 
 /* İstenen: Üzerine gelince hiçbir şey olmayacak */
 .title:hover {
-    /* Hover efekti tamamen kaldırıldı, sadece normal stili gösterir */
     text-shadow: 
         0 0 7px rgba(255, 0, 0, 0.7), 
         0 0 15px rgba(255, 0, 0, 0.5); 
     cursor: default; 
-    /* Yazı rengi hover'da da kırmızı kalır */
     color: #FF0000; 
 }
 
@@ -112,6 +110,11 @@ body {
 /* RGB Çerçeve (::before) tamamen iptal */
 .discord-info::before {
     content: none; 
+}
+
+/* YENİ: Discord kartının içindeki tüm öğelere yumuşak geçiş ekle */
+.discord-info * {
+    transition: opacity 0.5s ease; 
 }
 
 .discord-info:hover {
