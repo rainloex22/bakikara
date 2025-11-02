@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const musicToggle = document.getElementById('music-toggle');
     const volumeSlider = document.getElementById('volume-slider');
     const volumeIcon = document.getElementById('volume-icon');
-    const visitorCountElement = document.getElementById('visitor-count'); // Yeni: Sayaç elemanı
+    const visitorCountTextElement = document.getElementById('visitor-count-text'); // Yeni id'yi yakalıyoruz
 
     // Müzik Kontrolleri
     let isPlaying = false;
@@ -67,8 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Discord API'den verileri çekme (Buraya kendi API URL'nizi girin)
-    // Örnek: 'https://api.lanyard.rest/v1/users/YOUR_DISCORD_ID'
+    // Discord API'den verileri çekme 
     const DISCORD_ID = '1252284892457468026';
     const LANYARD_API_URL = `https://api.lanyard.rest/v1/users/${DISCORD_ID}`;
 
@@ -101,23 +100,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 2. Aktivite
                 let activityText;
-                let activityDotColor = 'transparent'; // Varsayılan: Yok
+                let activityDotColor = 'transparent'; 
                 let activityDotVisible = false;
 
                 if (user.activities && user.activities.length > 0) {
                     const activity = user.activities[0];
                     activityDotVisible = true;
                     
-                    if (activity.type === 0) { // Playing
+                    if (activity.type === 0) { 
                         activityText = `Oynuyor: <strong>${activity.name}</strong>`;
-                        activityDotColor = '#1DB954'; // Oyun yeşili
-                    } else if (activity.type === 1) { // Streaming
+                        activityDotColor = '#1DB954'; 
+                    } else if (activity.type === 1) { 
                         activityText = `Yayın yapıyor: <strong>${activity.name}</strong>`;
-                        activityDotColor = '#9400D3'; // Twitch moru
-                    } else if (activity.type === 2) { // Listening (Spotify)
+                        activityDotColor = '#9400D3'; 
+                    } else if (activity.type === 2) { 
                         if (user.spotify) {
                             activityText = `Dinliyor: <strong>${user.spotify.song}</strong> - ${user.spotify.artist}`;
-                            activityDotColor = '#1DB954'; // Spotify yeşili
+                            activityDotColor = '#1DB954'; 
                         } else {
                             activityText = 'Şu anda bir aktivite yok...';
                             activityDotVisible = false;
@@ -165,33 +164,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Sayaç için CountAPI.xyz entegrasyonu
-    // Kendi namespace'inizi ve key'inizi belirlemeniz önemlidir.
-    // Örnek: `https://api.countapi.xyz/hit/YOUR_GITHUB_USERNAME.github.io/BAKI-S2`
-    const COUNT_API_NAMESPACE = 'https://bak1kara.github.io/bakikara/'; // Burayı kendi GitHub kullanıcı adınız.github.io ile değiştirin!
-    const COUNT_API_KEY = 'bakikara'; // Burayı projenizin adı (repo adı) ile değiştirin
+    // ❗ BURAYI KENDİNİZE GÖRE DÜZENLEYİN ❗
+    const COUNT_API_NAMESPACE = 'https://bak1kara.github.io/bakikara/'; 
+    const COUNT_API_KEY = 'bakikara'; 
 
     const fetchVisitorCount = () => {
         fetch(`https://api.countapi.xyz/hit/${COUNT_API_NAMESPACE}/${COUNT_API_KEY}`)
             .then(response => response.json())
             .then(data => {
-                if (visitorCountElement) {
-                    visitorCountElement.textContent = data.value;
+                if (visitorCountTextElement) {
+                    // Sadece sayıyı doğrudan metin alanına yazıyoruz
+                    visitorCountTextElement.textContent = data.value;
                 }
             })
             .catch(error => {
                 console.error("Sayaç verileri çekilirken hata oluştu:", error);
-                if (visitorCountElement) {
-                    visitorCountElement.textContent = '?'; // Hata durumunda soru işareti
+                if (visitorCountTextElement) {
+                    visitorCountTextElement.textContent = '?'; // Hata durumunda soru işareti
                 }
             });
     };
 
     // İlk yüklemede Discord ve Sayaç verilerini çek
     fetchDiscordStatus();
-    fetchVisitorCount(); // Sayacı da başlatıyoruz
+    fetchVisitorCount(); 
 
     // Ardından her 10 saniyede bir Discord verilerini güncelle
     setInterval(fetchDiscordStatus, 10000); 
-    // Sayaç değeri her sayfa yüklendiğinde bir artar, yenilemeye gerek yok.
 });
-
