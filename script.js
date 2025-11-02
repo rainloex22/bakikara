@@ -1,7 +1,5 @@
-// ** Sadece `script.js` dosyasının tamamını bununla değiştirin **
-
 // ** Ayarlar **
-const DISCORD_USER_ID = '1252284892457468026'; // Lütfen bu ID'nin doğru olduğundan emin olun!
+const DISCORD_USER_ID = '1252284892457468026'; // Discord ID'nizi buraya yazın
 const LANYARD_API_URL = `https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`;
 const cardElement = document.getElementById('discord-card');
 
@@ -96,6 +94,7 @@ async function fetchDiscordData() {
 }
 
 function updateDiscordCard(user) {
+    // Varsayılan aktivite metni
     let activityText = 'Şu anda oynamıyor...'; 
     let statusColor = '#99aab5'; // Varsayılan: Gri (Çevrimdışı)
 
@@ -115,6 +114,7 @@ function updateDiscordCard(user) {
     if (spotifyActivity) {
         activityText = `Spotify'da ${spotifyActivity.details}`;
     } else if (mainActivity) {
+        // Ne oynuyorsa onu yazsın
         if (mainActivity.details) {
             if (mainActivity.state) {
                  activityText = `${mainActivity.details} (${mainActivity.state})`;
@@ -123,9 +123,7 @@ function updateDiscordCard(user) {
             }
         } else if (mainActivity.name) {
             activityText = mainActivity.name;
-        } else {
-             // Aktivite var ama detay yoksa, varsayılan metin kalır.
-        }
+        } 
     }
     
     // Discord CDN'den avatar çekme
