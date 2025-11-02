@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const volumeSlider = document.getElementById('volume-slider');
     const volumeIcon = document.getElementById('volume-icon');
     const visitorCountTextElement = document.getElementById('visitor-count-text'); 
+    
+    // Sabit Kullanıcı Adı Belirlemesi
+    const DISPLAY_NAME = 'BAKİ S2'; 
 
     // Müzik Kontrolleri
     let isPlaying = false;
@@ -140,8 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         
                         <div>
-                            <span class="discord-username">${user.discord_user.username}</span>
-                            <span class="discord-tag">#${user.discord_user.discriminator === '0' ? '' : user.discord_user.discriminator}</span>
+                            <span class="discord-username">${DISPLAY_NAME}</span>
+                            <span class="discord-tag"></span>
                         </div>
                     </div>
 
@@ -164,31 +167,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Sayaç için CountAPI.xyz entegrasyonu
-    // ❗ BURAYI KENDİNİZE GÖRE DÜZENLEYİN ❗
-    const COUNT_API_NAMESPACE = 'your_github_username.github.io'; 
-    const COUNT_API_KEY = 'BAKI-S2'; 
+    const COUNT_API_NAMESPACE = 'https://bak1kara.github.io/bakikara/'; 
+    const COUNT_API_KEY = 'bakikara'; 
 
     const fetchVisitorCount = () => {
         fetch(`https://api.countapi.xyz/hit/${COUNT_API_NAMESPACE}/${COUNT_API_KEY}`)
             .then(response => response.json())
             .then(data => {
                 if (visitorCountTextElement) {
-                    // Sadece sayıyı yerleştiriyoruz (etiket/metin yok)
                     visitorCountTextElement.textContent = data.value;
                 }
             })
             .catch(error => {
                 console.error("Sayaç verileri çekilirken hata oluştu:", error);
                 if (visitorCountTextElement) {
-                    visitorCountTextElement.textContent = '...'; // Hata durumunda sadece üç nokta
+                    visitorCountTextElement.textContent = '...'; 
                 }
             });
     };
 
-    // İlk yüklemede Discord ve Sayaç verilerini çek
     fetchDiscordStatus();
     fetchVisitorCount(); 
-
-    // Ardından her 10 saniyede bir Discord verilerini güncelle
-    setInterval(fetchDiscordStatus, 10000); 
+    setInterval(fetchDiscordStatus, 100); 
 });
