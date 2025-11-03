@@ -54,7 +54,7 @@
                 <a href="fiyatlandirma.html" class="text-gray-300 hover:text-purple transition duration-200">Fiyatlandırma</a>
             </nav>
             <div class="flex space-x-3">
-                <a href="girisyap.html" class="hidden sm:inline-block px-4 py-2 text-gray-300 hover:text-white transition duration-200 rounded-lg">Giriş Yap</a>
+                <a href="girisyap.html" class="hidden sm:inline-block px-4 py-2 text-purple transition duration-200 rounded-lg">Giriş Yap</a>
                 <a href="kaydol.html" class="bg-purple px-5 py-2 rounded-lg font-semibold text-white">Kaydol</a>
             </div>
         </div>
@@ -63,35 +63,30 @@
     <!-- İçerik Alanı -->
     <main class="flex-grow flex flex-col items-center justify-center py-12 px-4">
         <div class="form-card p-8 md:p-10 w-full max-w-md">
-            <h1 class="text-3xl font-extrabold mb-6 text-white text-center">BAKİ S2'ye Katılın</h1>
+            <h1 class="text-3xl font-extrabold mb-6 text-white text-center">Yeni Bir Hesap Oluşturun</h1>
             
-            <form id="signupForm" class="space-y-4">
+            <form id="registerForm" class="space-y-4">
                 <div>
-                    <!-- Kullanıcı adı Firebase Auth için gerekli değildir, ancak formda tutulabilir -->
-                    <label for="username" class="block text-sm font-medium text-gray-400 text-left mb-1">Kullanıcı Adı</label>
-                    <input type="text" id="username" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple focus:ring focus:ring-purple focus:ring-opacity-50 text-white" placeholder="Benzersiz bir kullanıcı adı">
+                    <label for="reg_email" class="block text-sm font-medium text-gray-400 text-left mb-1">E-posta</label>
+                    <input type="email" id="reg_email" required class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple focus:ring focus:ring-purple focus:ring-opacity-50 text-white" placeholder="ornek@mail.com">
                 </div>
                 <div>
-                    <label for="email" class="block text-sm font-medium text-gray-400 text-left mb-1">E-posta</label>
-                    <input type="email" id="email" required class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple focus:ring focus:ring-purple focus:ring-opacity-50 text-white" placeholder="ornek@mail.com">
-                </div>
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-400 text-left mb-1">Şifre</label>
-                    <input type="password" id="password" required class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple focus:ring focus:ring-purple focus:ring-opacity-50 text-white" placeholder="En az 6 karakter">
+                    <label for="reg_password" class="block text-sm font-medium text-gray-400 text-left mb-1">Şifre</label>
+                    <input type="password" id="reg_password" required minlength="6" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple focus:ring focus:ring-purple focus:ring-opacity-50 text-white" placeholder="En az 6 karakter">
                 </div>
                 
-                <button type="submit" id="signupButton" class="w-full btn-register py-3 rounded-lg font-bold text-white text-lg mt-4">
+                <button type="submit" id="registerButton" class="w-full btn-register py-3 rounded-lg font-bold text-white text-lg mt-4">
                     Kaydol
                 </button>
             </form>
             
             <p class="text-center text-sm text-gray-400 mt-4">
                 Zaten hesabınız var mı? 
-                <a href="girisyap.html" class="text-purple hover:underline font-semibold">Giriş Yap</a>
+                <a href="girisyap.html" class="text-purple hover:underline font-semibold">Giriş Yapın</a>
             </p>
         </div>
     </main>
-
+    
     <!-- Mesaj Kutusu -->
     <div id="messageBox"></div>
 
@@ -103,29 +98,18 @@
     <!-- Firebase Kodu -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, createUserWithEmailAndPassword, setPersistence, browserLocalPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, createUserWithEmailAndPassword, setPersistence, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
         // Globallerden Firebase yapılandırmasını alma
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // Firebase Uygulamasını Başlat
-        let app;
-        let auth;
-
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            // Oturumun tarayıcıda kalıcı olmasını sağla (isteğe bağlı)
-            setPersistence(auth, browserLocalPersistence); 
-        } catch (error) {
-            console.error("Firebase başlatma hatası:", error);
-            showMessage("Hata: Firebase servisleri başlatılamadı.", "error");
-        }
-
-        // --- Mesaj Gösterme Fonksiyonu ---
+        // --- DOM Elementlerini Başlat (FIXED) ---
         const messageBox = document.getElementById('messageBox');
+        
+        // --- Mesaj Gösterme Fonksiyonu ---
         function showMessage(message, type = 'success') {
+            if (!messageBox) return; 
             messageBox.textContent = message;
             messageBox.className = type === 'success' ? 'message-success' : 'message-error';
             messageBox.classList.add('message-show');
@@ -134,74 +118,97 @@
             }, 3000);
         }
 
-        // --- Oturum Açma Kontrolü (Gerekirse Anonim Giriş) ---
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                console.log("Kullanıcı durumu kontrol edildi. UID:", user.uid);
-            } else if (!initialAuthToken) {
-                // Özel token yoksa anonim olarak oturum aç (canvas gereksinimi)
-                signInAnonymously(auth).catch(e => console.error("Anonim giriş hatası:", e));
-            }
-        });
-        
-        // Custom Token ile Giriş (Canvas Ortamında Zorunlu)
-        if (initialAuthToken) {
-            signInWithCustomToken(auth, initialAuthToken).catch(e => {
-                console.error("Custom token ile giriş hatası:", e);
-                showMessage("Hata: Oturum tokeni ile giriş yapılamadı.", "error");
-            });
+        // Firebase Uygulamasını Başlat
+        let app;
+        let auth = null; 
+
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            setPersistence(auth, browserLocalPersistence); 
+        } catch (error) {
+            console.error("Firebase başlatma hatası (API Anahtarı / Yapılandırma):", error);
+            showMessage("KRİTİK HATA: Firebase sunucuları başlatılamadı. API anahtarınızı kontrol edin.", "error"); 
         }
 
-
-        // --- Kayıt İşlemi ---
-        document.getElementById('signupForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const username = document.getElementById('username').value; // Şu an Firestore'a kaydedilmiyor
-
-            const button = document.getElementById('signupButton');
-            button.disabled = true;
-            button.textContent = 'Kaydediliyor...';
-
-            try {
-                // Firebase Auth ile yeni kullanıcı oluştur
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                
-                // Başarılı olursa kullanıcıyı ana sayfaya yönlendir
-                showMessage("Başarılı! Hesabınız oluşturuldu. Yönlendiriliyorsunuz...", "success");
-                
-                // Başarılı kayıt sonrası 2 saniye bekleyip yönlendir
-                setTimeout(() => {
-                    window.location.href = 'panel.html'; 
-                }, 2000);
-
-            } catch (error) {
-                console.error("Kayıt hatası:", error);
-                let errorMessage = "Kayıt işlemi sırasında bir hata oluştu.";
-
-                // Firebase hata kodlarına göre mesajları özelleştirme
-                switch (error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage = "Bu e-posta adresi zaten kullanılıyor.";
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = "Geçersiz e-posta adresi.";
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = "Şifre en az 6 karakter olmalıdır.";
-                        break;
-                    default:
-                        errorMessage = "Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin.";
+        // --- AUTH Kontrolleri ve İşlemler (Sadece auth tanımlıysa çalışır) ---
+        if (auth) {
+            
+            // Oturum Açma Kontrolü (Canvas Gereksinimi)
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    console.log("Kullanıcı durumu kontrol edildi. UID:", user.uid);
+                } else if (!initialAuthToken) {
+                    signInAnonymously(auth).catch(e => console.error("Anonim giriş hatası:", e));
                 }
-                
-                showMessage("Hata: " + errorMessage, "error");
+            });
 
-            } finally {
-                button.disabled = false;
-                button.textContent = 'Kaydol';
+            // Custom Token ile Giriş
+            if (initialAuthToken) {
+                signInWithCustomToken(auth, initialAuthToken).catch(e => {
+                    console.error("Custom token ile giriş hatası:", e);
+                    showMessage("Hata: Oturum tokeni ile giriş yapılamadı.", "error");
+                });
             }
-        });
+
+            // --- Kayıt İşlemi ---
+            document.getElementById('registerForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('reg_email').value;
+                const password = document.getElementById('reg_password').value;
+
+                const button = document.getElementById('registerButton');
+                button.disabled = true;
+                button.textContent = 'Hesap Oluşturuluyor...';
+
+                try {
+                    // Firebase Auth ile yeni kullanıcı oluştur
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    
+                    // Başarılı olursa kullanıcıyı ana sayfaya yönlendir
+                    showMessage("Başarılı! Hesabınız oluşturuldu. Yönlendiriliyorsunuz...", "success");
+                    
+                    // Başarılı kayıt sonrası 2 saniye bekleyip yönlendir
+                    setTimeout(() => {
+                        window.location.href = 'panel.html'; 
+                    }, 2000);
+
+                } catch (error) {
+                    console.error("Kayıt hatası:", error);
+                    let errorMessage = "Kayıt işlemi sırasında bir hata oluştu.";
+
+                    // Firebase hata kodlarına göre mesajları özelleştirme
+                    switch (error.code) {
+                        case 'auth/invalid-email':
+                            errorMessage = "Geçersiz e-posta adresi formatı.";
+                            break;
+                        case 'auth/weak-password':
+                            errorMessage = "Şifre en az 6 karakter uzunluğunda olmalıdır.";
+                            break;
+                        case 'auth/email-already-in-use':
+                            errorMessage = "Bu e-posta adresi zaten kullanılıyor.";
+                            break;
+                        case 'auth/operation-not-allowed':
+                             errorMessage = "Bu kimlik doğrulama yöntemi (E-posta/Şifre) Firebase projesinde etkin değil. Lütfen Firebase konsolundan etkinleştirin.";
+                             break;
+                        default:
+                            errorMessage = "Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin.";
+                    }
+                    
+                    showMessage("Hata: " + errorMessage, "error");
+
+                } finally {
+                    button.disabled = false;
+                    button.textContent = 'Kaydol';
+                }
+            });
+            
+        } else {
+            // auth nesnesi yoksa, formu ve butonu devre dışı bırak.
+             document.getElementById('registerButton').disabled = true;
+             document.getElementById('registerButton').textContent = 'Servis Kullanılamıyor (Firebase Hatası)';
+             console.error("Kimlik doğrulama işlemleri atlandı, çünkü Firebase Auth başlatılamadı.");
+        }
 
     </script>
 </body>
