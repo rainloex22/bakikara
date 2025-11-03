@@ -27,7 +27,6 @@
             font-family: 'Poppins', sans-serif;
             background-color: var(--active-bg-color); /* Tema Renkleri Kullanımı */
             color: #ffffff;
-            display: flex;
             min-height: 100vh;
             transition: background-color 0.3s;
         }
@@ -90,12 +89,17 @@
             backdrop-filter: blur(3px);
             z-index: 50;
         }
-        /* Güvenlik Modalı için yüksek z-index */
-        #securityModal {
+        /* Güvenlik Modalı ve Yükleme Ekranı için yüksek z-index */
+        #securityModal, #loadingOverlay {
             z-index: 1000;
         }
-
-        /* Tema Seçimi Stilleri */
+        /* Yükleme Ekranı Stili */
+        #loadingOverlay {
+            background-color: var(--dark-bg); /* Tema rengini kullan */
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        
         .theme-option {
             width: 3rem;
             height: 3rem;
@@ -111,202 +115,223 @@
             border-color: #fff;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
-        
     </style>
 </head>
-<body class="min-h-screen flex">
+<body class="min-h-screen">
     
-    <!-- Sidebar / Navigasyon -->
-    <aside class="sidebar w-64 p-6 hidden md:block flex-shrink-0">
-        <h1 class="text-2xl font-extrabold text-white mb-8 flex items-center">
-            <i class="fas fa-terminal mr-2" style="color: var(--accent-purple);"></i> BAKİ S2
-        </h1>
-        <nav class="space-y-2">
-            <!-- Menü Öğeleri -->
-            <div id="navDashboard" class="nav-item active" data-content="dashboard">
-                <i class="fas fa-chart-line w-6"></i>
-                <span class="ml-3">Kontrol Paneli</span>
-            </div>
-            <div id="navLinks" class="nav-item" data-content="links">
-                <i class="fas fa-link w-6"></i>
-                <span class="ml-3">Biyolinkler</span>
-            </div>
-            <div id="navSettings" class="nav-item" data-content="settings">
-                <i class="fas fa-cog w-6"></i>
-                <span class="ml-3">Ayarlar</span>
-            </div>
-            <a href="index.html" class="nav-item">
-                <i class="fas fa-home w-6"></i>
-                <span class="ml-3">Ana Sayfa</span>
-            </a>
-        </nav>
-        
-        <div class="mt-12 pt-6 border-t border-gray-700">
-            
-            <!-- KULLANICI ADI VE ROL BİLGİSİ -->
-            <div class="mb-4">
-                <p id="welcomeUser" class="text-lg font-semibold text-white">Hoş Geldin, <span id="displayNamePlaceholder">Yükleniyor...</span></p>
-                <p id="userRoleDisplay" class="text-sm font-medium rounded-full inline-block px-3 py-0.5 mt-1">Yükleniyor...</p>
-            </div>
-            <!-- KULLANICI ADI VE ROL BİLGİSİ SONU -->
-
-            <div class="text-sm text-gray-500">Kullanıcı ID:</div>
-            <div id="userIdDisplay" class="text-xs text-gray-400 truncate">Yükleniyor...</div>
-            <a href="girisyap.html" class="nav-item mt-4 text-sm bg-gray-700 hover:bg-red-600">
-                <i class="fas fa-sign-out-alt w-6"></i>
-                <span class="ml-3">Çıkış Yap</span>
-            </a>
+    <!-- YÜKLEME EKRANI (Loading Overlay) - Başlangıçta görünür -->
+    <div id="loadingOverlay" class="fixed inset-0 flex items-center justify-center">
+        <div class="text-center">
+            <i class="fas fa-spinner fa-spin text-6xl" style="color: var(--accent-purple);"></i>
+            <p class="mt-4 text-xl font-semibold text-gray-300">Panel Yükleniyor...</p>
         </div>
-    </aside>
-
-    <!-- Ana İçerik -->
-    <div class="flex-grow p-4 md:p-10 overflow-y-auto">
-
-        <!-- 1. Kontrol Paneli İçeriği -->
-        <section id="dashboardContent" class="content-tab">
-            <header class="mb-8 flex justify-between items-center">
-                <h2 class="text-3xl font-bold">Kontrol Paneli</h2>
-                <button id="quickCreateLinkBtn" class="cta-button px-4 py-2 rounded-lg font-semibold text-white text-sm">
-                    <i class="fas fa-plus mr-2"></i> Yeni Biyolink Oluştur
-                </button>
-            </header>
-
-            <!-- İstatistik Kartları -->
-            <div id="statsSection" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+    </div>
+    
+    <!-- ANA KONTROL PANELİ İÇERİĞİ - Başlangıçta gizli -->
+    <div id="mainContentWrapper" class="hidden min-h-screen flex">
+        
+        <!-- Sidebar / Navigasyon -->
+        <aside class="sidebar w-64 p-6 hidden md:block flex-shrink-0">
+            <h1 class="text-2xl font-extrabold text-white mb-8 flex items-center">
+                <i class="fas fa-terminal mr-2" style="color: var(--accent-purple);"></i> BAKİ S2
+            </h1>
+            <nav class="space-y-2">
+                <!-- Menü Öğeleri -->
+                <div id="navDashboard" class="nav-item active" data-content="dashboard">
+                    <i class="fas fa-chart-line w-6"></i>
+                    <span class="ml-3">Kontrol Paneli</span>
+                </div>
+                <div id="navLinks" class="nav-item" data-content="links">
+                    <i class="fas fa-link w-6"></i>
+                    <span class="ml-3">Biyolinkler</span>
+                </div>
+                <div id="navSettings" class="nav-item" data-content="settings">
+                    <i class="fas fa-cog w-6"></i>
+                    <span class="ml-3">Ayarlar</span>
+                </div>
+                <a href="index.html" class="nav-item">
+                    <i class="fas fa-home w-6"></i>
+                    <span class="ml-3">Ana Sayfa</span>
+                </a>
+            </nav>
+            
+            <div class="mt-12 pt-6 border-t border-gray-700">
                 
-                <!-- Tıklama Sayısı -->
-                <div class="stat-card p-6 rounded-xl shadow-lg flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-400 font-medium">Toplam Tıklama</p>
-                        <p id="totalClicks" class="text-4xl font-extrabold mt-1">
-                            <i class="fas fa-spinner fa-spin text-lg"></i>
-                        </p>
-                    </div>
-                    <div class="stat-icon bg-gray-900 p-3 rounded-full">
-                        <i class="fas fa-hand-pointer text-xl"></i>
-                    </div>
+                <!-- KULLANICI ADI VE ROL BİLGİSİ (Sidebar) -->
+                <div class="mb-4">
+                    <p id="welcomeUser" class="text-lg font-semibold text-white">Hoş Geldin, <span id="displayNamePlaceholder">Yükleniyor...</span></p>
+                    <p id="userRoleDisplay" class="text-sm font-medium rounded-full inline-block px-3 py-0.5 mt-1">Yükleniyor...</p>
                 </div>
+                <!-- KULLANICI ADI VE ROL BİLGİSİ SONU -->
 
-                <!-- Ziyaretçi Sayısı -->
-                <div class="stat-card p-6 rounded-xl shadow-lg flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-400 font-medium">Benzersiz Ziyaretçi</p>
-                        <p id="uniqueVisitors" class="text-4xl font-extrabold mt-1">
-                            <i class="fas fa-spinner fa-spin text-lg"></i>
-                        </p>
-                    </div>
-                    <div class="stat-icon bg-gray-900 p-3 rounded-full">
-                        <i class="fas fa-users text-xl"></i>
-                    </div>
-                </div>
+                <div class="text-sm text-gray-500">Kullanıcı ID:</div>
+                <div id="userIdDisplay" class="text-xs text-gray-400 truncate">Yükleniyor...</div>
+                <a href="girisyap.html" class="nav-item mt-4 text-sm bg-gray-700 hover:bg-red-600">
+                    <i class="fas fa-sign-out-alt w-6"></i>
+                    <span class="ml-3">Çıkış Yap</span>
+                </a>
             </div>
+        </aside>
 
-            <!-- Grafik Alanı -->
-            <section class="mb-10">
-                <div class="stat-card p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-semibold mb-4">Aylık Performans</h3>
-                    <div class="chart-mock">
-                        Grafik Verileri Yükleniyor...
+        <!-- Ana İçerik -->
+        <div class="flex-grow p-4 md:p-10 overflow-y-auto">
+
+            <!-- 1. Kontrol Paneli İçeriği -->
+            <section id="dashboardContent" class="content-tab">
+                <header class="mb-8 flex justify-between items-center">
+                    
+                    <!-- YENİ DİNAMİK KARŞILAMA ALANI -->
+                    <div id="dashboardWelcomeHeader">
+                        <h2 class="text-3xl font-bold text-white mb-1">Hoş Geldiniz, <span id="dashboardDisplayName">Yükleniyor...</span></h2>
+                        <!-- Dashboard rol/plan alanı. Sidebar'dakinden biraz farklı (margin-top yok) -->
+                        <p id="dashboardUserRoleDisplay" class="text-sm font-medium rounded-full inline-block px-3 py-0.5"></p>
+                    </div>
+                    <!-- YENİ DİNAMİK KARŞILAMA ALANI SONU -->
+
+                    <button id="quickCreateLinkBtn" class="cta-button px-4 py-2 rounded-lg font-semibold text-white text-sm">
+                        <i class="fas fa-plus mr-2"></i> Yeni Biyolink Oluştur
+                    </button>
+                </header>
+
+                <!-- İstatistik Kartları -->
+                <div id="statsSection" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                    
+                    <!-- Tıklama Sayısı -->
+                    <div class="stat-card p-6 rounded-xl shadow-lg flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-400 font-medium">Toplam Tıklama</p>
+                            <p id="totalClicks" class="text-4xl font-extrabold mt-1">
+                                <i class="fas fa-spinner fa-spin text-lg"></i>
+                            </p>
+                        </div>
+                        <div class="stat-icon bg-gray-900 p-3 rounded-full">
+                            <i class="fas fa-hand-pointer text-xl"></i>
+                        </div>
+                    </div>
+
+                    <!-- Ziyaretçi Sayısı -->
+                    <div class="stat-card p-6 rounded-xl shadow-lg flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-400 font-medium">Benzersiz Ziyaretçi</p>
+                            <p id="uniqueVisitors" class="text-4xl font-extrabold mt-1">
+                                <i class="fas fa-spinner fa-spin text-lg"></i>
+                            </p>
+                        </div>
+                        <div class="stat-icon bg-gray-900 p-3 rounded-full">
+                            <i class="fas fa-users text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grafik Alanı -->
+                <section class="mb-10">
+                    <div class="stat-card p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-semibold mb-4">Aylık Performans</h3>
+                        <div class="chart-mock">
+                            Grafik Verileri Yükleniyor...
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- 2. Biyolink Yönetimi İçeriği -->
+            <section id="linksContent" class="content-tab hidden">
+                <header class="mb-8 flex justify-between items-center">
+                    <h2 class="text-3xl font-bold">Biyolink Yönetimi</h2>
+                    <button id="openNewLinkModalBtn" class="cta-button px-4 py-2 rounded-lg font-semibold text-white text-sm">
+                        <i class="fas fa-plus mr-2"></i> Yeni Link Oluştur
+                    </button>
+                </header>
+
+                <div id="linkListContainer" class="space-y-3">
+                    <!-- Linkler buraya JavaScript ile yüklenecek -->
+                    <div class="stat-card p-6 rounded-xl shadow-lg text-center text-gray-400" id="linkLoadingMessage">
+                        <i class="fas fa-spinner fa-spin mr-2"></i> Linkler Yükleniyor...
                     </div>
                 </div>
             </section>
-        </section>
+            
+            <!-- 3. Ayarlar İçeriği -->
+            <section id="settingsContent" class="content-tab hidden">
+                <header class="mb-8">
+                    <h2 class="text-3xl font-bold">Ayarlar</h2>
+                </header>
 
-        <!-- 2. Biyolink Yönetimi İçeriği -->
-        <section id="linksContent" class="content-tab hidden">
-            <header class="mb-8 flex justify-between items-center">
-                <h2 class="text-3xl font-bold">Biyolink Yönetimi</h2>
-                <button id="openNewLinkModalBtn" class="cta-button px-4 py-2 rounded-lg font-semibold text-white text-sm">
-                    <i class="fas fa-plus mr-2"></i> Yeni Link Oluştur
-                </button>
-            </header>
-
-            <div id="linkListContainer" class="space-y-3">
-                <!-- Linkler buraya JavaScript ile yüklenecek -->
-                <div class="stat-card p-6 rounded-xl shadow-lg text-center text-gray-400" id="linkLoadingMessage">
-                    <i class="fas fa-spinner fa-spin mr-2"></i> Linkler Yükleniyor...
-                </div>
-            </div>
-        </section>
-        
-        <!-- 3. Ayarlar İçeriği -->
-        <section id="settingsContent" class="content-tab hidden">
-            <header class="mb-8">
-                <h2 class="text-3xl font-bold">Ayarlar</h2>
-            </header>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                
-                <!-- Hesap Bilgileri Kartı -->
-                <div class="stat-card p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-semibold mb-4 flex items-center">
-                        <i class="fas fa-user-circle mr-2 text-accent-purple"></i> Hesap Bilgileri
-                    </h3>
-                    <form id="profileForm">
-                        <div class="mb-4">
-                            <label for="profileName" class="block text-sm font-medium text-gray-300 mb-1">Adınız / Kullanıcı Adınız</label>
-                            <input type="text" id="profileName" required class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-purple focus:border-purple" placeholder="Örn: Baki S2">
-                        </div>
-                        
-                        <div class="mb-6">
-                            <label for="profileLinkSlug" class="block text-sm font-medium text-gray-300 mb-1 flex items-center justify-between">
-                                Biyolink Sayfa Adresi (URL Uzantısı)
-                                <span class="bg-yellow-500 text-gray-900 text-xs font-bold px-2 py-0.5 rounded-full">PREMIUM</span>
-                            </label>
-                            
-                            <div class="flex relative">
-                                <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-600 bg-gray-600 text-gray-300 text-sm">baki-s2.com/</span>
-                                <input type="text" id="profileLinkSlug" disabled class="flex-grow px-4 py-2 rounded-r-lg bg-gray-700 border border-gray-600 text-gray-500 cursor-not-allowed" placeholder="kullaniciadi">
-                            </div>
-                            <p class="text-sm text-red-400 mt-2 flex items-center">
-                                <i class="fas fa-lock mr-1"></i> Özel URL uzantısını değiştirmek Premium abonelik gerektirir.
-                            </p>
-                        </div>
-                        
-                        <button type="submit" id="saveProfileBtn" class="cta-button px-6 py-2 rounded-lg font-semibold text-white">
-                            <i class="fas fa-save mr-2"></i> Bilgileri Kaydet
-                        </button>
-                        <span id="profileStatus" class="ml-4 text-sm text-gray-400"></span>
-                    </form>
-                </div>
-
-                <!-- Görünüm Ayarları Kartı -->
-                <div class="stat-card p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-semibold mb-4 flex items-center">
-                        <i class="fas fa-paint-brush mr-2 text-accent-purple"></i> Görünüm Ayarları
-                    </h3>
-                    <p class="text-gray-400 mb-4 text-sm">Panelinizin ve biyolink sayfanızın temasını özelleştirin.</p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-300 mb-2">Tema Rengi Seçimi</label>
-                            <div id="themeOptions" class="flex flex-wrap gap-4">
-                                <!-- Tema seçenekleri buraya JS ile yüklenecek -->
+                    <!-- Hesap Bilgileri Kartı -->
+                    <div class="stat-card p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <i class="fas fa-user-circle mr-2 text-accent-purple"></i> Hesap Bilgileri
+                        </h3>
+                        <form id="profileForm">
+                            <div class="mb-4">
+                                <label for="profileName" class="block text-sm font-medium text-gray-300 mb-1">Adınız / Kullanıcı Adınız</label>
+                                <input type="text" id="profileName" required class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-purple focus:border-purple" placeholder="Örn: Baki S2">
                             </div>
-                        </div>
+                            
+                            <div class="mb-6">
+                                <label for="profileLinkSlug" class="block text-sm font-medium text-gray-300 mb-1 flex items-center justify-between">
+                                    Biyolink Sayfa Adresi (URL Uzantısı)
+                                    <span class="bg-yellow-500 text-gray-900 text-xs font-bold px-2 py-0.5 rounded-full">PREMIUM</span>
+                                </label>
+                                
+                                <div class="flex relative">
+                                    <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-600 bg-gray-600 text-gray-300 text-sm">baki-s2.com/</span>
+                                    <input type="text" id="profileLinkSlug" disabled class="flex-grow px-4 py-2 rounded-r-lg bg-gray-700 border border-gray-600 text-gray-500 cursor-not-allowed" placeholder="kullaniciadi">
+                                </div>
+                                <p class="text-sm text-red-400 mt-2 flex items-center">
+                                    <i class="fas fa-lock mr-1"></i> Özel URL uzantısını değiştirmek Premium abonelik gerektirir.
+                                </p>
+                            </div>
+                            
+                            <button type="submit" id="saveProfileBtn" class="cta-button px-6 py-2 rounded-lg font-semibold text-white">
+                                <i class="fas fa-save mr-2"></i> Bilgileri Kaydet
+                            </button>
+                            <span id="profileStatus" class="ml-4 text-sm text-gray-400"></span>
+                        </form>
                     </div>
 
-                    <button id="saveThemeBtn" class="cta-button px-6 py-2 rounded-lg font-semibold text-white mt-6">
-                        <i class="fas fa-check mr-2"></i> Görünümü Kaydet
-                    </button>
-                    <span id="themeStatus" class="ml-4 text-sm text-gray-400"></span>
+                    <!-- Görünüm Ayarları Kartı -->
+                    <div class="stat-card p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <i class="fas fa-paint-brush mr-2 text-accent-purple"></i> Görünüm Ayarları
+                        </h3>
+                        <p class="text-gray-400 mb-4 text-sm">Panelinizin ve biyolink sayfanızın temasını özelleştirin.</p>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Tema Rengi Seçimi</label>
+                                <div id="themeOptions" class="flex flex-wrap gap-4">
+                                    <!-- Tema seçenekleri buraya JS ile yüklenecek -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <button id="saveThemeBtn" class="cta-button px-6 py-2 rounded-lg font-semibold text-white mt-6">
+                            <i class="fas fa-check mr-2"></i> Görünümü Kaydet
+                        </button>
+                        <span id="themeStatus" class="ml-4 text-sm text-gray-400"></span>
+                    </div>
                 </div>
-            </div>
+                
+                <div class="mt-8 stat-card p-6 rounded-xl shadow-lg border-red-500/30 border">
+                    <h3 class="text-xl font-semibold mb-4 flex items-center text-red-400">
+                        <i class="fas fa-exclamation-triangle mr-2"></i> Hesap Yönetimi
+                    </h3>
+                    <p class="text-gray-400 mb-4 text-sm">Hesabınızı kalıcı olarak silebilirsiniz. Lütfen dikkatli olun.</p>
+                    <button id="deleteAccountBtn" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded-lg transition">
+                        Hesabı Kalıcı Sil
+                    </button>
+                </div>
+            </section>
             
-            <div class="mt-8 stat-card p-6 rounded-xl shadow-lg border-red-500/30 border">
-                 <h3 class="text-xl font-semibold mb-4 flex items-center text-red-400">
-                    <i class="fas fa-exclamation-triangle mr-2"></i> Hesap Yönetimi
-                </h3>
-                 <p class="text-gray-400 mb-4 text-sm">Hesabınızı kalıcı olarak silebilirsiniz. Lütfen dikkatli olun.</p>
-                 <button id="deleteAccountBtn" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded-lg transition">
-                    Hesabı Kalıcı Sil
-                </button>
-            </div>
-        </section>
+        </div>
         
     </div>
 
-    <!-- MODAL: GÜVENLİK VE YÖNLENDİRME MESAJI (YENİ EKLENDİ) -->
+    <!-- MODAL: GÜVENLİK VE YÖNLENDİRME MESAJI -->
+    <!-- Artık gizlenmeyecek, doğrudan yüklenecek ve JS ile gösterilecek -->
     <div id="securityModal" class="modal fixed inset-0 flex items-center justify-center hidden">
         <div class="bg-red-800 rounded-xl shadow-2xl p-8 w-full max-w-sm text-center border-4 border-red-600">
             <i class="fas fa-lock text-5xl text-red-300 mb-4"></i>
@@ -390,6 +415,8 @@
 
 
         // UI Elementleri
+        const loadingOverlayEl = document.getElementById('loadingOverlay'); // YENİ
+        const mainContentWrapperEl = document.getElementById('mainContentWrapper'); // YENİ
         const totalClicksEl = document.getElementById('totalClicks');
         const uniqueVisitorsEl = document.getElementById('uniqueVisitors');
         const userIdDisplayEl = document.getElementById('userIdDisplay');
@@ -397,10 +424,14 @@
         const chartMockEl = document.querySelector('.chart-mock');
         const linkLoadingMessageEl = document.getElementById('linkLoadingMessage'); 
         
-        // YENİ KULLANICI BİLGİ ELEMENTLERİ
+        // KULLANICI BİLGİ ELEMENTLERİ (Sidebar)
         const displayNamePlaceholderEl = document.getElementById('displayNamePlaceholder');
         const userRoleDisplayEl = document.getElementById('userRoleDisplay');
         
+        // YENİ KULLANICI BİLGİ ELEMENTLERİ (Dashboard)
+        const dashboardDisplayNameEl = document.getElementById('dashboardDisplayName');
+        const dashboardUserRoleDisplayEl = document.getElementById('dashboardUserRoleDisplay');
+
         // Ayarlar Elementleri
         const profileForm = document.getElementById('profileForm');
         const profileNameField = document.getElementById('profileName');
@@ -426,7 +457,7 @@
         const messageTextEl = document.getElementById('messageText');
         const messageActionsEl = document.getElementById('messageActions');
         
-        // GÜVENLİK MODALI ELEMENTLERİ (YENİ)
+        // GÜVENLİK MODALI ELEMENTLERİ
         const securityModal = document.getElementById('securityModal');
         const countdownEl = document.getElementById('countdown');
 
@@ -470,16 +501,23 @@
             document.documentElement.style.setProperty('--active-theme-color', theme.color);
             document.documentElement.style.setProperty('--active-bg-color', theme.darkBg);
             document.documentElement.style.setProperty('--active-card-color', theme.cardBg);
+            
+            // Yükleme ekranının da arka planını güncelle
+            loadingOverlayEl.style.backgroundColor = theme.darkBg;
         };
         
         /**
          * Oturum açılmamış kullanıcıyı uyarıp belirtilen sayfaya yönlendirir.
+         * Beyaz ekranı engellemek için yükleme ekranını gizlemez, doğrudan güvenlik modalını gösterir.
          * @param {string} redirectUrl - Yönlendirilecek sayfanın URL'si (örneğin: 'girisyap.html').
          */
         const showSecurityRedirect = (redirectUrl = 'girisyap.html') => {
-            // Panel içeriğini gizle
-            document.body.classList.add('hidden'); 
+            // Loading Overlay'i hemen gizleme, onun yerine Security Modal'ı göster
             
+            // Eğer yükleme ekranı hala görünüyorsa, saydamlığını yavaşça kaldır
+            loadingOverlayEl.style.opacity = '0';
+            setTimeout(() => loadingOverlayEl.classList.add('hidden'), 500); // 500ms sonra gizle
+
             securityModal.classList.remove('hidden');
             let count = 3;
             countdownEl.textContent = `${count} saniye`;
@@ -490,51 +528,64 @@
                 
                 if (count <= 0) {
                     clearInterval(interval);
-                    // Güvenli sayfaya yönlendir
                     window.location.href = redirectUrl; 
                 }
             }, 1000);
+        };
+
+        // Başarılı yükleme sonrası arayüzü gösteren fonksiyon (YENİ)
+        const showAppContent = () => {
+            // Yükleme ekranını şeffaf yap
+            loadingOverlayEl.style.opacity = '0';
+            
+            // Ana içeriği göster
+            mainContentWrapperEl.classList.remove('hidden');
+            mainContentWrapperEl.classList.add('flex'); // body'deki flex stilini buraya taşıdık
+
+            // Yarım saniye sonra (CSS transition süresi kadar) loading overlay'i DOM'dan kaldır
+            setTimeout(() => {
+                loadingOverlayEl.classList.add('hidden');
+            }, 500); 
         };
 
 
         // --- Firebase Başlatma ve Kimlik Doğrulama ---
         
         async function initializeFirebase() {
-            // Yönlendirme yapılana kadar sayfa içeriğini gizle (opsiyonel ama iyi bir pratik)
-            document.body.style.display = 'none';
-
             try {
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
+                // İlk token ile oturum açmayı dene
                 if (initialAuthToken) {
                     await signInWithCustomToken(auth, initialAuthToken);
                 } else {
-                    await signInAnonymously(auth);
+                    // Token yoksa veya bir sorun varsa anonim giriş yap (ama panele erişim engellenecek)
+                    await signInAnonymously(auth); 
                 }
 
                 onAuthStateChanged(auth, (user) => {
-                    // Kullanıcı oturumu açık ve anonim DEĞİLSE devam et
+                    // Kullanıcı oturumu açık ve anonim DEĞİLSE devam et (Paneli Göster)
                     if (user && !user.isAnonymous) { 
                         userId = user.uid;
                         isAuthReady = true;
                         userIdDisplayEl.textContent = userId;
                         
-                        // Panel içeriğini göster
-                        document.body.style.display = 'flex';
+                        // Panel içeriğini göster ve yükleme ekranını kaldır
+                        showAppContent();
                         
                         setupDashboardListener(userId);
                         setupLinksListener(userId);
                         setupProfileListener(userId);
                         
-                        // Varsayılan verileri kontrol et ve oluştur (varsa günceller, yoksa oluşturur)
                         checkAndCreateDefaultStats(userId);
                         checkAndCreateDefaultProfile(userId);
                         renderThemeOptions();
                         
                     } else {
                         // Kullanıcı oturumu açık değilse veya anonimse, uyarı göster ve yönlendir
+                        console.log("Kullanıcı oturumu kapalı veya anonim. Yönlendiriliyor...");
                         showSecurityRedirect('girisyap.html'); 
                     }
                 });
@@ -578,14 +629,12 @@
             if (unsubscribeLinks) { unsubscribeLinks(); }
             const linksQuery = query(getLinksCollectionRef(uid));
 
-            // Linkler yüklenmeye başladığında mesajı göster
             linkLoadingMessageEl.classList.remove('hidden');
 
             unsubscribeLinks = onSnapshot(linksQuery, (snapshot) => {
                 let links = [];
                 snapshot.forEach((doc) => { links.push({ id: doc.id, ...doc.data() }); });
                 
-                // Linkler yüklendiğinde mesajı gizle
                 linkLoadingMessageEl.classList.add('hidden'); 
                 
                 links.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -599,11 +648,9 @@
         function renderLinkList(links) {
              linkListContainerEl.innerHTML = '';
              
-             // Yükleniyor mesajının hala DOM'da olduğundan emin ol
              linkListContainerEl.appendChild(linkLoadingMessageEl);
 
              if (links.length === 0) {
-                 // Eğer link yoksa, yükleniyor mesajını gizle ve bilgilendirici mesajı göster.
                  linkLoadingMessageEl.classList.add('hidden');
                  linkListContainerEl.innerHTML = `<div class="stat-card p-6 rounded-xl shadow-lg text-center text-gray-400"><i class="fas fa-info-circle mr-2"></i> Henüz oluşturulmuş bir biyolinkiniz yok. Hemen bir tane oluşturun!</div>`;
                 return;
@@ -722,7 +769,7 @@
                         name: "Yeni Kullanıcı", 
                         slug: "kullanici-" + uid.substring(0, 6),
                         theme: THEMES[0].key, // Varsayılan tema
-                        isPremium: false, // YENİ: Varsayılan kullanıcı rolü (Standart)
+                        isPremium: false, // Varsayılan kullanıcı rolü (Standart)
                         createdAt: new Date() 
                     });
                 }
@@ -742,7 +789,10 @@
                     // KULLANICI ADI GÜNCELLEME
                     const userName = data.name || 'Misafir';
                     profileNameField.value = userName;
-                    displayNamePlaceholderEl.textContent = userName;
+                    
+                    // Sidebar ve Dashboard adlarını güncelle
+                    displayNamePlaceholderEl.textContent = userName; // Sidebar
+                    dashboardDisplayNameEl.textContent = userName; // Dashboard
                     
                     // ROL/PLAN GÜNCELLEME
                     const isPremium = data.isPremium === true;
@@ -750,8 +800,13 @@
                     // Premium için sarı arka plan, Standart için gri arka plan
                     const roleClass = isPremium ? 'bg-yellow-500 text-gray-900' : 'bg-gray-500 text-white';
 
+                    // Sidebar'ı güncelle
                     userRoleDisplayEl.textContent = roleText;
                     userRoleDisplayEl.className = `text-sm font-medium rounded-full inline-block px-3 py-0.5 mt-1 ${roleClass}`;
+                    
+                    // Dashboard'ı güncelle (mt-1 kaldırıldı)
+                    dashboardUserRoleDisplayEl.textContent = roleText;
+                    dashboardUserRoleDisplayEl.className = `text-sm font-medium rounded-full inline-block px-3 py-0.5 ${roleClass}`;
 
 
                     profileLinkSlugField.value = data.slug || ''; // Okunabilir ama değiştirilemez
@@ -820,7 +875,6 @@
             if (!userId) { showMessage("Oturum kimliği bulunamadı."); return; }
             
             const name = profileNameField.value.trim();
-            // Slug premium olduğu için burada güncellenmeyecek
             
             profileStatusEl.textContent = 'Kaydediliyor...';
             
