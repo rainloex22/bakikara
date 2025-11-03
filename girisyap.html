@@ -10,205 +10,201 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --purple: #6c5ce7; }
-        body { font-family: 'Poppins', sans-serif; background-color: #1a0e21; color: #ffffff; }
-        .header-bg { background-color: rgba(26, 14, 33, 0.9); backdrop-filter: blur(5px); }
-        .form-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(5px); border-radius: 1rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
-        .btn-login {
-            background-color: var(--purple);
-            transition: background-color 0.3s ease, transform 0.2s ease;
+        :root {
+            --purple: #6c5ce7; /* Mor vurgu rengi */
+            --dark-bg: #1a0e21; /* Koyu arka plan */
+            --card-bg: #2a1b3a; /* Kart arka planı */
         }
-        .btn-login:hover {
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--dark-bg);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .form-card {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(108, 92, 231, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        .input-field {
+            background-color: #3b2f4f;
+            border: 1px solid transparent;
+            color: white;
+            transition: border-color 0.3s;
+        }
+        .input-field:focus {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 1px var(--purple);
+            outline: none;
+        }
+        .main-cta-button {
+            background-color: var(--purple);
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+            transition: transform 0.3s ease;
+        }
+        .main-cta-button:hover {
             background-color: #5c4cd9;
             transform: translateY(-1px);
         }
-        /* Custom Message Box Style */
-        #messageBox {
-            visibility: hidden;
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            padding: 15px 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            opacity: 0;
-            transition: opacity 0.3s, visibility 0.3s;
-            display: flex; 
-            align-items: center;
-            justify-content: center;
-            min-width: 300px;
-            text-align: center;
+        .alert {
+            transition: opacity 0.3s ease;
         }
-        .message-success { background-color: #10b981; }
-        .message-error { background-color: #ef4444; }
-        .message-show { visibility: visible; opacity: 1; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
-    <!-- Navbar -->
-    <header class="header-bg p-4 flex justify-center sticky top-0 z-20">
-        <div class="w-full max-w-6xl flex justify-between items-center">
-            <a href="panel.html" class="text-3xl font-extrabold text-white flex items-center">
-                <i class="fas fa-terminal mr-2 text-purple"></i> BAKİ S2
+<body>
+
+    <div class="w-full max-w-md px-4">
+        
+        <!-- Logo -->
+        <div class="text-center mb-10">
+            <a href="index.html" class="text-4xl font-extrabold text-white flex items-center justify-center">
+                <i class="fas fa-terminal mr-3 text-purple"></i> BAKİ S2
             </a>
-            <nav class="hidden md:flex space-x-6 text-lg">
-                <a href="yardim.html" class="text-gray-300 hover:text-purple transition duration-200">Yardım Merkezi</a>
-                <a href="discord.html" class="text-gray-300 hover:text-purple transition duration-200">Discord</a>
-                <a href="fiyatlandirma.html" class="text-gray-300 hover:text-purple transition duration-200">Fiyatlandirma</a>
-            </nav>
-            <div class="flex space-x-3">
-                <a href="girisyap.html" class="hidden sm:inline-block px-4 py-2 text-purple transition duration-200 rounded-lg">Giriş Yap</a>
-                <a href="kaydol.html" class="bg-purple px-5 py-2 rounded-lg font-semibold text-white">Kaydol</a>
-            </div>
+            <h2 class="text-2xl font-semibold mt-4 text-gray-300">Hesabınıza Giriş Yapın</h2>
         </div>
-    </header>
 
-    <!-- İçerik Alanı -->
-    <main class="flex-grow flex flex-col items-center justify-center py-12 px-4">
-        <div class="form-card p-8 md:p-10 w-full max-w-md">
-            <h1 class="text-3xl font-extrabold mb-6 text-white text-center">Giriş Yapın</h1>
-            
-            <form id="loginForm" class="space-y-4">
-                <div>
-                    <label for="login_email" class="block text-sm font-medium text-gray-400 text-left mb-1">E-posta</label>
-                    <input type="email" id="login_email" required class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple focus:ring focus:ring-purple focus:ring-opacity-50 text-white" placeholder="ornek@mail.com">
-                </div>
-                <div>
-                    <label for="login_password" class="block text-sm font-medium text-gray-400 text-left mb-1">Şifre</label>
-                    <input type="password" id="login_password" required class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple focus:ring focus:ring-purple focus:ring-opacity-50 text-white" placeholder="Şifreniz">
-                </div>
+        <div class="form-card p-8 rounded-xl">
+
+            <!-- Giriş Formu -->
+            <form id="loginForm" class="space-y-6">
                 
-                <!-- Şifremi Unuttum Bağlantısı -->
-                <div class="text-right">
-                    <a href="sifremiunuttum.html" class="text-sm text-purple hover:underline font-medium">Şifremi Unuttum?</a>
+                <!-- E-posta Alanı -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-300 mb-1">E-posta Adresi</label>
+                    <input type="email" id="email" class="input-field w-full p-3 rounded-lg" placeholder="e-posta@adresiniz.com" required>
                 </div>
 
-                <button type="submit" id="loginButton" class="w-full btn-login py-3 rounded-lg font-bold text-white text-lg mt-4">
-                    Giriş Yap
+                <!-- Şifre Alanı -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-300 mb-1">Şifre</label>
+                    <input type="password" id="password" class="input-field w-full p-3 rounded-lg" placeholder="••••••••" required>
+                </div>
+
+                <!-- Dinamik Mesaj Alanı -->
+                <div id="messageBox" class="alert p-3 rounded-lg text-sm hidden"></div>
+
+                <!-- Giriş Butonu -->
+                <button type="submit" id="loginButton" class="main-cta-button w-full p-3 rounded-lg font-bold text-white text-lg">
+                    Giriş Yap <i class="fas fa-sign-in-alt ml-2"></i>
                 </button>
+
             </form>
+
+            <!-- Ek Bağlantılar -->
+            <div class="mt-6 text-center text-sm">
+                <p class="text-gray-400">
+                    Hesabınız yok mu? 
+                    <a href="kaydol.html" class="font-medium text-purple hover:text-white transition duration-200">Hemen Kaydolun</a>
+                </p>
+            </div>
             
-            <p class="text-center text-sm text-gray-400 mt-4">
-                Hesabınız yok mu? 
-                <a href="kaydol.html" class="text-purple hover:underline font-semibold">Kaydolun</a>
-            </p>
         </div>
-    </main>
-    
-    <!-- Mesaj Kutusu -->
-    <div id="messageBox"></div>
+    </div>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-500 text-center p-4">
-        © 2025 BAKİ S2 Yönetim Hizmetleri.
-    </footer>
 
-    <!-- Firebase Kodu -->
+    <!-- Firebase Kodu ve Giriş Mantığı -->
     <script type="module">
-        // Zorunlu Firebase SDK sürüm 11.6.1 kullanılıyor
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
-        // --- Ortamdan Gelen Değişkenler ---
-        // Firebase yapılandırmasını güvenli bir şekilde al
+        // --- Ortamdan Gelen Değişkenler ve DOM Elementleri ---
         const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        // Custom Auth Token'ı al
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const messageBox = document.getElementById('messageBox');
+        const loginButton = document.getElementById('loginButton');
 
-        // --- DOM Elementlerini Başlat ---
-        let messageBox = document.getElementById('messageBox');
-        
-        // --- Mesaj Gösterme Fonksiyonu ---
-        function showMessage(message, type = 'success') {
-            if (!messageBox) {
-                messageBox = document.getElementById('messageBox');
-                if (!messageBox) return; 
-            }
-            messageBox.innerHTML = message;
-            messageBox.className = type === 'success' ? 'message-success' : 'message-error';
-            messageBox.classList.add('message-show');
-            setTimeout(() => {
-                messageBox.classList.remove('message-show');
-            }, 3000);
+        // --- Firebase Başlatma ---
+        let auth;
+        try {
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            // Oturumun yalnızca tarayıcı sekmesi açıkken kalmasını ayarla
+            setPersistence(auth, browserSessionPersistence); 
+        } catch (e) {
+            console.error("Firebase başlatma hatası:", e);
         }
 
-        // Firebase Uygulamasını Başlat
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        
-        // Oturum kalıcılığını yerel depolama olarak ayarla (Kullanıcının oturumunu hatırlamasını sağlar)
-        setPersistence(auth, browserLocalPersistence)
-            .then(() => {
-                // Custom Token ile Giriş
-                if (initialAuthToken) {
-                    return signInWithCustomToken(auth, initialAuthToken).catch(e => {
-                        console.error("Custom token ile giriş hatası:", e);
-                        // Hata durumunda anonim girişe düş
-                        return signInAnonymously(auth);
-                    });
-                } else {
-                    // Custom token yoksa anonim girişi dene
-                    return signInAnonymously(auth);
-                }
-            })
-            .catch(e => {
-                console.error("Kalıcılık ayarlanırken veya anonim/custom token ile giriş yapılırken hata:", e);
-            });
-        
-        // --- Giriş İşlemi ---
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('login_email').value;
-            const password = document.getElementById('login_password').value;
+        /**
+         * Mesaj kutusunu görünür yapar ve stilini ayarlar.
+         * @param {string} message - Gösterilecek mesaj.
+         * @param {string} type - 'success' veya 'error'.
+         */
+        function displayMessage(message, type) {
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-red-900/30', 'text-red-300', 'bg-green-900/30', 'text-green-300');
+            
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-900/30', 'text-red-300');
+            } else if (type === 'success') {
+                messageBox.classList.add('bg-green-900/30', 'text-green-300');
+            }
+        }
 
-            const button = document.getElementById('loginButton');
-            button.disabled = true;
-            button.textContent = 'Giriş Yapılıyor...';
+        // --- Giriş İşlemi ---
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                displayMessage("Lütfen tüm alanları doldurun.", 'error');
+                return;
+            }
+
+            // Butonu devre dışı bırak ve yükleniyor durumunu göster
+            loginButton.disabled = true;
+            loginButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Giriş Yapılıyor...';
+            displayMessage("Giriş yapılıyor, lütfen bekleyin...", 'success');
+
 
             try {
-                // Firebase Auth ile giriş yap
+                // Firebase ile e-posta ve şifre ile giriş yap
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 
-                // Başarılı olursa kullanıcıyı ana sayfaya yönlendir
-                showMessage("Başarılı! Giriş yapıldı. Yönlendiriliyorsunuz...", "success");
+                // Başarılı giriş
+                displayMessage("Giriş başarılı! Kontrol paneline yönlendiriliyorsunuz.", 'success');
                 
-                // Başarılı giriş sonrası 2 saniye bekleyip yönlendir
+                // 1 saniye bekleyip panel.html'e yönlendir
                 setTimeout(() => {
-                    // Kullanıcı başarıyla giriş yaptığında yönlendirileceği sayfa
-                    window.location.href = 'panel.html'; 
-                }, 2000);
+                    window.location.href = "panel.html"; 
+                }, 1000);
 
             } catch (error) {
-                console.error("Giriş hatası:", error);
-                let errorMessage = "Giriş işlemi sırasında bir hata oluştu.";
+                console.error("Giriş hatası:", error.code, error.message);
+                
+                let errorMessage = "Bir hata oluştu. Lütfen tekrar deneyin.";
 
-                // Firebase hata kodlarına göre mesajları özelleştirme
+                // Firebase hata kodlarına göre mesajları Türkçeleştirme
                 switch (error.code) {
-                    case 'auth/invalid-email':
-                        errorMessage = "Geçersiz e-posta adresi formatı.";
-                        break;
                     case 'auth/user-not-found':
                     case 'auth/wrong-password':
-                    case 'auth/invalid-credential': // Yeni Firebase versiyonlarında bu kod kullanılabilir
-                        errorMessage = "Hatalı e-posta veya şifre. Lütfen tekrar deneyin.";
+                        errorMessage = "E-posta veya şifre hatalı.";
                         break;
-                    case 'auth/operation-not-allowed':
-                        errorMessage = "Bu kimlik doğrulama yöntemi Firebase'de etkin değil. (E-posta/Şifre)";
+                    case 'auth/invalid-email':
+                        errorMessage = "Geçersiz e-posta formatı.";
+                        break;
+                    case 'auth/user-disabled':
+                        errorMessage = "Hesabınız askıya alınmıştır.";
                         break;
                     default:
-                        // error.message'i direkt göstermek yerine daha kibar bir hata mesajı
-                        errorMessage = "Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin."; 
+                        errorMessage = `Giriş Hatası: ${error.message}`;
+                        break;
                 }
-                
-                showMessage("Giriş hatası: " + errorMessage, "error");
 
-            } finally {
-                button.disabled = false;
-                button.textContent = 'Giriş Yap';
+                displayMessage(errorMessage, 'error');
+                
+                // Butonu tekrar etkinleştir
+                loginButton.disabled = false;
+                loginButton.innerHTML = 'Giriş Yap <i class="fas fa-sign-in-alt ml-2"></i>';
             }
         });
+
     </script>
 </body>
 </html>
