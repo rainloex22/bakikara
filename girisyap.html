@@ -19,10 +19,12 @@
             font-family: 'Poppins', sans-serif;
             background-color: var(--dark-bg);
             color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             min-height: 100vh;
+            /* Flex özellikleri main içeriği ortalamak için body'den main'e taşındı */
+            display: flex; 
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
         }
         .form-card {
             background-color: var(--card-bg);
@@ -52,71 +54,172 @@
         .alert {
             transition: opacity 0.3s ease;
         }
+        
+        /* NAVBAR STİLLERİ (index.html'den alındı) */
+        .header-bg {
+            background-color: rgba(26, 14, 33, 0.9); /* Başlık için hafif şeffaf arka plan */
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        .profile-avatar-nav {
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            background-color: var(--purple);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .card-dropdown { 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(5px); 
+            border-radius: 0.5rem; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); 
+            border: 1px solid rgba(108, 92, 231, 0.1);
+        }
     </style>
 </head>
-<body>
+<body class="flex flex-col">
 
-    <div class="w-full max-w-md px-4">
-        
-        <!-- Logo -->
-        <div class="text-center mb-10">
-            <a href="index.html" class="text-4xl font-extrabold text-white flex items-center justify-center">
-                <i class="fas fa-terminal mr-3 text-purple"></i> BAKİ S2
+    <!-- Navbar -->
+    <header class="header-bg p-4 flex justify-center sticky top-0 z-20">
+        <div class="w-full max-w-6xl flex justify-between items-center">
+            
+            <!-- Logo -->
+            <a href="index.html" class="text-3xl font-extrabold text-white flex items-center">
+                <i class="fas fa-terminal mr-2 text-purple"></i> BAKİ S2
             </a>
-            <h2 class="text-2xl font-semibold mt-4 text-gray-300">Hesabınıza Giriş Yapın</h2>
-        </div>
-
-        <div class="form-card p-8 rounded-xl">
-
-            <!-- Giriş Formu -->
-            <form id="loginForm" class="space-y-6">
-                
-                <!-- E-posta Alanı -->
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-300 mb-1">E-posta Adresi</label>
-                    <input type="email" id="email" class="input-field w-full p-3 rounded-lg" placeholder="e-posta@adresiniz.com" required>
+            
+            <!-- Navigasyon Linkleri (Orta) -->
+            <nav class="hidden md:flex space-x-6 text-lg">
+                <a href="panel.html" class="text-gray-300 hover:text-purple transition duration-200">Kullanıcı Paneli</a>
+                <a href="yardim.html" class="text-gray-300 hover:text-purple transition duration-200">Yardım Merkezi</a>
+                <a href="discord.html" class="text-gray-300 hover:text-purple transition duration-200">Discord</a>
+                <a href="fiyatlandirma.html" class="text-gray-300 hover:text-purple transition duration-200">Fiyatlandırma</a>
+            </nav>
+            
+            <!-- DİNAMİK CTA / KULLANICI BİLGİSİ ALANI -->
+            <div class="flex space-x-3 items-center">
+                <!-- 1. Oturum Kapalı Durumu (Varsayılan olarak gösterilir, JS ile gizlenir) -->
+                <div id="loggedOutNav" class="flex space-x-3 items-center">
+                    <span class="text-red-400 font-medium hidden sm:inline-block">Giriş Yapılmamış</span>
+                    <a href="girisyap.html" class="hidden sm:inline-block px-4 py-2 text-gray-300 hover:text-white transition duration-200 rounded-lg">Giriş Yap</a>
+                    <a href="kaydol.html" class="main-cta-button px-5 py-2 rounded-lg font-semibold text-white">Kaydol</a>
                 </div>
 
-                <!-- Şifre Alanı -->
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-300 mb-1">Şifre</label>
-                    <input type="password" id="password" class="input-field w-full p-3 rounded-lg" placeholder="••••••••" required>
+                <!-- 2. Oturum Açık Durumu (Varsayılan olarak gizlenir, JS ile gösterilir) -->
+                <div id="loggedInNav" class="relative hidden">
+                    <button id="profileMenuButton" class="flex items-center space-x-3 p-2 rounded-full hover:bg-gray-700 transition duration-200 focus:outline-none">
+                        <!-- Profil Baş Harfleri -->
+                        <span id="nav_profile_initials" class="profile-avatar-nav flex-shrink-0">...</span>
+                        
+                        <div class="hidden sm:flex flex-col items-start">
+                            <!-- Kullanıcı Adı -->
+                            <span class="text-sm font-semibold" id="nav_profile_display_name">...</span>
+                            <!-- Kullanıcı Durumu (Premium/Standart) -->
+                            <span class="text-xs font-medium" id="nav_profile_status"></span>
+                        </div>
+                        <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+                    </button>
+                    
+                    <!-- Dropdown Menü -->
+                    <div id="profileDropdownMenu" class="absolute right-0 mt-2 w-48 card-dropdown bg-gray-800 rounded-lg shadow-xl py-1 z-30 hidden">
+                        <!-- Önizleme Alanı -->
+                        <div class="px-4 py-2 text-sm text-gray-400 border-b border-gray-700">
+                            <p class="font-bold text-white truncate" id="dropdown_email_preview">email@yok.com</p>
+                            <p class="text-xs font-medium" id="dropdown_status_preview">Standart</p>
+                        </div>
+                        <a href="panel.html" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition duration-150">
+                            <i class="fas fa-chart-line mr-2 w-4"></i> Kontrol Paneli
+                        </a>
+                        <div class="border-t border-gray-700 my-1"></div>
+                        <button id="logoutBtnNav" class="w-full text-left block px-4 py-2 text-sm text-red-400 hover:bg-gray-700 transition duration-150">
+                            <i class="fas fa-sign-out-alt mr-2 w-4"></i> Çıkış Yap
+                        </button>
+                    </div>
                 </div>
-
-                <!-- Dinamik Mesaj Alanı -->
-                <div id="messageBox" class="alert p-3 rounded-lg text-sm hidden"></div>
-
-                <!-- Giriş Butonu -->
-                <button type="submit" id="loginButton" class="main-cta-button w-full p-3 rounded-lg font-bold text-white text-lg">
-                    Giriş Yap <i class="fas fa-sign-in-alt ml-2"></i>
-                </button>
-
-            </form>
-
-            <!-- Ek Bağlantılar -->
-            <div class="mt-6 text-center text-sm">
-                <p class="text-gray-400">
-                    Hesabınız yok mu? 
-                    <a href="kaydol.html" class="font-medium text-purple hover:text-white transition duration-200">Hemen Kaydolun</a>
-                </p>
             </div>
             
         </div>
-    </div>
+    </header>
+
+    <main class="flex-grow flex justify-center items-center py-12">
+        <div class="w-full max-w-md px-4">
+            
+            <!-- Logo -->
+            <div class="text-center mb-10">
+                <a href="index.html" class="text-4xl font-extrabold text-white flex items-center justify-center">
+                    <i class="fas fa-terminal mr-3 text-purple"></i> BAKİ S2
+                </a>
+                <h2 class="text-2xl font-semibold mt-4 text-gray-300">Hesabınıza Giriş Yapın</h2>
+            </div>
+
+            <div class="form-card p-8 rounded-xl">
+
+                <!-- Giriş Formu -->
+                <form id="loginForm" class="space-y-6">
+                    
+                    <!-- E-posta Alanı -->
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-300 mb-1">E-posta Adresi</label>
+                        <input type="email" id="email" class="input-field w-full p-3 rounded-lg" placeholder="e-posta@adresiniz.com" required>
+                    </div>
+
+                    <!-- Şifre Alanı -->
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-300 mb-1">Şifre</label>
+                        <input type="password" id="password" class="input-field w-full p-3 rounded-lg" placeholder="••••••••" required>
+                    </div>
+
+                    <!-- Dinamik Mesaj Alanı -->
+                    <div id="messageBox" class="alert p-3 rounded-lg text-sm hidden"></div>
+
+                    <!-- Giriş Butonu -->
+                    <button type="submit" id="loginButton" class="main-cta-button w-full p-3 rounded-lg font-bold text-white text-lg">
+                        Giriş Yap <i class="fas fa-sign-in-alt ml-2"></i>
+                    </button>
+
+                </form>
+
+                <!-- Ek Bağlantılar -->
+                <div class="mt-6 text-center text-sm">
+                    <p class="text-gray-400">
+                        Hesabınız yok mu? 
+                        <a href="kaydol.html" class="font-medium text-purple hover:text-white transition duration-200">Hemen Kaydolun</a>
+                    </p>
+                </div>
+                
+            </div>
+        </div>
+    </main>
 
 
     <!-- Firebase Kodu ve Giriş Mantığı -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
-        // --- Ortamdan Gelen Değişkenler ve DOM Elementleri ---
+        // --- Ortamdan Gelen Değişkenler ---
         const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+
+        // --- DOM Elementleri (Giriş Formu) ---
         const loginForm = document.getElementById('loginForm');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
         const messageBox = document.getElementById('messageBox');
         const loginButton = document.getElementById('loginButton');
+
+        // --- DOM Elementleri (Navigasyon) ---
+        const loggedOutNav = document.getElementById('loggedOutNav');
+        const loggedInNav = document.getElementById('loggedInNav');
+        const profileMenuButton = document.getElementById('profileMenuButton');
+        const profileDropdownMenu = document.getElementById('profileDropdownMenu');
+        const logoutBtnNav = document.getElementById('logoutBtnNav');
+
 
         // --- Firebase Başlatma ---
         let auth;
@@ -127,6 +230,100 @@
             setPersistence(auth, browserSessionPersistence); 
         } catch (e) {
             console.error("Firebase başlatma hatası:", e);
+        }
+
+
+        // --- Kullanıcı Profil Bilgilerini Türetme ve Gösterme ---
+        function renderUserProfile(user) {
+            const email = user.email;
+            let displayName = 'Kullanıcı';
+            let initials = 'K';
+            let userStatus = 'Standart Üye'; 
+            let statusColor = 'text-yellow-400';
+
+            if (email) {
+                const emailLocalPart = email.split('@')[0];
+                const nameParts = emailLocalPart.split(/[\._-]/); 
+                
+                if (nameParts.length > 1 && nameParts[0] && nameParts[1]) {
+                    initials = (nameParts[0].charAt(0) + nameParts[1].charAt(0)).toUpperCase();
+                    displayName = nameParts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+                } else {
+                    initials = emailLocalPart.charAt(0).toUpperCase();
+                    displayName = emailLocalPart.charAt(0).toUpperCase() + emailLocalPart.slice(1);
+                }
+
+                // Fictional Status Logic: E-posta "premium" içeriyorsa Premium yap
+                if (email.toLowerCase().includes('premium')) {
+                    userStatus = 'Premium Üye';
+                    statusColor = 'text-green-400';
+                }
+            } else if (user.isAnonymous) {
+                 displayName = 'Anonim';
+                 initials = 'A';
+                 userStatus = 'Misafir Oturumu';
+                 statusColor = 'text-gray-500';
+            }
+            
+            // --- Navbar Güncelleme ---
+            document.getElementById('nav_profile_initials').textContent = initials;
+            document.getElementById('nav_profile_display_name').textContent = displayName.split(' ')[0]; // Navbar'da sadece ilk kelimeyi göster
+            
+            const navStatusElement = document.getElementById('nav_profile_status');
+            navStatusElement.textContent = userStatus;
+            navStatusElement.className = `text-xs font-medium ${statusColor}`; 
+            
+            // --- Dropdown Güncelleme ---
+            document.getElementById('dropdown_email_preview').textContent = email || 'Misafir Oturumu';
+            const dropdownStatusElement = document.getElementById('dropdown_status_preview');
+            dropdownStatusElement.textContent = userStatus;
+            dropdownStatusElement.className = `text-xs font-medium ${statusColor}`; 
+        }
+
+        // --- Oturum Durumu Kontrolü (Navbar için) ---
+        if (auth) {
+            onAuthStateChanged(auth, (user) => {
+                if (user && !user.isAnonymous) { // Sadece gerçek bir kullanıcı girişi varsa
+                    renderUserProfile(user);
+                    loggedOutNav.classList.add('hidden');
+                    loggedInNav.classList.remove('hidden');
+                } else {
+                    loggedOutNav.classList.remove('hidden');
+                    loggedInNav.classList.add('hidden');
+                }
+            });
+        }
+
+        // --- Çıkış Yapma İşlemi ---
+        const handleLogout = async () => {
+            if (auth) {
+                try {
+                    profileDropdownMenu.classList.add('hidden');
+                    await signOut(auth);
+                } catch (error) {
+                    console.error("Çıkış yapma hatası:", error);
+                }
+            }
+        };
+
+        // --- Dropdown Toggle İşlemi ---
+        if (profileMenuButton) {
+            profileMenuButton.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                profileDropdownMenu.classList.toggle('hidden');
+            });
+        }
+
+        // Dropdown menü dışına tıklanınca gizle
+        document.addEventListener('click', (e) => {
+            if (profileDropdownMenu && profileMenuButton && !profileMenuButton.contains(e.target) && !profileDropdownMenu.contains(e.target)) {
+                profileDropdownMenu.classList.add('hidden');
+            }
+        });
+
+        // Çıkış düğmesine event listener ekle
+        if (logoutBtnNav) {
+            logoutBtnNav.addEventListener('click', handleLogout);
         }
 
         /**
