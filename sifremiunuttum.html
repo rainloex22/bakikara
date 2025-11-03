@@ -36,8 +36,12 @@
             opacity: 0;
             transition: opacity 0.3s, visibility 0.3s;
             display: flex; 
+            flex-direction: column; /* İçeriğin alt alta gelmesi için */
             align-items: center;
             justify-content: center;
+            text-align: center; /* Mesajın ortalanması için eklendi */
+            max-width: 90%;
+            min-width: 280px;
         }
         .message-success { background-color: #10b981; }
         .message-error { background-color: #ef4444; }
@@ -116,18 +120,32 @@
         // --- DOM Elementlerini Başlat ---
         let messageBox = document.getElementById('messageBox');
         
-        // --- Mesaj Gösterme Fonksiyonu ---
+        // --- Mesaj Gösterme Fonksiyonu (Düzeltildi) ---
         function showMessage(message, type = 'success') {
+            // Element kontrolü
             if (!messageBox) {
                 messageBox = document.getElementById('messageBox');
-                if (!messageBox) return; 
+                if (!messageBox) {
+                     console.error("Message box element not found!");
+                     return;
+                }
             }
+
+            // Önceki renk sınıflarını temizle
+            messageBox.classList.remove('message-success', 'message-error');
+
+            // İçeriği ve yeni renk sınıfını ayarla
             messageBox.innerHTML = message;
-            messageBox.className = type === 'success' ? 'message-success' : 'message-error';
+            const colorClass = type === 'success' ? 'message-success' : 'message-error';
+            messageBox.classList.add(colorClass);
+
+            // Mesaj kutusunu görünür yap
             messageBox.classList.add('message-show');
+            
+            // 5 saniye sonra gizle
             setTimeout(() => {
                 messageBox.classList.remove('message-show');
-            }, 5000); // Mesaj 5 saniye kalsın
+            }, 5000); 
         }
 
         // Firebase Uygulamasını Başlat
@@ -163,10 +181,8 @@
                 // Firebase Auth ile sıfırlama e-postası gönder
                 await sendPasswordResetEmail(auth, email);
                 
-                // BAŞARILI MESAJ GÜNCELLENDİ: Spam uyarısı eklendi.
                 const successMessage = `
-                    Şifre sıfırlama bağlantısı <strong>${email}</strong> adresine başarıyla gönderildi.
-                    <br>
+                    Şifre sıfırlama bağlantısı <strong>${email}</strong> adresine başarıyla gönderildi.<br>
                     Lütfen e-posta kutunuzu ve **spam (gereksiz)** klasörlerini kontrol etmeyi unutmayın.
                 `;
 
