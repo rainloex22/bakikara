@@ -51,7 +51,7 @@
             <nav class="hidden md:flex space-x-6 text-lg">
                 <a href="yardim.html" class="text-gray-300 hover:text-purple transition duration-200">Yardım Merkezi</a>
                 <a href="discord.html" class="text-gray-300 hover:text-purple transition duration-200">Discord</a>
-                <a href="fiyatlandirma.html" class="text-gray-300 hover:text-purple transition duration-200">Fiyatlandırma</a>
+                <a href="fiyatlandirma.html" class="text-gray-300 hover:text-purple transition duration-200">Fiyatlandirma</a>
             </nav>
             <div class="flex space-x-3">
                 <a href="girisyap.html" class="hidden sm:inline-block px-4 py-2 text-purple transition duration-200 rounded-lg">Giriş Yap</a>
@@ -63,20 +63,20 @@
     <!-- İçerik Alanı -->
     <main class="flex-grow flex flex-col items-center justify-center py-12 px-4">
         <div class="form-card p-8 md:p-10 w-full max-w-md">
-            <h1 class="text-3xl font-extrabold mb-6 text-white text-center">Yeni Bir Hesap Oluşturun</h1>
+            <h1 class="text-3xl font-extrabold mb-6 text-white text-center">Hemen Kaydolun</h1>
             
             <form id="registerForm" class="space-y-4">
                 <div>
-                    <label for="reg_email" class="block text-sm font-medium text-gray-400 text-left mb-1">E-posta</label>
-                    <input type="email" id="reg_email" required class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple focus:ring focus:ring-purple focus:ring-opacity-50 text-white" placeholder="ornek@mail.com">
+                    <label for="register_email" class="block text-sm font-medium text-gray-400 text-left mb-1">E-posta</label>
+                    <input type="email" id="register_email" required class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple focus:ring focus:ring-purple focus:ring-opacity-50 text-white" placeholder="ornek@mail.com">
                 </div>
                 <div>
-                    <label for="reg_password" class="block text-sm font-medium text-gray-400 text-left mb-1">Şifre</label>
-                    <input type="password" id="reg_password" required minlength="6" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple focus:ring focus:ring-purple focus:ring-opacity-50 text-white" placeholder="En az 6 karakter">
+                    <label for="register_password" class="block text-sm font-medium text-gray-400 text-left mb-1">Şifre (Min 6 Karakter)</label>
+                    <input type="password" id="register_password" required minlength="6" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple focus:ring focus:ring-purple focus:ring-opacity-50 text-white" placeholder="Şifreniz">
                 </div>
-                
+
                 <button type="submit" id="registerButton" class="w-full btn-register py-3 rounded-lg font-bold text-white text-lg mt-4">
-                    Kaydol
+                    Hesap Oluştur
                 </button>
             </form>
             
@@ -97,24 +97,32 @@
 
     <!-- Firebase Kodu -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, createUserWithEmailAndPassword, setPersistence, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // Firebase SDK v12.5.0 kullanılıyor
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, createUserWithEmailAndPassword, setPersistence, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
         
-        // Globallerden Firebase yapılandırmasını alma
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        // GÜNCEL Firebase yapılandırması (Sizin yeni projenizden alınan)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfc0F8o5aVmwTw-gyLRZVI2OMUljFi6Ao",
+            authDomain: "baki-s2-yonetim.firebaseapp.com",
+            projectId: "baki-s2-yonetim",
+            storageBucket: "baki-s2-yonetim.firebasestorage.app",
+            messagingSenderId: "692508919425",
+            appId: "1:692508919425:web:fac963c81c11b7be70af80",
+            measurementId: "G-Q52XG8GLB2"
+        };
+
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // --- DOM Elementlerini Başlat (let ile tanımlandı) ---
+        // --- DOM Elementlerini Başlat ---
         let messageBox = document.getElementById('messageBox');
         
         // --- Mesaj Gösterme Fonksiyonu ---
         function showMessage(message, type = 'success') {
-            // Savunma mekanizması: Eğer bir hata nedeniyle başlangıçta bulunamadıysa tekrar dene.
             if (!messageBox) {
                 messageBox = document.getElementById('messageBox');
-                if (!messageBox) return; // Hala bulunamazsa sessizce geri dön
+                if (!messageBox) return; 
             }
-
             messageBox.textContent = message;
             messageBox.className = type === 'success' ? 'message-success' : 'message-error';
             messageBox.classList.add('message-show');
@@ -124,97 +132,74 @@
         }
 
         // Firebase Uygulamasını Başlat
-        let app;
-        let auth = null; 
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        setPersistence(auth, browserLocalPersistence); 
 
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            setPersistence(auth, browserLocalPersistence); 
-        } catch (error) {
-            console.error("Firebase başlatma hatası (API Anahtarı / Yapılandırma):", error);
-            showMessage("KRİTİK HATA: Firebase sunucuları başlatılamadı. API anahtarınızı kontrol edin.", "error"); 
-        }
-
-        // --- AUTH Kontrolleri ve İşlemler (Sadece auth tanımlıysa çalışır) ---
-        if (auth) {
-            
-            // Oturum Açma Kontrolü (Canvas Gereksinimi)
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    console.log("Kullanıcı durumu kontrol edildi. UID:", user.uid);
-                } else if (!initialAuthToken) {
-                    signInAnonymously(auth).catch(e => console.error("Anonim giriş hatası:", e));
-                }
-            });
-
-            // Custom Token ile Giriş
-            if (initialAuthToken) {
-                signInWithCustomToken(auth, initialAuthToken).catch(e => {
-                    console.error("Custom token ile giriş hatası:", e);
-                    showMessage("Hata: Oturum tokeni ile giriş yapılamadı.", "error");
-                });
+        // Oturum Açma Kontrolü (Anonim Giriş veya Custom Token)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("Kullanıcı durumu kontrol edildi. UID:", user.uid);
+            } else if (!initialAuthToken) {
+                // Anonim girişi etkinleştirin (Hata alırsanız Firebase konsolunda 'Anonymous' seçeneğini açın)
+                signInAnonymously(auth).catch(e => console.error("Anonim giriş hatası:", e));
             }
+        });
 
-            // --- Kayıt İşlemi ---
-            document.getElementById('registerForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = document.getElementById('reg_email').value;
-                const password = document.getElementById('reg_password').value;
-
-                const button = document.getElementById('registerButton');
-                button.disabled = true;
-                button.textContent = 'Hesap Oluşturuluyor...';
-
-                try {
-                    // Firebase Auth ile yeni kullanıcı oluştur
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    
-                    // Başarılı olursa kullanıcıyı ana sayfaya yönlendir
-                    showMessage("Başarılı! Hesabınız oluşturuldu. Yönlendiriliyorsunuz...", "success");
-                    
-                    // Başarılı kayıt sonrası 2 saniye bekleyip yönlendir
-                    setTimeout(() => {
-                        window.location.href = 'panel.html'; 
-                    }, 2000);
-
-                } catch (error) {
-                    console.error("Kayıt hatası:", error);
-                    let errorMessage = "Kayıt işlemi sırasında bir hata oluştu.";
-
-                    // Firebase hata kodlarına göre mesajları özelleştirme
-                    switch (error.code) {
-                        case 'auth/invalid-email':
-                            errorMessage = "Geçersiz e-posta adresi formatı.";
-                            break;
-                        case 'auth/weak-password':
-                            errorMessage = "Şifre en az 6 karakter uzunluğunda olmalıdır.";
-                            break;
-                        case 'auth/email-already-in-use':
-                            errorMessage = "Bu e-posta adresi zaten kullanılıyor.";
-                            break;
-                        case 'auth/operation-not-allowed':
-                             errorMessage = "Bu kimlik doğrulama yöntemi (E-posta/Şifre) Firebase projesinde etkin değil. Lütfen Firebase konsolundan etkinleştirin.";
-                             break;
-                        default:
-                            errorMessage = "Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin.";
-                    }
-                    
-                    showMessage("Hata: " + errorMessage, "error");
-
-                } finally {
-                    button.disabled = false;
-                    button.textContent = 'Kaydol';
-                }
+        if (initialAuthToken) {
+            signInWithCustomToken(auth, initialAuthToken).catch(e => {
+                console.error("Custom token ile giriş hatası:", e);
             });
-            
-        } else {
-            // auth nesnesi yoksa, formu ve butonu devre dışı bırak.
-             document.getElementById('registerButton').disabled = true;
-             document.getElementById('registerButton').textContent = 'Servis Kullanılamıyor (Firebase Hatası)';
-             console.error("Kimlik doğrulama işlemleri atlandı, çünkü Firebase Auth başlatılamadı.");
         }
 
+        // --- Kayıt İşlemi ---
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('register_email').value;
+            const password = document.getElementById('register_password').value;
+
+            const button = document.getElementById('registerButton');
+            button.disabled = true;
+            button.textContent = 'Oluşturuluyor...';
+
+            try {
+                // Firebase Auth ile yeni kullanıcı oluştur
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                
+                // Başarılı olursa kullanıcıyı ana sayfaya yönlendir
+                showMessage("Kayıt başarılı! Giriş yapılıyor...", "success");
+                
+                // Başarılı giriş sonrası 2 saniye bekleyip yönlendir
+                setTimeout(() => {
+                    window.location.href = 'panel.html'; 
+                }, 2000);
+
+            } catch (error) {
+                console.error("Kayıt hatası:", error);
+                let errorMessage = "Kayıt işlemi sırasında bir hata oluştu.";
+
+                // Firebase hata kodlarına göre mesajları özelleştirme
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = "Bu e-posta adresi zaten kullanımda.";
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = "Geçersiz e-posta adresi formatı.";
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = "Şifre en az 6 karakter olmalıdır.";
+                        break;
+                    default:
+                        errorMessage = "Bilinmeyen bir hata oluştu. Kod: " + error.code;
+                }
+                
+                showMessage("Kayıt hatası: " + errorMessage, "error");
+
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Hesap Oluştur';
+            }
+        });
     </script>
 </body>
 </html>
