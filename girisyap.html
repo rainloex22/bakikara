@@ -20,7 +20,6 @@
             background-color: var(--dark-bg);
             color: #ffffff;
             min-height: 100vh;
-            /* Flex özellikleri main içeriği ortalamak için body'den main'e taşındı */
             display: flex; 
             flex-direction: column;
             overflow-x: hidden;
@@ -55,9 +54,9 @@
             transition: opacity 0.3s ease;
         }
         
-        /* NAVBAR STİLLERİ (index.html'den alındı) */
+        /* NAVBAR STİLLERİ */
         .header-bg {
-            background-color: rgba(26, 14, 33, 0.9); /* Başlık için hafif şeffaf arka plan */
+            background-color: rgba(26, 14, 33, 0.9);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
         }
@@ -207,16 +206,18 @@
         let auth;
         let app;
         let firebaseConfig = {};
-        
+        let isConfigAvailable = false; 
+
         try {
             // __firebase_config'in varlığını ve tipini kontrol et
             if (typeof __firebase_config !== 'undefined' && typeof __firebase_config === 'string' && __firebase_config.trim().length > 0) {
                  firebaseConfig = JSON.parse(__firebase_config);
-            } else {
-                 console.error("HATA: Firebase yapılandırması (__firebase_config) tanımlı değil veya boş.");
+                 isConfigAvailable = true;
             }
         } catch (e) {
             console.error("HATA: Firebase yapılandırması JSON ayrıştırma hatası:", e);
+            // Ayrıştırma hatası varsa, config kullanılamaz
+            isConfigAvailable = false; 
         }
 
         // --- DOM Elementleri (Giriş Formu) ---
@@ -235,7 +236,7 @@
 
 
         // --- Firebase Başlatma ---
-        if (Object.keys(firebaseConfig).length > 0) {
+        if (isConfigAvailable) {
             try {
                 // Uygulamayı başlat
                 app = initializeApp(firebaseConfig);
@@ -252,14 +253,13 @@
             } catch (e) {
                 // Başlatma sırasında oluşan hataları yakala
                 console.error("Firebase başlatma/servis alma hatası:", e);
-                // Auth'u null yap ki diğer fonksiyonlar çalışmaya kalkmasın
                 auth = null; 
-                // Bu kritik hatayı kullanıcıya göster
-                displayMessage("Kritik Hata: Uygulama yapılandırması başarısız oldu. Lütfen konsolu kontrol edin.", 'error');
+                isConfigAvailable = false; // Başlatma başarısız oldu
+                displayMessage("Kritik Hata: Firebase servisleri başlatılamadı. Konsolu kontrol edin.", 'error');
             }
         } else {
-             // Yapılandırma eksikse, kullanıcıya uyarı göster
-             displayMessage("Kritik Hata: Firebase yapılandırması eksik. Uygulama çalışmayacaktır.", 'error');
+             // Yapılandırma eksikse/geçersizse hata mesajını göster
+             displayMessage("Kritik Hata: Firebase yapılandırması eksik. Kimlik doğrulama işlemi çalışmayacaktır.", 'error');
         }
 
 
@@ -297,7 +297,7 @@
             
             // --- Navbar Güncelleme ---
             document.getElementById('nav_profile_initials').textContent = initials;
-            document.getElementById('nav_profile_display_name').textContent = displayName.split(' ')[0]; // Navbar'da sadece ilk kelimeyi göster
+            document.getElementById('nav_profile_display_name').textContent = displayName.split(' ')[0]; 
             
             const navStatusElement = document.getElementById('nav_profile_status');
             navStatusElement.textContent = userStatus;
@@ -387,10 +387,9 @@
                 return;
             }
             
-            // Eğer Auth servisi başlatılmamışsa, giriş denemesini engelle
-            if (!auth) {
-                // Bu hata zaten başlangıçta gösterildi ama tekrar göstermek güvenli
-                displayMessage("Sistem hatası: Kimlik doğrulama servisi kullanılamıyor. Lütfen yapılandırmayı kontrol edin.", 'error');
+            // Firebase Auth başlatılmadıysa işlemi engelle
+            if (!auth || !isConfigAvailable) {
+                displayMessage("Sistem hatası: Kimlik doğrulama servisi yapılandırılamadı. Giriş engellendi.", 'error');
                 return;
             }
 
