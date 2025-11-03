@@ -19,8 +19,8 @@
         <a href="video-indir.html" class="video-download-link" aria-label="Video İndirme Sayfasına Git">
             <i class="fas fa-download"></i> Video İndirici
         </a>
-        <!-- 2. Sırada: Panel Butonu (En sağda) -->
-        <a href="panel.html" class="video-download-link panel-link" aria-label="Yönetim Paneline Git">
+        <!-- 2. Sırada: Panel Butonu (Erişim Kontrolü eklendi) -->
+        <a href="javascript:void(0)" onclick="checkPanelAccess()" class="video-download-link panel-link" aria-label="Yönetim Paneline Git">
             <i class="fas fa-tools"></i> Panel
         </a>
     </div>
@@ -69,6 +69,49 @@
     <script src="script.js"></script> 
     
     <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script> 
+    
+    <!-- YÖNETİCİ ERİŞİM KONTROLÜ -->
+    <script>
+        // Simülasyon mesaj kutusu için basit bir fonksiyon
+        function showAccessMessage(message, isSuccess) {
+            let toast = document.getElementById('panel-access-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'panel-access-toast';
+                // Temaya uygun stil ekleniyor
+                toast.style.cssText = `
+                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                    background-color: ${isSuccess ? 'rgba(67, 181, 129, 0.9)' : 'rgba(255, 0, 0, 0.9)'}; 
+                    color: white; padding: 20px 30px; border-radius: 10px; z-index: 9999; 
+                    box-shadow: 0 0 15px ${isSuccess ? 'rgba(67, 181, 129, 0.7)' : 'rgba(255, 0, 0, 0.7)'};
+                    font-family: 'Poppins', sans-serif; font-size: 1.2em; font-weight: 600;
+                    text-align: center; opacity: 0; transition: opacity 0.5s ease;
+                `;
+                document.body.appendChild(toast);
+            }
+            
+            toast.textContent = message;
+            toast.style.opacity = 1;
+            
+            setTimeout(() => {
+                toast.style.opacity = 0;
+            }, 3000);
+        }
+
+        /**
+         * Panel butonuna tıklandığında erişim kontrolünü simüle eder.
+         * Gerçek uygulamada Firebase/Firestore ile yönetici rolü kontrol edilmelidir.
+         */
+        function checkPanelAccess() {
+            // İlk tıklamada uyarı gösterelim:
+            showAccessMessage("Erişim Kısıtlı: Yönetici kimliği gerekli.", false);
+
+            // Simülasyonun başarılı olması ve panel'e yönlendirme yapılması
+            setTimeout(() => {
+                 window.location.href = 'panel.html';
+            }, 2000);
+        }
+    </script>
 
 </body>
 </html>
