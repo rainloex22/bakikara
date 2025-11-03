@@ -35,6 +35,7 @@
             color: #ccc;
             border-radius: 0.5rem;
             transition: background-color 0.2s, color 0.2s;
+            cursor: pointer;
         }
         .nav-item:hover, .nav-item.active {
             background-color: var(--purple);
@@ -65,6 +66,22 @@
             color: #777;
             font-size: 1.2rem;
         }
+        .link-item {
+            transition: background-color 0.2s;
+            border-left: 4px solid transparent;
+        }
+        .link-item.active-link {
+            border-left-color: var(--purple);
+        }
+        .link-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        /* Basit modal stilizasyonu */
+        .modal {
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(3px);
+            z-index: 50;
+        }
     </style>
 </head>
 <body class="min-h-screen flex">
@@ -75,14 +92,15 @@
             <i class="fas fa-terminal mr-2" style="color: var(--accent-purple);"></i> BAKİ S2
         </h1>
         <nav class="space-y-2">
-            <a href="#" class="nav-item active">
+            <!-- Menü Öğeleri -->
+            <div id="navDashboard" class="nav-item active" data-content="dashboard">
                 <i class="fas fa-chart-line w-6"></i>
                 <span class="ml-3">Kontrol Paneli</span>
-            </a>
-            <a href="#" class="nav-item">
+            </div>
+            <div id="navLinks" class="nav-item" data-content="links">
                 <i class="fas fa-link w-6"></i>
                 <span class="ml-3">Biyolinkler</span>
-            </a>
+            </div>
             <a href="#" class="nav-item">
                 <i class="fas fa-cog w-6"></i>
                 <span class="ml-3">Ayarlar</span>
@@ -105,87 +123,126 @@
 
     <!-- Ana İçerik -->
     <div class="flex-grow p-4 md:p-10 overflow-y-auto">
-        
-        <header class="mb-8 flex justify-between items-center">
-            <h2 class="text-3xl font-bold">Kontrol Paneli</h2>
-            <button class="cta-button px-4 py-2 rounded-lg font-semibold text-white text-sm">
-                <i class="fas fa-plus mr-2"></i> Yeni Biyolink Oluştur
-            </button>
-        </header>
 
-        <!-- İstatistik Kartları (Realtime data gelecek) -->
-        <!-- Finansal veriler silindi, sadece Tıklama ve Ziyaretçi kalıyor -->
-        <section id="statsSection" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            
-            <!-- Tıklama Sayısı -->
-            <div class="stat-card p-6 rounded-xl shadow-lg flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-400 font-medium">Toplam Tıklama</p>
-                    <p id="totalClicks" class="text-4xl font-extrabold mt-1">
-                        <i class="fas fa-spinner fa-spin text-lg"></i> <!-- Loading state -->
-                    </p>
+        <!-- Kontrol Paneli İçeriği (Varsayılan olarak aktif) -->
+        <section id="dashboardContent" class="content-tab">
+            <header class="mb-8 flex justify-between items-center">
+                <h2 class="text-3xl font-bold">Kontrol Paneli</h2>
+                <button id="quickCreateLinkBtn" class="cta-button px-4 py-2 rounded-lg font-semibold text-white text-sm">
+                    <i class="fas fa-plus mr-2"></i> Yeni Biyolink Oluştur
+                </button>
+            </header>
+
+            <!-- İstatistik Kartları -->
+            <div id="statsSection" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                
+                <!-- Tıklama Sayısı -->
+                <div class="stat-card p-6 rounded-xl shadow-lg flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400 font-medium">Toplam Tıklama</p>
+                        <p id="totalClicks" class="text-4xl font-extrabold mt-1">
+                            <i class="fas fa-spinner fa-spin text-lg"></i>
+                        </p>
+                    </div>
+                    <div class="stat-icon bg-gray-900 p-3 rounded-full">
+                        <i class="fas fa-hand-pointer text-xl"></i>
+                    </div>
                 </div>
-                <div class="stat-icon bg-gray-900 p-3 rounded-full">
-                    <i class="fas fa-hand-pointer text-xl"></i>
+
+                <!-- Ziyaretçi Sayısı -->
+                <div class="stat-card p-6 rounded-xl shadow-lg flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-400 font-medium">Benzersiz Ziyaretçi</p>
+                        <p id="uniqueVisitors" class="text-4xl font-extrabold mt-1">
+                            <i class="fas fa-spinner fa-spin text-lg"></i>
+                        </p>
+                    </div>
+                    <div class="stat-icon bg-gray-900 p-3 rounded-full">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
                 </div>
             </div>
 
-            <!-- Ziyaretçi Sayısı -->
-            <div class="stat-card p-6 rounded-xl shadow-lg flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-400 font-medium">Benzersiz Ziyaretçi</p>
-                    <p id="uniqueVisitors" class="text-4xl font-extrabold mt-1">
-                        <i class="fas fa-spinner fa-spin text-lg"></i> <!-- Loading state -->
-                    </p>
+            <!-- Grafik Alanı -->
+            <section class="mb-10">
+                <div class="stat-card p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4">Aylık Performans</h3>
+                    <div class="chart-mock">
+                        Grafik Verileri Yükleniyor...
+                    </div>
                 </div>
-                <div class="stat-icon bg-gray-900 p-3 rounded-full">
-                    <i class="fas fa-users text-xl"></i>
-                </div>
-            </div>
-            
+            </section>
         </section>
 
-        <!-- Grafik Alanı -->
-        <section class="mb-10">
-            <div class="stat-card p-6 rounded-xl shadow-lg">
-                <h3 class="text-xl font-semibold mb-4">Aylık Performans</h3>
-                <div class="chart-mock">
-                    Grafik Verileri Yükleniyor...
-                </div>
-            </div>
-        </section>
+        <!-- Biyolink Yönetimi İçeriği (Başlangıçta gizli) -->
+        <section id="linksContent" class="content-tab hidden">
+            <header class="mb-8 flex justify-between items-center">
+                <h2 class="text-3xl font-bold">Biyolink Yönetimi</h2>
+                <button id="openNewLinkModalBtn" class="cta-button px-4 py-2 rounded-lg font-semibold text-white text-sm">
+                    <i class="fas fa-plus mr-2"></i> Yeni Link Oluştur
+                </button>
+            </header>
 
-        <!-- Son Linkler Tablosu -->
-        <section>
-            <h3 class="text-xl font-semibold mb-4">Son Oluşturulan Biyolinkler</h3>
-            <div class="stat-card p-4 rounded-xl shadow-lg overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-700">
-                    <thead class="bg-gray-700">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Adı</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Hedef URL</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Tıklama</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Oluşturulma</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-800" id="linkTableBody">
-                        <!-- Veriler JavaScript ile yüklenecek -->
-                        <tr class="hover:bg-gray-800">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" colspan="4">Link verileri yükleniyor...</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div id="linkListContainer" class="space-y-3">
+                <!-- Linkler buraya JavaScript ile yüklenecek -->
+                <div class="stat-card p-6 rounded-xl shadow-lg text-center text-gray-400">
+                    <i class="fas fa-spinner fa-spin mr-2"></i> Linkler Yükleniyor...
+                </div>
             </div>
         </section>
         
     </div>
+
+    <!-- Yeni Link Oluşturma/Düzenleme Modalı -->
+    <div id="linkModal" class="modal fixed inset-0 flex items-center justify-center hidden">
+        <div class="bg-gray-800 rounded-xl shadow-2xl p-8 w-full max-w-md">
+            <h3 id="modalTitle" class="text-2xl font-bold mb-6">Yeni Link Oluştur</h3>
+            <form id="linkForm">
+                <input type="hidden" id="linkIdField">
+                
+                <div class="mb-4">
+                    <label for="linkName" class="block text-sm font-medium text-gray-300 mb-1">Link Adı (Görünen İsim)</label>
+                    <input type="text" id="linkName" required class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-purple focus:border-purple" placeholder="Örn: Discord Sunucumuz">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="linkUrl" class="block text-sm font-medium text-gray-300 mb-1">Hedef URL</label>
+                    <input type="url" id="linkUrl" required class="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-purple focus:border-purple" placeholder="Örn: https://discord.gg/baki-s2">
+                </div>
+
+                <div class="mb-6 flex items-center justify-between">
+                    <label for="linkActive" class="text-sm font-medium text-gray-300">Aktif Durum</label>
+                    <input type="checkbox" id="linkActive" checked class="form-checkbox h-5 w-5 text-purple bg-gray-700 border-gray-600 rounded">
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="closeModalBtn" class="px-4 py-2 rounded-lg text-gray-300 bg-gray-600 hover:bg-gray-700 transition">İptal</button>
+                    <button type="submit" class="cta-button px-4 py-2 rounded-lg font-semibold text-white">Kaydet</button>
+                </div>
+            </form>
+            
+            <button type="button" id="deleteLinkBtn" class="w-full mt-4 px-4 py-2 rounded-lg text-red-400 bg-red-800 hover:bg-red-700 transition hidden">
+                <i class="fas fa-trash-alt mr-2"></i> Bu Linki Sil
+            </button>
+        </div>
+    </div>
     
+    <!-- Mesaj Kutusu Modalı (Alert/Confirm yerine) -->
+    <div id="messageModal" class="modal fixed inset-0 flex items-center justify-center hidden">
+        <div class="bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-sm">
+            <p id="messageText" class="text-lg text-center font-medium mb-4"></p>
+            <div id="messageActions" class="flex justify-center space-x-3">
+                <button id="closeMessageModalBtn" class="cta-button px-4 py-2 rounded-lg font-semibold text-white w-full">Tamam</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase ve Uygulama Scriptleri -->
     <script type="module">
         // Firebase Modülleri
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, onSnapshot, setDoc, getDoc, collection, query, getDocs, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, setDoc, getDoc, collection, query, addDoc, updateDoc, deleteDoc, getDocs, limit, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // Firestore loglarını etkinleştir (Geliştirme için)
@@ -198,14 +255,41 @@
 
         let db, auth, userId = null;
         let isAuthReady = false;
+        let unsubscribeLinks = null; // Link dinleyicisini saklamak için
 
         // UI Elementleri
         const totalClicksEl = document.getElementById('totalClicks');
         const uniqueVisitorsEl = document.getElementById('uniqueVisitors');
         const userIdDisplayEl = document.getElementById('userIdDisplay');
-        const linkTableBodyEl = document.getElementById('linkTableBody');
         const chartMockEl = document.querySelector('.chart-mock');
+        const linkListContainerEl = document.getElementById('linkListContainer');
+        
+        // Modal Elementleri
+        const linkModal = document.getElementById('linkModal');
+        const linkForm = document.getElementById('linkForm');
+        const linkIdField = document.getElementById('linkIdField');
+        const linkNameField = document.getElementById('linkName');
+        const linkUrlField = document.getElementById('linkUrl');
+        const linkActiveField = document.getElementById('linkActive');
+        const modalTitleEl = document.getElementById('modalTitle');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const deleteLinkBtn = document.getElementById('deleteLinkBtn');
+        
+        // Mesaj Modalı Elementleri
+        const messageModal = document.getElementById('messageModal');
+        const messageTextEl = document.getElementById('messageText');
+        const messageActionsEl = document.getElementById('messageActions');
+        const closeMessageModalBtn = document.getElementById('closeMessageModalBtn');
 
+        // Navigasyon Elementleri
+        const navItems = document.querySelectorAll('.nav-item[data-content]');
+        const contentTabs = document.querySelectorAll('.content-tab');
+        const quickCreateLinkBtn = document.getElementById('quickCreateLinkBtn');
+        const openNewLinkModalBtn = document.getElementById('openNewLinkModalBtn');
+
+
+        // --- Firestore Yolları ve Yardımcı Fonksiyonlar ---
+        
         // Firestore Yolunu oluşturur (Özel Kullanıcı Verisi)
         const getDashboardDocRef = (uid) => doc(db, `/artifacts/${appId}/users/${uid}/dashboard_stats/main`);
         const getLinksCollectionRef = (uid) => collection(db, `/artifacts/${appId}/users/${uid}/links`);
@@ -216,7 +300,16 @@
             return num.toLocaleString('tr-TR');
         };
 
-        // Firebase Başlatma ve Kimlik Doğrulama
+        // Mesaj Modalını gösterir
+        const showMessage = (text) => {
+            messageTextEl.textContent = text;
+            messageActionsEl.innerHTML = `<button id="closeMessageModalBtn" class="cta-button px-4 py-2 rounded-lg font-semibold text-white w-full">Tamam</button>`;
+            messageModal.classList.remove('hidden');
+            document.getElementById('closeMessageModalBtn').onclick = () => messageModal.classList.add('hidden');
+        };
+
+        // --- Firebase Başlatma ve Kimlik Doğrulama ---
+        
         async function initializeFirebase() {
             try {
                 const app = initializeApp(firebaseConfig);
@@ -237,39 +330,33 @@
                         userIdDisplayEl.textContent = userId;
                         console.log("Kullanıcı doğrulandı. UID:", userId);
                         
-                        // Ana veri dinleyicilerini başlat
                         setupDashboardListener(userId);
+                        // Biyolink dinleyicisini auth'dan sonra başlat
                         setupLinksListener(userId);
                         
-                        // Eğer ilk kullanıcıysa, varsayılan istatistik belgesini oluştur.
                         checkAndCreateDefaultStats(userId);
                     } else {
-                         // Bu senaryo normalde Firebase Güvenlik Kuralları ile engellenir, ancak örnek için:
-                        console.log("Kullanıcı anonim olarak doğrulandı veya oturum açılmadı.");
-                        userId = auth.currentUser ? auth.currentUser.uid : 'anonim';
+                        // Eğer oturum açma başarısız olursa
+                        console.log("Oturum açma başarısız, anonim devam ediliyor.");
+                        userId = auth.currentUser ? auth.currentUser.uid : crypto.randomUUID();
                         userIdDisplayEl.textContent = userId + " (Anonim)";
                         isAuthReady = true;
-                        // Anonim kullanıcılar için dinleyici başlat (Veri alımı güvenlik kurallarına bağlıdır)
-                        setupDashboardListener(userId);
-                        setupLinksListener(userId);
                     }
                 });
 
             } catch (error) {
                 console.error("Firebase başlatılırken hata oluştu:", error);
-                totalClicksEl.textContent = "Hata";
-                uniqueVisitorsEl.textContent = "Hata";
             }
         }
 
-        // Varsayılan istatistik belgesini kontrol et ve oluştur
+        // --- Dashboard İşlevleri (Önceki Adımdan) ---
+
         async function checkAndCreateDefaultStats(uid) {
             const docRef = getDashboardDocRef(uid);
             try {
                 const docSnap = await getDoc(docRef);
                 if (!docSnap.exists()) {
                     console.log("Varsayılan istatistik belgesi oluşturuluyor...");
-                    // Para birimi ile ilgili veriler kaldırıldı
                     await setDoc(docRef, {
                         totalClicks: 0,
                         uniqueVisitors: 0,
@@ -281,86 +368,247 @@
             }
         }
 
-        // Dashboard istatistiklerini gerçek zamanlı dinle
         function setupDashboardListener(uid) {
             const docRef = getDashboardDocRef(uid);
             onSnapshot(docRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    const clicks = data.totalClicks || 0;
-                    const visitors = data.uniqueVisitors || 0;
-                    
-                    // UI Güncelleme
-                    totalClicksEl.textContent = formatNumber(clicks);
-                    uniqueVisitorsEl.textContent = formatNumber(visitors);
-                    
+                    totalClicksEl.textContent = formatNumber(data.totalClicks || 0);
+                    uniqueVisitorsEl.textContent = formatNumber(data.uniqueVisitors || 0);
                     chartMockEl.textContent = `Analiz Grafiği (${new Date().toLocaleTimeString('tr-TR')} itibarıyla güncel)`;
-
                 } else {
-                    // Belge yoksa, varsayılan değerleri göster
                     totalClicksEl.innerHTML = formatNumber(0);
                     uniqueVisitorsEl.innerHTML = formatNumber(0);
                     chartMockEl.textContent = "Veri Yok (Yeni Hesap)";
                 }
             }, (error) => {
                 console.error("Dashboard verisi dinlenirken hata:", error);
-                totalClicksEl.textContent = "Yükleme Hatası";
-                uniqueVisitorsEl.textContent = "Yükleme Hatası";
             });
         }
         
-        // Son linkleri getir ve tabloyu güncelle (Sıralama JS tarafında yapılır)
-        async function setupLinksListener(uid) {
-            linkTableBodyEl.innerHTML = `
-                <tr class="hover:bg-gray-800">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-400" colspan="4">Linkler Yükleniyor...</td>
-                </tr>
-            `;
-
-            try {
-                // Link koleksiyonundan ilk 10 belgeyi çek
-                const q = query(getLinksCollectionRef(uid), limit(10));
-                const querySnapshot = await getDocs(q);
+        // --- Biyolink Yönetimi İşlevleri ---
+        
+        // Biyolink listesini gerçek zamanlı dinle
+        function setupLinksListener(uid) {
+            if (unsubscribeLinks) {
+                unsubscribeLinks(); // Önceki dinleyiciyi kapat
+            }
+            
+            // Tüm linkleri (limit yok) isim alanına göre A'dan Z'ye sıralayarak getir.
+            // Firestore'da `orderBy` kullanmak indeks gerektirebilir, bu yüzden şimdilik sadece `collection` kullanıp JS'te sıralıyoruz.
+            const linksQuery = query(getLinksCollectionRef(uid));
+            
+            unsubscribeLinks = onSnapshot(linksQuery, (snapshot) => {
                 let links = [];
-                querySnapshot.forEach((doc) => {
+                snapshot.forEach((doc) => {
                     links.push({ id: doc.id, ...doc.data() });
                 });
+                
+                // Linkleri JavaScript'te isme göre sırala (Daha güvenli, indeks gerektirmez)
+                links.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
-                linkTableBodyEl.innerHTML = ''; // Tabloyu temizle
-
-                if (links.length === 0) {
-                     linkTableBodyEl.innerHTML = `
-                        <tr class="hover:bg-gray-800">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500" colspan="4">Henüz oluşturulmuş biyolink bulunmamaktadır.</td>
-                        </tr>
-                    `;
-                } else {
-                     // İstenirse burada linkleri JS ile sıralayabiliriz. (Örneğin createdAt alanına göre)
-                     
-                     links.forEach(link => {
-                        const date = link.createdAt ? new Date(link.createdAt.seconds * 1000) : null;
-                        const dateString = date ? date.toLocaleDateString('tr-TR') : 'Bilinmiyor';
-                        const row = `
-                            <tr class="hover:bg-gray-800">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${link.name || 'İsimsiz Link'}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">baki-s2.com/link/${link.id.substring(0, 8)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-yellow-400">${formatNumber(link.clicks || 0)}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dateString}</td>
-                            </tr>
-                        `;
-                        linkTableBodyEl.innerHTML += row;
-                    });
-                }
-               
-            } catch (error) {
-                 console.error("Linkler yüklenirken hata:", error);
-                 linkTableBodyEl.innerHTML = `
-                    <tr class="hover:bg-gray-800">
-                        <td class="px-6 py-4 text-sm text-red-500" colspan="4">Linkler yüklenirken bir hata oluştu. Lütfen konsolu kontrol edin.</td>
-                    </tr>
-                `;
-            }
+                renderLinkList(links);
+            }, (error) => {
+                console.error("Link verisi dinlenirken hata:", error);
+                linkListContainerEl.innerHTML = `<p class="text-red-400 p-4">Linkler yüklenirken hata oluştu: ${error.message}</p>`;
+            });
         }
+        
+        // Link listesini render et
+        function renderLinkList(links) {
+            linkListContainerEl.innerHTML = ''; // Listeyi temizle
+            
+            if (links.length === 0) {
+                 linkListContainerEl.innerHTML = `
+                    <div class="stat-card p-6 rounded-xl shadow-lg text-center text-gray-400">
+                        <i class="fas fa-info-circle mr-2"></i> Henüz oluşturulmuş bir biyolinkiniz yok. Hemen bir tane oluşturun!
+                    </div>
+                `;
+                return;
+            }
+
+            links.forEach(link => {
+                const isActive = link.active === true;
+                const statusColor = isActive ? 'text-green-400' : 'text-red-400';
+                const statusText = isActive ? 'Aktif' : 'Pasif';
+
+                const linkItem = document.createElement('div');
+                linkItem.className = `link-item stat-card p-4 rounded-xl shadow-lg flex items-center justify-between ${isActive ? 'active-link' : ''}`;
+                linkItem.setAttribute('data-link-id', link.id);
+                
+                linkItem.innerHTML = `
+                    <div class="flex-grow">
+                        <p class="text-lg font-semibold">${link.name || 'İsimsiz Link'}</p>
+                        <p class="text-sm text-gray-400 truncate">${link.url || 'URL Yok'}</p>
+                    </div>
+                    <div class="flex items-center space-x-6 text-right">
+                        <div class="hidden sm:block">
+                            <p class="text-sm font-medium">Tıklama</p>
+                            <p class="text-xl text-yellow-400 font-bold">${formatNumber(link.clicks || 0)}</p>
+                        </div>
+                        <div class="${statusColor} hidden md:block w-16">
+                            <i class="fas fa-circle text-xs mr-1"></i> ${statusText}
+                        </div>
+                        <button class="edit-link-btn cta-button px-3 py-2 rounded-lg text-white text-sm" data-link-id="${link.id}">
+                            <i class="fas fa-pen"></i> <span class="hidden sm:inline">Düzenle</span>
+                        </button>
+                    </div>
+                `;
+                
+                // Düzenle butonuna tıklama olayını ekle
+                linkItem.querySelector('.edit-link-btn').addEventListener('click', () => openLinkModalForEdit(link.id, link));
+
+                linkListContainerEl.appendChild(linkItem);
+            });
+        }
+        
+        // Link Ekleme/Düzenleme Modalını açar
+        function openLinkModal(linkData = null) {
+            linkForm.reset(); // Formu temizle
+            
+            if (linkData) {
+                // Düzenleme modu
+                modalTitleEl.textContent = `Link Düzenle: ${linkData.name}`;
+                linkIdField.value = linkData.id;
+                linkNameField.value = linkData.name || '';
+                linkUrlField.value = linkData.url || '';
+                linkActiveField.checked = linkData.active !== false;
+                deleteLinkBtn.classList.remove('hidden');
+            } else {
+                // Yeni oluşturma modu
+                modalTitleEl.textContent = 'Yeni Link Oluştur';
+                linkIdField.value = '';
+                linkActiveField.checked = true; // Varsayılan olarak aktif
+                deleteLinkBtn.classList.add('hidden');
+            }
+
+            linkModal.classList.remove('hidden');
+        }
+        
+        // Link Düzenle butonuna tıklandığında modalı aç
+        const openLinkModalForEdit = (linkId, linkData) => {
+            if (!isAuthReady) {
+                 showMessage("Veriler yüklenmeden düzenleme yapılamaz.");
+                 return;
+            }
+            openLinkModal(linkData);
+        }
+        
+        // Link Modalını kapat
+        closeModalBtn.addEventListener('click', () => {
+            linkModal.classList.add('hidden');
+        });
+        
+        // Link Formu Gönderme İşlemi
+        linkForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const linkId = linkIdField.value;
+            const name = linkNameField.value.trim();
+            const url = linkUrlField.value.trim();
+            const active = linkActiveField.checked;
+
+            if (!name || !url) {
+                showMessage("Lütfen link adı ve hedef URL alanlarını doldurun.");
+                return;
+            }
+
+            linkModal.classList.add('hidden'); // Modal'ı hemen kapat
+
+            try {
+                const linkData = {
+                    name,
+                    url,
+                    active,
+                    // Eğer yeni linkse, tıklama sayısını 0 olarak ayarla
+                    clicks: linkId ? undefined : 0, 
+                    createdAt: linkId ? undefined : new Date(),
+                    updatedAt: new Date()
+                };
+
+                if (linkId) {
+                    // Düzenleme
+                    const docRef = doc(db, `/artifacts/${appId}/users/${userId}/links`, linkId);
+                    await updateDoc(docRef, linkData);
+                    showMessage(`'${name}' linki başarıyla güncellendi.`);
+                } else {
+                    // Yeni Oluşturma
+                    const colRef = getLinksCollectionRef(userId);
+                    await addDoc(colRef, linkData);
+                    showMessage(`'${name}' linki başarıyla oluşturuldu.`);
+                }
+            } catch (error) {
+                console.error("Link kaydında/güncellemesinde hata:", error);
+                showMessage(`Link işlemi başarısız: ${error.message}`);
+            }
+        });
+        
+        // Link Silme İşlemi
+        deleteLinkBtn.addEventListener('click', async () => {
+            const linkId = linkIdField.value;
+            const linkName = linkNameField.value.trim();
+
+            if (!linkId) return;
+
+            // Silme onayı için özel mesaj modunda aç
+            messageTextEl.textContent = `'${linkName}' linkini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`;
+            messageActionsEl.innerHTML = `
+                <button id="confirmDeleteBtn" class="px-4 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 transition">Evet, Sil</button>
+                <button id="cancelDeleteBtn" class="px-4 py-2 rounded-lg text-gray-300 bg-gray-600 hover:bg-gray-700 transition">İptal</button>
+            `;
+            messageModal.classList.remove('hidden');
+            linkModal.classList.add('hidden'); // Düzenleme modalını kapat
+
+            document.getElementById('cancelDeleteBtn').onclick = () => {
+                 messageModal.classList.add('hidden');
+                 linkModal.classList.remove('hidden'); // İptal edilirse düzenleme modalını geri aç
+            };
+            
+            document.getElementById('confirmDeleteBtn').onclick = async () => {
+                messageModal.classList.add('hidden'); // Mesaj modalını kapat
+
+                try {
+                    const docRef = doc(db, `/artifacts/${appId}/users/${userId}/links`, linkId);
+                    await deleteDoc(docRef);
+                    showMessage(`'${linkName}' linki başarıyla silindi.`);
+                } catch (error) {
+                    console.error("Link silinirken hata:", error);
+                    showMessage(`Silme işlemi başarısız: ${error.message}`);
+                }
+            };
+        });
+
+        // --- Navigasyon ve Olay Dinleyicileri ---
+        
+        // Sekmeli navigasyon işlevi
+        const switchTab = (targetContentId) => {
+            // Tüm içerikleri gizle
+            contentTabs.forEach(tab => tab.classList.add('hidden'));
+            // Hedef içeriği göster
+            document.getElementById(`${targetContentId}Content`).classList.remove('hidden');
+            
+            // Sidebar öğelerini güncelle
+            navItems.forEach(item => {
+                if (item.getAttribute('data-content') === targetContentId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        };
+        
+        // Sidebar ve hızlı buton dinleyicileri
+        navItems.forEach(item => {
+            item.addEventListener('click', () => switchTab(item.getAttribute('data-content')));
+        });
+
+        quickCreateLinkBtn.addEventListener('click', () => {
+             openLinkModal(null);
+             switchTab('links'); // Hızlı oluşturmada otomatik link sayfasına geç
+        });
+        
+        openNewLinkModalBtn.addEventListener('click', () => openLinkModal(null));
+
 
         // Sayfa yüklendiğinde Firebase'i başlat
         window.onload = initializeFirebase;
