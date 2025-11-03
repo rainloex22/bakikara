@@ -204,7 +204,20 @@
         import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
         // --- Ortamdan Gelen Değişkenler ---
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        let auth;
+        let app;
+        let firebaseConfig = {};
+        
+        try {
+            // __firebase_config'in varlığını ve tipini kontrol et
+            if (typeof __firebase_config !== 'undefined' && typeof __firebase_config === 'string' && __firebase_config.trim().length > 0) {
+                 firebaseConfig = JSON.parse(__firebase_config);
+            } else {
+                 console.error("HATA: Firebase yapılandırması (__firebase_config) tanımlı değil veya boş.");
+            }
+        } catch (e) {
+            console.error("HATA: Firebase yapılandırması JSON ayrıştırma hatası:", e);
+        }
 
         // --- DOM Elementleri (Giriş Formu) ---
         const loginForm = document.getElementById('loginForm');
@@ -222,12 +235,7 @@
 
 
         // --- Firebase Başlatma ---
-        let auth;
-        let app; // 'app' değişkenini modül kapsamında tanımla
-        
-        if (Object.keys(firebaseConfig).length === 0) {
-            console.error("HATA: Firebase yapılandırması (__firebase_config) eksik veya boş.");
-        } else {
+        if (Object.keys(firebaseConfig).length > 0) {
             try {
                 // Uygulamayı başlat
                 app = initializeApp(firebaseConfig);
@@ -244,7 +252,14 @@
             } catch (e) {
                 // Başlatma sırasında oluşan hataları yakala
                 console.error("Firebase başlatma/servis alma hatası:", e);
+                // Auth'u null yap ki diğer fonksiyonlar çalışmaya kalkmasın
+                auth = null; 
+                // Bu kritik hatayı kullanıcıya göster
+                displayMessage("Kritik Hata: Uygulama yapılandırması başarısız oldu. Lütfen konsolu kontrol edin.", 'error');
             }
+        } else {
+             // Yapılandırma eksikse, kullanıcıya uyarı göster
+             displayMessage("Kritik Hata: Firebase yapılandırması eksik. Uygulama çalışmayacaktır.", 'error');
         }
 
 
@@ -295,52 +310,6 @@
             dropdownStatusElement.className = `text-xs font-medium ${statusColor}`; 
         }
 
-        // --- Oturum Durumu Kontrolü (Navbar için) ---
-        if (auth) {
-            onAuthStateChanged(auth, (user) => {
-                if (user && !user.isAnonymous) { // Sadece gerçek bir kullanıcı girişi varsa
-                    renderUserProfile(user);
-                    loggedOutNav.classList.add('hidden');
-                    loggedInNav.classList.remove('hidden');
-                } else {
-                    loggedOutNav.classList.remove('hidden');
-                    loggedInNav.classList.add('hidden');
-                }
-            });
-        }
-
-        // --- Çıkış Yapma İşlemi ---
-        const handleLogout = async () => {
-            if (auth) {
-                try {
-                    profileDropdownMenu.classList.add('hidden');
-                    await signOut(auth);
-                } catch (error) {
-                    console.error("Çıkış yapma hatası:", error);
-                }
-            }
-        };
-
-        // --- Dropdown Toggle İşlemi ---
-        if (profileMenuButton) {
-            profileMenuButton.addEventListener('click', (e) => {
-                e.stopPropagation(); 
-                profileDropdownMenu.classList.toggle('hidden');
-            });
-        }
-
-        // Dropdown menü dışına tıklanınca gizle
-        document.addEventListener('click', (e) => {
-            if (profileDropdownMenu && profileMenuButton && !profileMenuButton.contains(e.target) && !profileDropdownMenu.contains(e.target)) {
-                profileDropdownMenu.classList.add('hidden');
-            }
-        });
-
-        // Çıkış düğmesine event listener ekle
-        if (logoutBtnNav) {
-            logoutBtnNav.addEventListener('click', handleLogout);
-        }
-
         /**
          * Mesaj kutusunu görünür yapar ve stilini ayarlar.
          * @param {string} message - Gösterilecek mesaj.
@@ -357,6 +326,55 @@
             }
         }
 
+
+        // --- Oturum Durumu Kontrolü (Navbar için) ---
+        if (auth) {
+            onAuthStateChanged(auth, (user) => {
+                if (user && !user.isAnonymous) { // Sadece gerçek bir kullanıcı girişi varsa
+                    renderUserProfile(user);
+                    loggedOutNav.classList.add('hidden');
+                    loggedInNav.classList.remove('hidden');
+                } else {
+                    loggedOutNav.classList.remove('hidden');
+                    loggedInNav.classList.add('hidden');
+                }
+            });
+
+            // --- Çıkış Yapma İşlemi ---
+            const handleLogout = async () => {
+                if (auth) {
+                    try {
+                        profileDropdownMenu.classList.add('hidden');
+                        await signOut(auth);
+                    } catch (error) {
+                        console.error("Çıkış yapma hatası:", error);
+                    }
+                }
+            };
+            
+            // Çıkış düğmesine event listener ekle
+            if (logoutBtnNav) {
+                logoutBtnNav.addEventListener('click', handleLogout);
+            }
+        }
+
+
+        // --- Dropdown Toggle İşlemi ---
+        if (profileMenuButton) {
+            profileMenuButton.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                profileDropdownMenu.classList.toggle('hidden');
+            });
+        }
+
+        // Dropdown menü dışına tıklanınca gizle
+        document.addEventListener('click', (e) => {
+            if (profileDropdownMenu && profileMenuButton && !profileMenuButton.contains(e.target) && !profileDropdownMenu.contains(e.target)) {
+                profileDropdownMenu.classList.add('hidden');
+            }
+        });
+
+
         // --- Giriş İşlemi ---
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -371,6 +389,7 @@
             
             // Eğer Auth servisi başlatılmamışsa, giriş denemesini engelle
             if (!auth) {
+                // Bu hata zaten başlangıçta gösterildi ama tekrar göstermek güvenli
                 displayMessage("Sistem hatası: Kimlik doğrulama servisi kullanılamıyor. Lütfen yapılandırmayı kontrol edin.", 'error');
                 return;
             }
