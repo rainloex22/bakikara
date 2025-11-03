@@ -113,10 +113,6 @@ body {
     content: none; 
 }
 
-/* Önceki denemeden kalan alt element geçişini kaldırın (Eğer varsa) */
-/* .discord-info * { transition: opacity 0.5s ease; } */
-
-
 .discord-info:hover {
     transform: scale(1.02); 
     box-shadow: 0 15px 40px rgba(0, 0, 0, 1.0);
@@ -295,4 +291,64 @@ body {
     margin-right: 10px;
     color: #fff; 
     text-shadow: 0 0 7px rgba(255, 255, 255, 0.7); 
+}
+
+/* ========================= */
+/* 8. VİDEO İNDİRME BUTONU (SAĞ ÜST KÖŞE) */
+/* ========================= */
+
+/* Ana sayfanızda, sosyal linkler içinde bulunan .video-download-btn sınıfını gizliyoruz */
+/* Çünkü butonu yeni bir pozisyonda, ayrı bir div içinde gösteriyoruz. */
+.social-links .video-download-btn {
+    display: none; 
+}
+
+/* YENİ BUTON KAPSAYICISI VE KONUMU */
+#video-download-wrapper {
+    position: fixed; /* Ekran pozisyonuna sabitle */
+    top: 30px; /* Üstten 30px boşluk */
+    right: 30px; /* Sağdan 30px boşluk */
+    z-index: 10; /* Diğer elementlerin üzerinde görünmesini sağla */
+    display: block; 
+}
+
+.video-download-link {
+    /* Genel Görünüm */
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 1.1em; /* Orta büyüklük */
+    padding: 12px 20px;
+    border-radius: 8px;
+    
+    /* Kırmızı Tema ve Neon Efekti */
+    background-color: rgba(255, 0, 0, 0.15); /* Hafif şeffaf kırmızı arka plan */
+    color: #FF0000; /* Kırmızı metin rengi */
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid #FF0000; /* Kırmızı kenarlık */
+    
+    /* Neon Parlaklık Efekti */
+    box-shadow: 
+        0 0 5px rgba(255, 0, 0, 0.5),
+        0 0 10px rgba(255, 0, 0, 0.3);
+        
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    
+    display: flex;
+    align-items: center;
+    gap: 8px; /* İkon ve metin arası boşluk */
+}
+
+.video-download-link:hover {
+    background-color: rgba(255, 0, 0, 0.3); /* Üzerine gelince arka planı koyulaştır */
+    color: #ffffff; /* Metin rengini beyaza çevir */
+    border-color: #ffffff; /* Kenarlığı beyaza çevir */
+    box-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.6), /* Beyaz parlama */
+        0 0 20px rgba(255, 0, 0, 0.8); /* Güçlü kırmızı parlama */
+    transform: scale(1.05); /* Butonu hafifçe büyüt */
+}
+
+.video-download-link i {
+    font-size: 1.2em; /* İkon büyüklüğü */
 }
