@@ -82,6 +82,7 @@
 </head>
 <body class="flex flex-col">
 
+    <!-- Navbar Başlangıcı -->
     <header class="header-bg p-4 flex justify-center sticky top-0 z-20">
         <div class="w-full max-w-6xl flex justify-between items-center">
             
@@ -132,6 +133,7 @@
             
         </div>
     </header>
+    <!-- Navbar Sonu -->
 
     <main class="flex-grow flex justify-center items-center py-12">
         <div class="w-full max-w-md px-4">
@@ -163,6 +165,7 @@
                         </a>
                     </div>
                     
+                    <!-- Hata/Başarı Mesaj Kutusu -->
                     <div id="messageBox" class="alert p-3 rounded-lg text-sm hidden"></div>
 
                     <button type="submit" id="loginButton" class="main-cta-button w-full p-3 rounded-lg font-bold text-white text-lg">
@@ -184,6 +187,7 @@
 
 
     <script type="module">
+        // Firebase Auth ve Core Modülleri
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence, onAuthStateChanged, signOut, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         
@@ -195,6 +199,7 @@
         const setupFirebase = async () => {
             try {
                 // Zorunlu global değişkenleri alın
+                // __app_id ve __firebase_config Canvas ortamında tanımlanır.
                 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
                 const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
                 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
@@ -225,6 +230,7 @@
 
             } catch (e) {
                 console.error("Firebase Başlatma/Servis Hatası:", e);
+                // Kullanıcıya görünür mesaj
                 displayMessage("Kritik Hata: Firebase servisleri başlatılamadı. Kimlik doğrulama çalışmayacaktır.", 'error');
                 auth = null;
                 isConfigAvailable = false;
@@ -316,12 +322,15 @@
             if (auth) {
                 // Oturum Durumu Kontrolü (Navbar için)
                 onAuthStateChanged(auth, (user) => {
-                    // isAnonymous: true ise anonim giriş. E-posta/şifre ile giriş yapan kullanıcı anonim değildir.
+                    // user.email varsa bu bir E-posta/Şifre oturumudur.
                     if (user && user.email) { 
                         renderUserProfile(user);
                         loggedOutNav.classList.add('hidden');
                         loggedInNav.classList.remove('hidden');
+                        // Başarılı girişten sonra bu sayfadaysak (girisyap.html) yönlendirme yapılabilir.
+                        // Ancak sayfanın açılmasına izin verelim, yönlendirme sadece form submit'inde olsun.
                     } else {
+                        // Anonim veya çıkış yapmış
                         loggedOutNav.classList.remove('hidden');
                         loggedInNav.classList.add('hidden');
                     }
@@ -391,7 +400,7 @@
 
             try {
                 // Firebase ile e-posta ve şifre ile giriş yap
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                await signInWithEmailAndPassword(auth, email, password);
                 
                 // Başarılı giriş
                 displayMessage("Giriş başarılı! Kontrol paneline yönlendiriliyorsunuz.", 'success');
@@ -417,6 +426,9 @@
                         break;
                     case 'auth/user-disabled':
                         errorMessage = "Hesabınız askıya alınmıştır.";
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = "Çok fazla başarısız giriş denemesi. Lütfen daha sonra tekrar deneyin.";
                         break;
                     default:
                         errorMessage = `Giriş Hatası: ${error.message.includes('password') ? 'E-posta veya şifre hatalı.' : 'Sunucuya bağlanılamadı.'}`;
