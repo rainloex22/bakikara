@@ -38,8 +38,12 @@
             border: 1px solid rgba(108, 92, 231, 0.3);
             border-radius: 1rem;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease;
         }
-        /* YENİ: Navbar Stilleri */
+        .card-panel:hover {
+            transform: translateY(-5px);
+        }
+        /* Navbar Stilleri */
         .profile-avatar-nav {
             width: 40px; height: 40px; line-height: 40px; font-size: 16px; font-weight: 600;
             background-color: var(--purple); color: white; border-radius: 50%; text-align: center;
@@ -92,28 +96,75 @@
             </div>
         </nav>
     </header>
-    <script type="module" src="https://www.gstatic.com/firebase/9.6.1/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebase/9.6.1/firebase-auth.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebase/9.6.1/firebase-firestore.js"></script>
+
+    <main class="flex-grow container mx-auto px-4 py-16">
+        
+        <div class="text-center mb-16">
+            <h1 class="text-5xl md:text-6xl font-extrabold leading-tight mb-4">
+                Tüm Bağlantılarınız <span class="text-purple-500">Tek Bir Yerde</span>
+            </h1>
+            <p class="text-xl text-gray-400 max-w-3xl mx-auto mb-8">
+                BAKİ S2 ile Instagram, TikTok, Twitter gibi sosyal medya profillerinizin biyografi alanını en verimli şekilde kullanın. Saniyeler içinde link ağınızı oluşturun.
+            </p>
+            <a href="kaydol.html" class="btn-purple inline-block px-10 py-4 text-xl rounded-full font-bold shadow-lg shadow-purple/50">
+                <i class="fas fa-rocket mr-2"></i> Ücretsiz Başla!
+            </a>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <div class="card-panel p-6 text-center">
+                <i class="fas fa-link text-4xl text-purple-400 mb-4"></i>
+                <h3 class="text-xl font-semibold mb-3">Sınırsız Bağlantı</h3>
+                <p class="text-gray-400">Tek bir biyografi linkiyle tüm sosyal medya hesaplarınıza, web sitelerinize ve içeriklerinize trafik çekin.</p>
+            </div>
+            
+            <div class="card-panel p-6 text-center">
+                <i class="fas fa-chart-line text-4xl text-purple-400 mb-4"></i>
+                <h3 class="text-xl font-semibold mb-3">Detaylı Analiz</h3>
+                <p class="text-gray-400">Hangi bağlantınızın kaç kez tıklandığını, hangi ülkenin ziyaret ettiğini anlık olarak takip edin.</p>
+            </div>
+            
+            <div class="card-panel p-6 text-center">
+                <i class="fas fa-paint-brush text-4xl text-purple-400 mb-4"></i>
+                <h3 class="text-xl font-semibold mb-3">Özel Tasarım</h3>
+                <p class="text-gray-400">Renkleri, yazı tiplerini ve arkaplanı dilediğiniz gibi kişiselleştirerek markanızla uyumlu hale getirin.</p>
+            </div>
+
+        </div>
+        
+        <div class="text-center mt-16 p-10 card-panel">
+            <h2 class="text-3xl font-bold mb-4">Hemen Şimdi Link Ağınızı Kurun!</h2>
+            <a href="kaydol.html" class="btn-purple inline-block px-8 py-3 rounded-lg font-bold">
+                <i class="fas fa-user-plus mr-2"></i> Kaydol
+            </a>
+        </div>
+    </main>
+
+    <footer class="bg-gray-900 text-gray-500 text-center p-4 mt-auto">
+        © 2025 BAKİ S2 Yönetim Hizmetleri.
+    </footer>
+
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
     <script type="module" src="./firebase-auth-service.js"></script>
 
     <script type="module">
-        // YENİ: Dropdown açma/kapama JS'i
+        // Ortak Auth Servisini başlat
+        window.startClient(); 
+        
+        // Dropdown açma/kapama JS'i (Önceki düzeltmelerden)
         document.getElementById('profileMenuButton')?.addEventListener('click', (e) => {
             e.stopPropagation();
-            const dropdown = document.getElementById('profileDropdown');
-            dropdown.classList.toggle('hidden');
+            document.getElementById('profileDropdown')?.classList.toggle('hidden');
         });
         document.addEventListener('click', (event) => {
-            const menu = document.getElementById('loggedInNav'); // ID'yi güncelledik
+            const menu = document.getElementById('loggedInNav');
             const isClickInside = menu?.contains(event.target);
             if (!isClickInside) {
                 document.getElementById('profileDropdown')?.classList.add('hidden');
             }
         });
-
-        // Sayfa yüklendiğinde Firebase başlatma ve dinleme işlemini başlat
-        window.onload = window.startClient;
     </script>
 </body>
 </html>
