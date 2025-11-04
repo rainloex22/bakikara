@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel | BAKİ S2</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -30,230 +28,144 @@
         }
         .main-cta-button {
             background-color: var(--purple);
-            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.5);
-            transition: transform 0.3s ease, background-color 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
         }
         .main-cta-button:hover {
-            background-color: #5c4cd9;
-            transform: translateY(-1px);
+            background-color: #5d4cd9;
         }
-        .secondary-cta-button {
-            border: 2px solid var(--purple);
-            color: var(--purple);
-            background-color: transparent;
-            transition: background-color 0.3s ease, color 0.3s ease;
+        .main-content {
+            flex-grow: 1;
         }
-        .secondary-cta-button:hover {
-            background-color: var(--purple);
-            color: white;
+        .footer-bg {
+            background-color: #140b1b;
         }
-        .profile-pic {
+        
+        /* YENİ: Navbar Stilleri */
+        .profile-avatar-nav {
             width: 40px;
             height: 40px;
+            line-height: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            background-color: var(--purple); /* Mor arka plan */
+            color: white;
             border-radius: 50%;
-            border: 2px solid var(--purple);
-            object-fit: cover;
+            text-align: center;
+            flex-shrink: 0;
+            cursor: pointer;
+            border: 2px solid var(--purple); /* Çerçeve rengi */
         }
-
-        /* Ana Sayfa Arka Plan Efekti */
-        body::before {
-             content: '';
-             position: absolute;
-             top: 0;
-             left: 0;
-             width: 100%;
-             height: 100%;
-             background-image: radial-gradient(circle at 50% 10%, rgba(108, 92, 231, 0.15) 0%, transparent 40%);
-             opacity: 0.5;
-             z-index: -1;
-         }
-         /* Görseldeki cihaz kartları için stil */
-         .device-mockup {
-             background: #2a1b3a;
-             border-radius: 3rem;
-             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 0 8px rgba(108, 92, 231, 0.1);
-             position: absolute;
-             overflow: hidden;
-             width: 250px;
-             height: 450px;
-             transform: rotate(-10deg);
-             transition: transform 0.5s ease;
-             transform-origin: center;
-         }
+        .card-dropdown { 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(5px); 
+            border-radius: 0.5rem; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); 
+            border: 1px solid rgba(108, 92, 231, 0.2); /* Hafif mor çerçeve */
+            z-index: 30; /* Navbar'dan yüksek olsun */
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body>
 
-    <!-- HEADER (Dinamik Alanlar Eklendi) -->
-    <header class="header-bg p-4 flex justify-center sticky top-0 z-20">
-        <div class="w-full max-w-6xl flex justify-between items-center">
-            
-            <!-- Logo -->
-            <a href="panel.html" class="text-3xl font-extrabold text-white flex items-center">
-                <i class="fas fa-terminal mr-2 text-purple"></i> BAKİ S2
+    <header class="header-bg sticky top-0 z-10">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <a href="panel.html" class="text-2xl font-extrabold text-white flex items-center">
+                <i class="fas fa-meteor text-purple-500 mr-2"></i> BAKİ S2
             </a>
-            
-            <!-- Navigasyon Linkleri -->
-            <nav class="flex space-x-6 text-lg items-center">
-                <a href="kullanicipaneli.html" class="text-gray-300 hover:text-purple transition duration-200">Kullanıcı Paneli</a>
-                <a href="yardim.html" class="text-gray-300 hover:text-purple transition duration-200">Yardım Merkezi</a>
-                <a href="discord.html" class="text-gray-300 hover:text-purple transition duration-200">Discord</a>
-                <a href="fiyatlandirma.html" class="text-gray-300 hover:text-purple transition duration-200">Fiyatlandırma</a>
-            </nav>
-            
-            <!-- DİNAMİK BUTON/PROFİL ALANI -->
-            <div id="authButtons" class="flex space-x-3">
-                <!-- Buraya JS ile oturum durumuna göre Profil veya Giriş/Kaydol butonları eklenecek -->
-                <!-- Varsayılan olarak boş bırakılmıştır. -->
-            </div>
 
-        </div>
-    </header>
+            <div class="hidden md:flex space-x-6">
+                <a href="panel.html" class="text-white hover:text-purple-400 transition duration-200 font-medium">Panel</a>
+                <a href="yardim.html" class="text-white hover:text-purple-400 transition duration-200 font-medium">Yardım</a>
+                </div>
 
-    <!-- MAIN CONTENT (Orijinal Ana Sayfa İçeriği - Değişmedi) -->
-    <main class="flex-grow flex flex-col items-center pt-20 pb-40 relative z-10 text-center">
-        
-        <div class="w-full max-w-4xl px-4">
-            <h1 class="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
-                İstediğin Her Şey, <span class="text-purple">Tam Burada.</span>
-            </h1>
-            <p class="text-xl text-gray-400 mb-12 max-w-2xl mx-auto">
-                BAKİ S2, modern, zengin özellikli ve hızlı biyolinkleriniz ve güvenli dosya barındırma hizmetiniz için vazgeçilmezinizdir. İhtiyacınız olan her şey — işte burada.
-            </p>
-            
-            <div class="flex justify-center space-x-4">
-                <!-- Bu butonlar, giriş yapılmış olsa bile ana sayfa içeriğinde kaldığı için korundu -->
-                <a href="kaydol.html" class="main-cta-button px-8 py-3 rounded-xl font-bold text-lg text-white">
-                    Hemen Kaydol
-                </a>
-                <a href="fiyatlandirma.html" class="secondary-cta-button px-8 py-3 rounded-xl font-bold text-lg">
-                    Fiyatları Gör
-                </a>
-            </div>
-        </div>
-
-        <div class="relative mt-20 h-[500px] w-full max-w-6xl flex justify-center items-end">
-            
-            <div class="device-mockup left-1/2 -ml-[300px] bg-cover bg-center" style="transform: rotate(-15deg) scale(0.9); z-index: 1;">
-                 <img src="https://via.placeholder.com/250x450/451a54/ffffff?text=BIOLINK+PANELI" alt="Biyolink Paneli" class="w-full h-full object-cover rounded-[2.8rem] p-1.5" style="border: 4px solid #6c5ce7;">
-            </div>
-
-            <div class="device-mockup relative mx-4 bg-cover bg-center" style="transform: rotate(0deg) scale(1.1); z-index: 3; box-shadow: 0 15px 50px rgba(108, 92, 231, 0.7);">
-                 <img src="https://via.placeholder.com/250x450/563e75/ffffff?text=HESAP+ISTATISTIKLERI" alt="Hesap İstatistikleri" class="w-full h-full object-cover rounded-[2.8rem] p-1.5" style="border: 4px solid #8f82f2;">
-            </div>
-
-            <div class="device-mockup right-1/2 mr-[300px] bg-cover bg-center" style="transform: rotate(15deg) scale(0.9); z-index: 2;">
-                 <img src="https://via.placeholder.com/250x450/331a47/ffffff?text=DISCORD+PROFIL" alt="Discord Profil Görüntüsü" class="w-full h-full object-cover rounded-[2.8rem] p-1.5" style="border: 4px solid #6c5ce7;">
-            </div>
-
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-500 text-center p-4 mt-auto">
-        © 2025 BAKİ S2 Yönetim Hizmetleri. Tüm hakları saklıdır.
-    </footer>
-
-    <!-- Firebase Oturum Yönetimi ve Dinamik Navbar Kodu -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
-        
-        // Buradaki firebaseConfig, Canvas ortamında otomatik olarak sağlanır.
-        const firebaseConfig = {
-            apiKey: "AIzaSyBfc0F8o5aVmwTw-gyLRZVI2OMUljFi6Ao", // Örnek Anahtar
-            authDomain: "baki-s2-yonetim.firebaseapp.com",
-            projectId: "baki-s2-yonetim",
-        };
-        
-        // --- Firebase Başlatma ---
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
-        // --- DOM Elementleri ---
-        const authButtons = document.getElementById('authButtons');
-        
-        // --- Çıkış Yapma Fonksiyonu ---
-        async function handleLogout() {
-            try {
-                await signOut(auth);
-                // Çıkış başarılı olursa, kullanıcıyı giriş sayfasına yönlendirir
-                window.location.href = 'girisyap.html';
-            } catch (error) {
-                console.error("Çıkış hatası:", error);
-                // Hata durumunda kullanıcıya bilgi ver
-                const errorMessage = document.createElement('div');
-                errorMessage.className = 'fixed top-20 right-4 p-3 bg-red-600 text-white rounded-lg shadow-xl';
-                errorMessage.textContent = 'Çıkış yapılırken bir hata oluştu.';
-                document.body.appendChild(errorMessage);
-                setTimeout(() => errorMessage.remove(), 3000);
-            }
-        }
-
-      const firebaseConfig = {
-  apiKey: "AIzaSyBfc0F8o5aVmwTw-gyLRZVI2OMUljFi6Ao",
-  authDomain: "baki-s2-yonetim.firebaseapp.com",
-  projectId: "baki-s2-yonetim",
-  storageBucket: "baki-s2-yonetim.firebasestorage.app",
-  messagingSenderId: "692508919425",
-  appId: "1:692508919425:web:fac963c81c11b7be70af80",
-  measurementId: "G-Q52XG8GLB2"
-};
-
-        // --- Navigasyon Çubuğunu Güncelleme Fonksiyonu ---
-        function updateNavbar(user) {
-            authButtons.innerHTML = ''; // Önceki içeriği temizle
-
-            if (user && user.email) {
-                // 1. Kullanıcı Giriş Yapmış Durumda (Hesap adı, türü, fotoğraf)
-                const displayName = user.displayName || user.email.split('@')[0].substring(0, 10);
-                const profilePhotoUrl = user.photoURL || `https://ui-avatars.com/api/?name=${displayName.substring(0, 1)}&background=6c5ce7&color=fff`;
-
-                const profileHtml = `
-                    <div class="flex items-center space-x-4">
-                        <!-- Profil Fotoğrafı -->
-                        <img src="${profilePhotoUrl}" 
-                             alt="Profil" class="profile-pic">
-                        
-                        <!-- Hesap Bilgisi -->
-                        <div class="hidden sm:block text-left">
-                            <span class="block text-sm font-semibold">${displayName}</span>
-                            <span class="block text-xs text-gray-400">Standart Kullanıcı</span>
-                        </div>
-
-                        <!-- Çıkış Butonu -->
-                        <button id="logoutButtonNav" class="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg text-sm font-medium transition duration-200">
-                            <i class="fas fa-sign-out-alt"></i> Çıkış
-                        </button>
-                    </div>
-                `;
-                authButtons.innerHTML = profileHtml;
-                
-                // Çıkış butonuna olayı bağla
-                document.getElementById('logoutButtonNav').addEventListener('click', handleLogout);
-
-            } else {
-                // 2. Kullanıcı Giriş Yapmamış Durumda (Giriş/Kaydol butonları)
-                const guestHtml = `
+            <div class="flex space-x-3 items-center">
+                <div id="loggedOutNav" class="flex space-x-3 items-center">
                     <a href="girisyap.html" class="px-5 py-2 rounded-lg font-semibold text-white border border-purple hover:bg-purple transition duration-200">Giriş Yap</a>
                     <a href="kaydol.html" class="main-cta-button px-5 py-2 rounded-lg font-semibold text-white">Kaydol</a>
-                `;
-                authButtons.innerHTML = guestHtml;
-            }
-        }
-        
-        // --- Oturum Durumu Değişikliği Dinleyicisi ---
-        onAuthStateChanged(auth, (user) => {
-            updateNavbar(user); // Navbar'ı her durumda güncelle
+                </div>
 
-            // Güvenlik Kontrolü DEVRE DIŞI BIRAKILDI:
-            // Artık giriş yapılmadıysa bile sayfa yüklenir ve sadece Navbar değişir.
-            /* if (!user) {
-                 window.location.href = 'girisyap.html'; 
+                <div id="loggedInNav" class="relative hidden"> 
+                    <button id="profileMenuButton" class="flex items-center space-x-3 p-2 rounded-full hover:bg-gray-700 transition duration-200 focus:outline-none">
+                        <span id="nav_profile_initials" class="profile-avatar-nav flex-shrink-0">...</span> 
+                        
+                        <div class="hidden sm:flex flex-col items-end">
+                            <span id="nav_display_name" class="text-sm font-semibold text-white">Yükleniyor...</span>
+                            <span id="nav_user_role" class="text-xs font-medium rounded-full px-2 py-0.5 mt-0.5">Yükleniyor...</span>
+                        </div>
+                        
+                        <i class="fas fa-chevron-down text-gray-400 text-xs hidden sm:block"></i>
+                    </button>
+                    
+                    <div id="profileDropdown" class="card-dropdown absolute right-0 mt-3 w-48 p-2 hidden">
+                        <a href="kullanicipaneli%20(1).html" class="flex items-center p-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg transition duration-200">
+                            <i class="fas fa-chart-line w-5 mr-2"></i> Kontrol Paneli
+                        </a>
+                        
+                        <button id="logoutButtonNav" class="w-full text-left flex items-center p-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded-lg transition duration-200 mt-2">
+                            <i class="fas fa-sign-out-alt w-5 mr-2"></i> Çıkış Yap
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            </nav>
+    </header>
+
+    <main class="main-content container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <section class="text-center">
+            <h1 class="text-5xl font-extrabold mb-4">Hoş Geldiniz!</h1>
+            <p class="text-xl text-gray-400 mb-8">Burada sitemize ait tüm özelliklere erişebilir ve hizmetlerimizden yararlanabilirsiniz.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-purple-500 transition duration-300">
+                    <i class="fas fa-link text-3xl text-purple-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Hızlı Bağlantılar</h3>
+                    <p class="text-gray-400">En sık kullandığınız araçlara tek tıkla ulaşın.</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-purple-500 transition duration-300">
+                    <i class="fas fa-chart-line text-3xl text-purple-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Performans Analizi</h3>
+                    <p class="text-gray-400">Verilerinizi takip edin ve büyümeyi izleyin.</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-purple-500 transition duration-300">
+                    <i class="fas fa-headset text-3xl text-purple-500 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">7/24 Destek</h3>
+                    <p class="text-gray-400">Ne zaman ihtiyacınız olursa yanınızdayız.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer-bg mt-auto">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-gray-400 text-sm">
+            &copy; 2024 BAKİ S2. Tüm hakları saklıdır. | <a href="yardim.html" class="hover:text-purple-400">Yardım Merkezi</a>
+        </div>
+    </footer>
+
+    <script type="module" src="https://www.gstatic.com/firebase/9.6.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebase/9.6.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebase/9.6.1/firebase-firestore.js"></script>
+
+    <script type="module" src="./firebase-auth-service.js"></script>
+
+    <script>
+        // YENİ: Dropdown açma/kapama JS'i
+        document.getElementById('profileMenuButton')?.addEventListener('click', () => {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('hidden');
+        });
+        // Dışarı tıklamada kapatma
+        document.addEventListener('click', (event) => {
+            const menu = document.getElementById('loggedInNav');
+            const isClickInside = menu?.contains(event.target);
+            if (!isClickInside) {
+                document.getElementById('profileDropdown')?.classList.add('hidden');
             }
-            */
         });
 
+        // YENİ: Sayfa yüklendiğinde Firebase başlatma ve dinleme işlemini başlat
+        // Eski 'updateNavbar' ve 'onAuthStateChanged' mantığı bu çağrı ile değiştirildi.
+        window.onload = window.startClient;
     </script>
 </body>
 </html>
