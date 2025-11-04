@@ -143,6 +143,8 @@
                     if (user && user.isAnonymous === false) {
                         // Kullanıcı oturum açmış
                         updateHeaderUI(user);
+                        // Kayıt başarılı olduğunda kullanıcıyı panele yönlendir (E-posta/Şifre ile giriş yaptıktan sonra)
+                        // window.location.href = 'panel.html';
                     } else {
                         // Kullanıcı oturum açmamış veya anonim
                         updateHeaderUI(null);
@@ -249,7 +251,7 @@
             const confirmPassword = confirmPasswordInput.value;
 
             if (!isConfigAvailable || !auth) {
-                 showMessage("Hata: Firebase bağlantısı kurulamadı.", "error");
+                 showMessage("Hata: Firebase bağlantısı kurulamadı. Lütfen yapılandırmayı kontrol edin.", "error");
                  resetRegisterButton(); 
                  return;
             }
