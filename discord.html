@@ -13,7 +13,7 @@
             font-family: 'Poppins', sans-serif; 
             background-color: #1a0e21; 
             color: #ffffff; 
-            /* Sayfa geçişi için opacity ve transition */
+            /* KRİTİK: Sayfa başlangıçta görünmez (0) */
             opacity: 0; 
             transition: opacity 0.5s ease-in-out;
             min-height: 100vh;
@@ -33,7 +33,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .btn-discord {
-            background-color: #5865F2; /* Discord'un Mavi Rengi */
+            background-color: #5865F2; 
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
         .btn-discord:hover {
@@ -249,7 +249,6 @@
             if (!memberCountElement || !onlineCountElement) return;
 
             try {
-                // Discord API çağrısı
                 const response = await fetch(apiUrl);
                 
                 if (!response.ok) {
@@ -284,9 +283,6 @@
         });
         
         document.addEventListener('DOMContentLoaded', () => {
-            // Görünürlük Düzeltmesi
-            document.body.style.opacity = '1';
-            
             fetchDiscordStats();
 
             // Dropdown açma/kapama
@@ -303,9 +299,16 @@
                 }
             });
         });
+        
+        // Sayfa yüklendiğinde Firebase başlatma ve dinleme işlemini başlat
+        // window.onload = window.startClient; // Eğer firebase-auth-service içinde bir init fonksiyonu varsa bu kalsın
 
-        // Alternatif olarak, eğer firebase-auth-service.js dosyanızda window.startClient varsa, bu satırı kullanın
-        // window.onload = window.startClient;
+    </script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+             document.body.style.opacity = '1';
+        });
     </script>
 </body>
 </html>
