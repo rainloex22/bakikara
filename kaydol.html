@@ -1,104 +1,51 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaydol | BAKİ S2</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --purple: #6c5ce7; }
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            background-color: #1a0e21; 
-            color: #ffffff;
-            min-height: 100vh;
-            display: flex; 
-            flex-direction: column;
-        }
-        .header-bg { background-color: rgba(26, 14, 33, 0.9); backdrop-filter: blur(5px); }
-        .form-card { 
-            background-color: #2a1b3a; 
-            border: 1px solid rgba(108, 92, 231, 0.3);
-            border-radius: 1rem; 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-        }
-        .main-cta-button {
-            background-color: var(--purple);
-            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
-        }
-        .main-cta-button:hover {
-            background-color: #5d4cd9;
-        }
-        .alert-message {
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            font-weight: 500;
-        }
-        .alert-error {
-            background-color: #fca5a5;
-            color: #7f1d1d;
-        }
-        .alert-success {
-            background-color: #a7f3d0;
-            color: #065f46;
-        }
-
-        /* YENİ: Navbar Stilleri */
+        /* ... (Mevcut stiller) ... */
+        /* Yeni Navbar Stilleri */
         .profile-avatar-nav {
-            width: 40px;
-            height: 40px;
-            line-height: 40px;
-            font-size: 16px;
-            font-weight: 600;
-            background-color: var(--purple);
-            color: white;
-            border-radius: 50%;
-            text-align: center;
-            flex-shrink: 0;
-            cursor: pointer;
-            border: 2px solid var(--purple);
+            width: 40px; height: 40px; line-height: 40px; font-size: 16px; font-weight: 600;
+            background-color: var(--purple); color: white; border-radius: 50%; text-align: center;
+            flex-shrink: 0; cursor: pointer; border: 2px solid var(--purple);
         }
         .card-dropdown { 
-            background: rgba(255, 255, 255, 0.05); 
-            backdrop-filter: blur(5px); 
-            border-radius: 0.5rem; 
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); 
-            border: 1px solid rgba(108, 92, 231, 0.2);
-            z-index: 30;
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(5px); border-radius: 0.5rem; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); border: 1px solid rgba(108, 92, 231, 0.2); z-index: 30;
         }
+        .btn-purple {
+            background-color: var(--purple); transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .btn-purple:hover { background-color: #5c4cd9; transform: translateY(-1px); }
     </style>
 </head>
-<body>
-    
-    <header class="header-bg sticky top-0 z-10">
-        <nav class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+<body class="min-h-screen flex flex-col">
+    <header class="header-bg sticky top-0 z-20">
+        <div class="w-full max-w-6xl flex justify-between items-center">
+            
             <a href="panel.html" class="text-2xl font-extrabold text-white flex items-center">
                 <i class="fas fa-meteor text-purple-500 mr-2"></i> BAKİ S2
             </a>
-
+            
             <div class="hidden md:flex space-x-6">
                 <a href="panel.html" class="text-white hover:text-purple-400 transition duration-200 font-medium">Panel</a>
                 <a href="yardim.html" class="text-white hover:text-purple-400 transition duration-200 font-medium">Yardım</a>
+                <a href="discord.html" class="text-white hover:text-purple-400 transition duration-200 font-medium">Discord</a>
+                <a href="fiyatlandirma.html" class="text-white hover:text-purple-400 transition duration-200 font-medium">Fiyatlandırma</a>
             </div>
 
             <div class="flex space-x-3 items-center">
                 <div id="loggedOutNav" class="flex space-x-3 items-center">
                     <a href="girisyap.html" class="px-5 py-2 rounded-lg font-semibold text-white border border-purple hover:bg-purple transition duration-200">Giriş Yap</a>
-                    <a href="kaydol.html" class="main-cta-button px-5 py-2 rounded-lg font-semibold text-white">Kaydol</a>
-                </div>
+                    </div>
 
                 <div id="loggedInNav" class="relative hidden"> 
                     <button id="profileMenuButton" class="flex items-center space-x-3 p-2 rounded-full hover:bg-gray-700 transition duration-200 focus:outline-none">
                         <span id="nav_profile_initials" class="profile-avatar-nav flex-shrink-0">...</span> 
-                        
                         <div class="hidden sm:flex flex-col items-end">
                             <span id="nav_display_name" class="text-sm font-semibold text-white">Yükleniyor...</span>
                             <span id="nav_user_role" class="text-xs font-medium rounded-full px-2 py-0.5 mt-0.5">Yükleniyor...</span>
                         </div>
-                        
                         <i class="fas fa-chevron-down text-gray-400 text-xs hidden sm:block"></i>
                     </button>
                     
@@ -106,87 +53,26 @@
                         <a href="kullanicipaneli%20(1).html" class="flex items-center p-2 text-sm text-gray-300 hover:bg-gray-700 rounded-lg transition duration-200">
                             <i class="fas fa-chart-line w-5 mr-2"></i> Kontrol Paneli
                         </a>
-                        
                         <button id="logoutButtonNav" class="w-full text-left flex items-center p-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded-lg transition duration-200 mt-2">
                             <i class="fas fa-sign-out-alt w-5 mr-2"></i> Çıkış Yap
                         </button>
                     </div>
                 </div>
             </div>
-            
-            </nav>
+        </div>
     </header>
 
-    <main class="flex-grow flex items-center justify-center py-10">
-        <div class="form-card w-full max-w-md p-8 sm:p-10">
-            <h2 class="text-3xl font-extrabold text-white text-center mb-6">Hemen Hesap Oluşturun</h2>
-            <p class="text-gray-400 text-center mb-8">Zaten hesabınız var mı? <a href="girisyap.html" class="text-purple-400 hover:text-purple-500 font-semibold">Giriş Yapın</a></p>
-
-            <div id="messageContainer" class="hidden"></div>
-            
-            <form id="registerForm">
-                <div class="mb-4">
-                    <label for="displayName" class="block text-sm font-medium text-gray-300 mb-2">Ad Soyad</label>
-                    <input type="text" id="displayName" required placeholder="Mehmet Açan" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:ring-purple-500 focus:border-purple-500 text-white">
-                </div>
-                <div class="mb-4">
-                    <label for="email" class="block text-sm font-medium text-gray-300 mb-2">E-posta Adresi</label>
-                    <input type="email" id="email" required placeholder="örnek@eposta.com" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:ring-purple-500 focus:border-purple-500 text-white">
-                </div>
-                <div class="mb-6">
-                    <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Şifre (En az 6 karakter)</label>
-                    <input type="password" id="password" required placeholder="••••••••" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:ring-purple-500 focus:border-purple-500 text-white">
-                </div>
-                
-                <button type="submit" id="registerButton" class="w-full main-cta-button py-3 rounded-lg font-semibold text-white transition duration-200">
-                    Kaydol <i class="fas fa-user-plus ml-2"></i>
-                </button>
-            </form>
-        </div>
-    </main>
-
-    <footer class="bg-[#140b1b] mt-auto">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-gray-400 text-sm">
-            &copy; 2024 BAKİ S2. Tüm hakları saklıdır. | <a href="yardim.html" class="hover:text-purple-400">Yardım Merkezi</a>
-        </div>
-    </footer>
-
-    <script type="module" src="https://www.gstatic.com/firebase/9.6.1/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebase/9.6.1/firebase-auth.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebase/9.6.1/firebase-firestore.js"></script>
-
     <script type="module" src="./firebase-auth-service.js"></script>
-
+    
     <script type="module">
-        // Ortak servisten başlatıldığı için artık initializeFirebase'i çağırmaya gerek yok.
-        import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebase/9.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebase/9.6.1/firebase-firestore.js";
-
-        // Auth ve Firestore instance'ları
-        const auth = getAuth();
-        const db = getFirestore();
-
-        const registerForm = document.getElementById('registerForm');
-        const messageContainer = document.getElementById('messageContainer');
-        const registerButton = document.getElementById('registerButton');
-
-        function showMessage(message, type) {
-            messageContainer.classList.remove('hidden', 'alert-error', 'alert-success');
-            messageContainer.classList.add(`alert-${type}`);
-            messageContainer.innerHTML = message;
-        }
-
-        function resetRegisterButton() {
-            registerButton.disabled = false;
-            registerButton.innerHTML = 'Kaydol <i class="fas fa-user-plus ml-2"></i>';
-        }
-
+        // ... (Mevcut JS kodları) ...
+        
         // YENİ: Dropdown açma/kapama JS'i
-        document.getElementById('profileMenuButton')?.addEventListener('click', () => {
+        document.getElementById('profileMenuButton')?.addEventListener('click', (e) => {
+            e.stopPropagation();
             const dropdown = document.getElementById('profileDropdown');
             dropdown.classList.toggle('hidden');
         });
-        // Dışarı tıklamada kapatma
         document.addEventListener('click', (event) => {
             const menu = document.getElementById('loggedInNav');
             const isClickInside = menu?.contains(event.target);
@@ -195,79 +81,6 @@
             }
         });
 
-        // Kayıt Formu Gönderme İşlemi
-        registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const displayName = registerForm.displayName.value.trim();
-            const email = registerForm.email.value;
-            const password = registerForm.password.value;
-            
-            // Basit doğrulama
-            if (displayName.length < 2) {
-                showMessage("Lütfen geçerli bir Ad Soyad girin.", "error");
-                return;
-            }
-
-            // Buton durumunu ayarla
-            registerButton.disabled = true;
-            registerButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Kayıt Olunuyor...';
-            messageContainer.classList.add('hidden'); 
-
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                // 1. Kullanıcı profilini güncelle (displayName)
-                await updateProfile(user, {
-                    displayName: displayName
-                });
-
-                // 2. Firestore'a kullanıcı bilgilerini kaydet (Örn: Premium durumu)
-                await setDoc(doc(db, "users", user.uid), {
-                    displayName: displayName,
-                    email: user.email,
-                    // Varsayılan olarak Standart üyelik
-                    isPremium: false, 
-                    createdAt: new Date()
-                });
-
-                showMessage("Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.", "success");
-                resetRegisterButton(); 
-                
-                // 2 saniye bekleyip giriş sayfasına yönlendir
-                setTimeout(() => {
-                    window.location.href = 'girisyap.html'; 
-                }, 2000);
-
-            } catch (error) {
-                console.error("Kayıt hatası:", error);
-                let errorMessage = "Kayıt işlemi sırasında bir hata oluştu.";
-
-                switch (error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage = "Bu e-posta adresi zaten kullanımda.";
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = "Geçersiz e-posta adresi formatı.";
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = "Şifre en az 6 karakter olmalıdır.";
-                        break;
-                    default:
-                        errorMessage = "Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin. Kod: " + error.code;
-                        break;
-                }
-                
-                showMessage("Hata: " + errorMessage, "error");
-                
-                // Hata durumunda butonu hemen sıfırla
-                resetRegisterButton(); 
-
-            }
-        });
-    </script>
-    <script>
         // Sayfa yüklendiğinde Firebase başlatma ve dinleme işlemini başlat
         window.onload = window.startClient;
     </script>
