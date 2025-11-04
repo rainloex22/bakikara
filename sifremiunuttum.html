@@ -24,7 +24,7 @@
         }
         .form-card { 
             background-color: #2a1b3a; 
-            border: 1px solid rgba(108, 92, 231, 0.3);
+            border: 1px solid rgba(108, 92, 231, 0.3); 
             border-radius: 1rem; 
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); 
         }
@@ -48,7 +48,33 @@
             background-color: #5c4cd9;
             transform: translateY(-1px);
         }
-        /* Yeni Navbar Stilleri */
+        /* Mesaj Kutusu Stili */
+        #messageBox {
+            visibility: hidden;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            padding: 15px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            max-width: 90%;
+            min-width: 280px;
+            color: white; 
+            font-weight: 600;
+        }
+        .message-success { background-color: #10b981; }
+        .message-error { background-color: #ef4444; }
+        .message-show { visibility: visible; opacity: 1; }
+        /* YENİ: Navbar Stilleri */
         .profile-avatar-nav {
             width: 40px; height: 40px; line-height: 40px; font-size: 16px; font-weight: 600;
             background-color: var(--purple); color: white; border-radius: 50%; text-align: center;
@@ -58,18 +84,9 @@
             background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(5px); border-radius: 0.5rem; 
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); border: 1px solid rgba(108, 92, 231, 0.2); z-index: 30;
         }
-        .btn-purple {
-            background-color: var(--purple); color: white; transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-        .btn-purple:hover { background-color: #5c4cd9; transform: translateY(-1px); }
-        
-        /* Mesaj Kutusu Stili (Kısaltıldı) */
-        #messageBox { /* ... */ }
-        .message-success { /* ... */ }
-        .message-error { /* ... */ }
     </style>
 </head>
-<body class="flex flex-col">
+<body class="min-h-screen flex flex-col">
     <header class="header-bg sticky top-0 z-20">
         <nav class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
             <a href="panel.html" class="text-2xl font-extrabold text-white flex items-center">
@@ -85,8 +102,8 @@
 
             <div class="flex space-x-3 items-center">
                 <div id="loggedOutNav" class="flex space-x-3 items-center">
-                    <a href="girisyap.html" class="px-5 py-2 rounded-lg font-semibold text-white border border-purple hover:bg-purple transition duration-200">Giriş Yap</a>
-                    <a href="kaydol.html" class="btn-purple px-5 py-2 rounded-lg font-semibold text-white">Kaydol</a> 
+                    <a href="girisyap.html" class="px-5 py-2 rounded-lg font-semibold text-white border border-purple hover:bg-purple/10 transition duration-200">Giriş Yap</a>
+                    <a href="kaydol.html" class="btn-reset px-5 py-2 rounded-lg font-semibold text-white">Kaydol</a> 
                 </div>
 
                 <div id="loggedInNav" class="relative hidden"> 
@@ -111,14 +128,102 @@
             </div>
         </nav>
     </header>
+    <main class="flex-grow flex flex-col items-center justify-center py-12 px-4">
+        <div class="form-card p-8 md:p-10 w-full max-w-md">
+            <h1 class="text-3xl font-extrabold mb-4 text-white text-center">🔒 Şifremi Sıfırla</h1>
+            <p class="text-center text-gray-400 mb-6">Hesabınızla ilişkili e-posta adresinizi girin. Size bir şifre sıfırlama bağlantısı göndereceğiz.</p>
+            
+            <form id="passwordResetForm" class="space-y-4">
+                <div>
+                    <label for="reset_email" class="block text-sm font-medium text-gray-400 text-left mb-1">E-posta</label>
+                    <input type="email" id="reset_email" required class="input-field w-full p-3 rounded-lg" placeholder="ornek@mail.com">
+                </div>
 
-    <script type="module" src="https://www.gstatic.com/firebase/9.6.1/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebase/9.6.1/firebase-auth.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebase/9.6.1/firebase-firestore.js"></script>
+                <button type="submit" id="resetButton" class="w-full btn-reset py-3 rounded-lg font-bold text-white text-lg mt-4">
+                    <i class="fas fa-envelope mr-2"></i> Sıfırlama Bağlantısı Gönder
+                </button>
+            </form>
+            
+            <p class="text-center text-sm text-gray-400 mt-4">
+                <a href="girisyap.html" class="text-purple hover:underline font-semibold transition duration-200">Giriş sayfasına geri dön</a>
+            </p>
+        </div>
+    </main>
+    
+    <div id="messageBox"></div>
+
+    <footer class="bg-gray-900 text-gray-500 text-center p-4 mt-auto">
+        © 2025 BAKİ S2 Yönetim Hizmetleri.
+    </footer>
+
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
     <script type="module" src="./firebase-auth-service.js"></script>
     
     <script type="module">
-        // ... (showMessage fonksiyonu ve form submit kodları buraya eklenecek) ...
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        const hardcodedConfig = {
+            apiKey: "AIzaSyBfc0F8o5aVmwTw-gyLRZVI2OMUljFi6Ao",
+            authDomain: "baki-s2-yonetim.firebaseapp.com",
+            projectId: "baki-s2-yonetim",
+            storageBucket: "baki-s2-yonetim.firebasestorage.app",
+            messagingSenderId: "692508919425",
+            appId: "1:692508919425:web:fac963c81c11b7be70af80",
+            measurementId: "G-Q52XG8GLB2"
+        };
+        
+        // Ortamdan gelen config'i kullan (yoksa hardcoded config'i kullan)
+        const globalFirebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const firebaseConfig = globalFirebaseConfig || hardcodedConfig;
+        
+        let auth;
+        let isConfigAvailable = !!firebaseConfig.apiKey;
+
+        // --- DOM Elementlerini Başlat ---
+        const passwordResetForm = document.getElementById('passwordResetForm');
+        const resetButton = document.getElementById('resetButton');
+        const emailInput = document.getElementById('reset_email');
+        const messageBox = document.getElementById('messageBox');
+        const originalButtonText = '<i class="fas fa-envelope mr-2"></i> Sıfırlama Bağlantısı Gönder';
+
+
+        // --- Mesaj Gösterme Fonksiyonu ---
+        function showMessage(message, type = 'success') {
+            if (!messageBox) return;
+
+            messageBox.classList.remove('message-success', 'message-error');
+            messageBox.innerHTML = message;
+            const colorClass = type === 'success' ? 'message-success' : 'message-error';
+            messageBox.classList.add(colorClass);
+
+            messageBox.classList.add('message-show');
+            
+            setTimeout(() => {
+                messageBox.classList.remove('message-show');
+            }, 5000);
+        }
+
+        // --- Firebase Başlatma ve Oturum Kontrolü ---
+        if (isConfigAvailable) {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                
+                // Anonim giriş yap (Navbar için)
+                signInAnonymously(auth).catch(e => console.error("Anonim giriş başarısız:", e));
+
+            } catch (e) {
+                console.error("Firebase başlatma hatası:", e);
+                isConfigAvailable = false;
+            }
+        } else {
+            console.error("Firebase yapılandırması mevcut değil.");
+        }
+        
+        // Ortak Auth Servisini başlat
+        window.startClient(); 
 
         // YENİ: Dropdown açma/kapama JS'i
         document.getElementById('profileMenuButton')?.addEventListener('click', (e) => {
@@ -134,10 +239,55 @@
             }
         });
 
-        // Sayfa yüklendiğinde Firebase başlatma ve dinleme işlemini başlat
-        window.onload = window.startClient;
-        
-        // ... (showMessage ve form submit kodlarının geri kalanı) ...
+
+        // --- Şifre Sıfırlama İşlemi ---
+        passwordResetForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!isConfigAvailable || !auth) {
+                 showMessage("Hata: Firebase bağlantısı kurulamadı.", "error");
+                 return;
+            }
+
+            const email = emailInput.value;
+
+            resetButton.disabled = true;
+            resetButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Gönderiliyor...';
+
+            try {
+                await sendPasswordResetEmail(auth, email);
+                
+                const successMessage = `
+                    Şifre sıfırlama bağlantısı <strong>${email}</strong> adresine başarıyla gönderildi.<br>
+                    Lütfen e-posta kutunuzu ve **spam (gereksiz)** klasörlerini kontrol etmeyi unutmayın.
+                `;
+
+                showMessage(successMessage, "success");
+                passwordResetForm.reset(); 
+
+            } catch (error) {
+                console.error("Şifre sıfırlama hatası:", error);
+                let errorMessage = "İşlem sırasında bir hata oluştu.";
+
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                    case 'auth/missing-email':
+                        errorMessage = "Bu e-posta adresine sahip bir kullanıcı bulunamadı.";
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = "Geçersiz e-posta adresi formatı.";
+                        break;
+                    default:
+                        errorMessage = `Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin. (Kod: ${error.code})`;
+                }
+                
+                showMessage("Hata: " + errorMessage, "error");
+
+            } finally {
+                resetButton.disabled = false;
+                resetButton.innerHTML = originalButtonText;
+            }
+        });
     </script>
 </body>
 </html>
