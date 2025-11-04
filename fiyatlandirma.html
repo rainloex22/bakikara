@@ -11,7 +11,7 @@
         :root { --purple: #6c5ce7; }
         body { 
             font-family: 'Poppins', sans-serif; 
-            background-color: #1a0e21 !important; /* !important ile koyu arka planın hemen uygulanması sağlandı */
+            background-color: #1a0e21 !important; 
             color: #ffffff; 
             min-height: 100vh;
             display: flex;
@@ -25,7 +25,7 @@
         /* GENEL KART STİLİ */
         .price-card { 
             background-color: #2a1b3a; 
-            border-radius: 1.5rem; /* Daha yuvarlak */
+            border-radius: 1.5rem; 
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); 
             transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s ease; 
             border: 1px solid transparent;
@@ -33,17 +33,17 @@
         .price-card:hover { 
             transform: translateY(-5px); 
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6); 
-            border-color: rgba(108, 92, 231, 0.3); /* Hafif border vurgusu */
+            border-color: rgba(108, 92, 231, 0.3); 
         }
         /* PREMIUM KART STİLİ (ÖNE ÇIKARILMIŞ) */
         .price-card-premium { 
             border: 3px solid var(--purple); 
             background: linear-gradient(145deg, rgba(108, 92, 231, 0.2) 0%, #2a1b3a 100%);
-            transform: scale(1.03); /* Başlangıçta daha büyük */
+            transform: scale(1.03); 
         }
         .price-card-premium:hover { 
-            transform: scale(1.05); /* Hover'da daha da büyük */
-            box-shadow: 0 20px 60px rgba(108, 92, 231, 0.3); /* Mor gölge efekti */
+            transform: scale(1.05); 
+            box-shadow: 0 20px 60px rgba(108, 92, 231, 0.3); 
         }
         /* BUTON VE VURGU RENGİ */
         .btn-purple {
@@ -245,7 +245,7 @@
         const loggedOutNav = document.getElementById('loggedOutNav');
         const loggedInNav = document.getElementById('loggedInNav');
 
-        // --- Fiyatlandırma ve Toggle Mantığı ---
+        // --- Fiyatlandırma Verisi ve Toggle Mantığı ---
         const buyBasicBtn = document.getElementById('buyBasicBtn');
         const buyPremiumBtn = document.getElementById('buyPremiumBtn');
         const BASE_SHOPIER_URL = 'https://www.shopier.com/bakikaraxyz'; 
@@ -275,34 +275,26 @@
         const monthlyToggle = document.getElementById('monthlyToggle');
         const annualToggle = document.getElementById('annualToggle');
 
-        function updatePrices(period) {
-            const data = PRICES[period];
+        // SADECE AYLIK FİYATLARI AYARLAYAN FONKSİYON
+        function setMonthlyPrices() {
+            const data = PRICES['monthly'];
             
-            // UI güncellemesi (Fiyat ve Periyot)
             priceBasicEl.textContent = data.basic;
             periodBasicEl.textContent = data.period;
             pricePremiumEl.textContent = data.premium;
             periodPremiumEl.textContent = data.period;
             
-            // Satın Alma Butonlarını Güncelleme
             buyBasicBtn.href = data.basicLink;
             buyPremiumBtn.href = data.premiumLink;
 
-            // Toggle butonlarının aktif/pasif durumu
-            monthlyToggle.classList.toggle('active', period === 'monthly');
-            annualToggle.classList.toggle('active', period === 'annual');
-
-            // Temel plan için vurgu rengi
-            if (period === 'monthly') {
-                priceBasicEl.classList.add('text-purple');
-                pricePremiumEl.classList.remove('text-purple');
-                pricePremiumEl.classList.add('text-white'); // Premium fiyatın mor olmaması için
-            } else {
-                priceBasicEl.classList.remove('text-purple');
-                pricePremiumEl.classList.remove('text-white');
-                pricePremiumEl.classList.add('text-white'); // Premium fiyatın beyaz olması için
-            }
+            monthlyToggle.classList.add('active');
+            annualToggle.classList.remove('active');
+            
+            priceBasicEl.classList.add('text-purple');
+            pricePremiumEl.classList.remove('text-purple');
+            pricePremiumEl.classList.add('text-white'); 
         }
+
         // --- Auth ve Navbar Mantığı ---
         function getInitials(name) {
             if (!name) return '??';
@@ -314,6 +306,7 @@
         }
 
         async function updateHeaderUI(user) {
+            // ... (Aynı Firebase/Navbar UI Güncelleme Kodu)
             if (loggedOutNav && loggedInNav) {
                 if (user && !user.isAnonymous) {
                     loggedOutNav.classList.add('hidden');
@@ -361,12 +354,16 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             
-            // Fiyat Toggle Olay Dinleyicileri (Düzeltilmiş ve doğru kod)
-            monthlyToggle.addEventListener('click', () => updatePrices('monthly'));
-            annualToggle.addEventListener('click', () => updatePrices('annual'));
+            // Fiyat Toggle Olay Dinleyicileri
+            monthlyToggle.addEventListener('click', () => setMonthlyPrices()); 
+            
+            // YILLIK BUTONU YENİ SAYFAYA YÖNLENDİRİR
+            annualToggle.addEventListener('click', () => {
+                window.location.href = 'fiyatlandirma2.html'; 
+            });
 
             // Başlangıçta aylık fiyatları yükle
-            updatePrices('monthly');
+            setMonthlyPrices();
 
             // Logout butonuna olayı bağlama
             document.getElementById('logoutButtonNav')?.addEventListener('click', handleLogout);
@@ -387,7 +384,6 @@
             });
         });
 
-        // Sayfa yüklendiğinde Firebase başlatma ve dinleme işlemini başlat
         window.onload = window.startClient;
 
     </script>
