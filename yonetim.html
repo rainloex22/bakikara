@@ -63,6 +63,27 @@
             text-align: left;
         }
         .log-line { font-family: monospace; font-size: 0.85rem; padding: 0.25rem 0; border-bottom: 1px dotted #2a1b3a; }
+
+        /* Toast Bildirim Stili */
+        #toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 300px;
+            background-color: #1a0e21;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1100;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            transform: translateY(-20px);
+        }
+        #toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body class="flex">
@@ -80,6 +101,10 @@
         });
     </script>
     
+    <div id="toast" role="alert">
+        <div id="toastContent" class="flex items-center space-x-2"></div>
+    </div>
+
     <div id="loadingOverlay" class="fixed inset-0 flex flex-col items-center justify-center transition-opacity duration-500">
         <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500 mb-4"></div>
         <p id="loadingMessage" class="text-lg text-white text-center">Yönetici Paneli yükleniyor...</p>
@@ -148,8 +173,8 @@
                     </div>
                     <div class="admin-card p-6">
                         <i class="fas fa-rocket text-red-400 text-3xl mb-3"></i>
-                        <h4 class="text-2xl font-bold text-white" id="linkClicks">58,741</h4>
-                        <p class="text-gray-400">Toplam Tıklama (Vars.)</p>
+                        <h4 class="text-2xl font-bold text-white" id="linkClicks">Yükleniyor...</h4>
+                        <p class="text-gray-400">Toplam Tıklama</p>
                     </div>
                 </div>
 
@@ -157,17 +182,17 @@
                     <div class="admin-card p-6">
                         <h3 class="text-xl font-bold text-white mb-4">Sistem Sağlığı</h3>
                         <div class="space-y-2">
-                             <p class="text-gray-400 flex justify-between">Firestore Durumu: <span class="text-green-500">✅ Bağlı</span></p>
-                             <p class="text-gray-400 flex justify-between">Cloud Functions: <span class="text-yellow-500">⚠️ Gecikmeli</span></p>
-                             <p class="text-gray-400 flex justify-between">CDN Ön belleği: <span class="text-green-500">✅ Çalışıyor</span></p>
+                             <p class="text-gray-400 flex justify-between">Firestore Durumu: <span id="firestoreStatus" class="text-yellow-500">Kontrol Ediliyor...</span></p>
+                             <p class="text-gray-400 flex justify-between">Cloud Functions: <span class="text-yellow-500">⚠️ Gecikmeli (Sim.)</span></p>
+                             <p class="text-gray-400 flex justify-between">CDN Ön belleği: <span class="text-green-500">✅ Çalışıyor (Sim.)</span></p>
                         </div>
                     </div>
                     <div class="admin-card p-6">
                         <h3 class="text-xl font-bold text-white mb-4">Bekleyen İşlemler</h3>
                         <div class="space-y-2">
-                             <p class="text-gray-400 flex justify-between">İncelenmeyi bekleyen Rapor: <span class="text-yellow-400 font-bold">3</span></p>
-                             <p class="text-gray-400 flex justify-between">Onay bekleyen Ödeme: <span class="text-green-400 font-bold">1</span></p>
-                             <p class="text-gray-400 flex justify-between">Kullanıcıdan Gelen Mesaj: <span class="text-purple-400 font-bold">7</span></p>
+                             <p class="text-gray-400 flex justify-between">İncelenmeyi bekleyen Rapor: <span id="pendingReportsCount" class="text-yellow-400 font-bold">0</span></p>
+                             <p class="text-gray-400 flex justify-between">Onay bekleyen Ödeme: <span class="text-green-400 font-bold">0</span></p>
+                             <p class="text-gray-400 flex justify-between">Kullanıcıdan Gelen Mesaj: <span class="text-purple-400 font-bold">0</span></p>
                         </div>
                     </div>
                 </div>
@@ -196,33 +221,27 @@
                             </tr>
                         </thead>
                         <tbody id="topLinksTableBody">
-                            <tr><td>/deneme1</td><td>https://google.com/...</td><td>1250</td></tr>
-                            <tr><td>/kampanya</td><td>https://example.com/prom...</td><td>890</td></tr>
-                            <tr><td>/hizli-link</td><td>https://site.net/...</td><td>540</td></tr>
-                            </tbody>
+                            <td colspan="3" class="text-center text-gray-500">Veriler yükleniyor...</td>
+                        </tbody>
                     </table>
                 </div>
             </div>
 
             <div id="networkContent" class="content-tab hidden">
                 <h3 class="text-2xl font-bold text-white mb-4">Ağ Aktivitesi ve Canlı Loglar <i class="fas fa-satellite-dish ml-2 text-red-400"></i></h3>
-                <p class="text-gray-300 mb-6">Sunucu isteklerini ve yönlendirme trafiğini izleyin.</p>
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="admin-card p-6">
-                        <h4 class="text-xl font-bold text-white mb-4">🌐 Küresel Trafik Haritası (Varsayımsal)</h4>
+                        <h4 class="text-xl font-bold text-white mb-4">🌐 Küresel Trafik Haritası (Sim.)</h4>
                         <div class="h-48 flex items-center justify-center bg-gray-900 rounded-lg border border-purple-500/30">
                             <span class="text-lg text-gray-500">🌍 [Küresel Harita Görünümü API Entegrasyonu]</span>
                         </div>
                     </div>
                     <div class="admin-card p-6">
-                        <h4 class="text-xl font-bold text-white mb-4">⚡ Canlı Erişim Logları (Son 10)</h4>
+                        <h4 class="text-xl font-bold text-white mb-4">⚡ Canlı Erişim Logları (Sim.)</h4>
                         <div id="liveLogs" class="h-48 overflow-y-scroll bg-gray-900 rounded-lg p-2 border border-yellow-500/30 space-y-1">
-                            <div class="log-line text-green-400">[12:21:45] GET /kisa-link-32: 200 OK (TR)</div>
-                            <div class="log-line text-red-400">[12:21:40] ERROR: Invalid shortcode /bad-code: 404 (US)</div>
-                            <div class="log-line text-green-400">[12:21:35] GET /kampanya: 200 OK (DE)</div>
-                            <div class="log-line text-yellow-400">[12:21:30] WARN: User 12345 rate limit hit.</div>
-                            </div>
+                            <div class="log-line text-green-400">[12:25:01] GET /link-a: 200 OK (TR)</div>
+                            <div class="log-line text-red-400">[12:24:58] ERROR: Link /banned-code: 403 (US)</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -253,7 +272,6 @@
                         <button id="banUserButton" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg">
                             <i class="fas fa-ban mr-2"></i> Hesabı Kalıcı Askıya Al
                         </button>
-                        <p class="text-sm text-yellow-400 mt-2">Bu eylemler için Cloud Functions/Admin SDK gereklidir.</p>
                     </div>
                 </div>
             </div>
@@ -286,8 +304,7 @@
                                 </tr>
                             </thead>
                             <tbody id="filteredLinksTableBody">
-                                <tr><td>/link1</td><td>12</td><td>user1@mail.com</td><td>Aktif</td><td><button class="text-red-400 text-sm">Dondur</button></td></tr>
-                                <tr><td>/link2</td><td>89</td><td>user2@mail.com</td><td>Raporlu</td><td><button class="text-red-400 text-sm">Sil</button></td></tr>
+                                <td colspan="5" class="text-center text-gray-500">Filtreleme bekleniyor...</td>
                             </tbody>
                         </table>
                     </div>
@@ -296,37 +313,34 @@
                 <div class="admin-card p-6">
                      <h4 class="text-xl font-bold mb-3">🚨 Toplu İşlemler</h4>
                      <button id="bulkFreezeAllButton" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-5 rounded-lg mr-3">
-                        <i class="fas fa-snowflake mr-2"></i> Tüm Linkleri Dondur
+                        <i class="fas fa-snowflake mr-2"></i> Tüm Linkleri Dondur (Sim.)
                     </button>
                      <button id="bulkDeleteReportedButton" class="bg-red-800 hover:bg-red-900 text-white font-bold py-3 px-5 rounded-lg">
-                        <i class="fas fa-trash mr-2"></i> Raporlu Linkleri Toplu Sil
+                        <i class="fas fa-trash mr-2"></i> Raporlu Linkleri Toplu Sil (Sim.)
                     </button>
                 </div>
             </div>
 
             <div id="reportsContent" class="content-tab hidden">
                 <h3 class="text-2xl font-bold text-white mb-4">Rapor ve Spam Yönetimi <i class="fas fa-flag ml-2 text-pink-400"></i></h3>
-                <p class="text-gray-300 mb-6">Kullanıcı şikayetlerini inceleyin ve spam algılama sistemini yönetin.</p>
-
                 <div class="admin-card p-6 mb-6">
-                    <h4 class="text-xl font-bold mb-3">📥 Bekleyen Kullanıcı Raporları (Vars.)</h4>
+                    <h4 class="text-xl font-bold mb-3">📥 Bekleyen Kullanıcı Raporları (Sim.)</h4>
                     <div id="pendingReportsList" class="space-y-3">
                         <div class="p-3 bg-gray-700 rounded-lg flex justify-between items-center">
                             <span>**Rapor ID: 001** - Link: /xyz123 (Neden: Kötü amaçlı yazılım)</span>
                             <div class="space-x-2">
-                                <button class="text-green-400 hover:text-green-500 text-sm">Onayla (Link Sil)</button>
-                                <button class="text-yellow-400 hover:text-yellow-500 text-sm">Reddet</button>
+                                <button data-report-id="001" class="report-action-btn text-green-400 hover:text-green-500 text-sm">Onayla (Link Sil)</button>
+                                <button data-report-id="001" class="report-action-btn text-yellow-400 hover:text-yellow-500 text-sm">Reddet</button>
                             </div>
                         </div>
-                        <p class="text-gray-400">Şu anda **3** rapor incelenmeyi bekliyor.</p>
+                        <p class="text-gray-400">Şu anda **3** rapor incelenmeyi bekliyor (Sim.)</p>
                     </div>
                 </div>
 
                 <div class="admin-card p-6">
-                    <h4 class="text-xl font-bold mb-3">🚫 Anahtar Kelime Kara Listesi</h4>
-                    <p class="text-gray-400 mb-3">Link kısaltma hedef URL'lerinde yasaklanacak kelimeler/domainler.</p>
-                    <textarea rows="3" placeholder="Örnek: phishing.com, spam-site.net, illegal-kelime" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white"></textarea>
-                    <button class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-5 rounded-lg mt-3">Kara Listeyi Kaydet</button>
+                    <h4 class="text-xl font-bold mb-3">🚫 Anahtar Kelime Kara Listesi (Sim.)</h4>
+                    <textarea id="blacklistTextarea" rows="3" placeholder="Örnek: phishing.com, spam-site.net, illegal-kelime" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white"></textarea>
+                    <button id="saveBlacklistButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-5 rounded-lg mt-3">Kara Listeyi Kaydet (Sim.)</button>
                 </div>
             </div>
 
@@ -341,21 +355,10 @@
                     <p id="maintenanceStatus" class="mt-3 text-sm text-green-400 hidden">Sistem bakım modunda.</p>
                 </div>
 
-                <div class="admin-card p-6 mb-6">
-                     <h4 class="text-xl font-bold mb-3">💰 Premium Ödeme Entegrasyonu</h4>
-                     <label class="block mb-2 text-gray-400">Stripe/Iyzico API Anahtarı:</label>
-                     <input type="password" placeholder="sk_live_******************" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white mb-4">
-                     <label class="flex items-center space-x-2 text-white">
-                        <input type="checkbox" checked class="form-checkbox text-purple-600 bg-gray-700 border-gray-600 rounded">
-                        <span>Otomatik Abonelik Yenilemeyi Etkinleştir</span>
-                    </label>
-                </div>
-                
                 <div class="admin-card p-6">
                     <h4 class="text-xl font-bold mb-3">🧹 Önbellek Yönetimi</h4>
-                    <p class="text-gray-400 mb-3">Sunucu ve CDN önbelleğini temizleyerek tüm değişikliklerin anında yayılmasını sağlayın.</p>
-                    <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-5 rounded-lg mr-3">
-                        <i class="fas fa-eraser mr-2"></i> CDN Önbelleğini Temizle
+                    <button id="clearCacheButton" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-5 rounded-lg mr-3">
+                        <i class="fas fa-eraser mr-2"></i> CDN Önbelleğini Temizle (Sim.)
                     </button>
                 </div>
             </div>
@@ -366,11 +369,19 @@
     <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js"></script>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, query, where, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // updateDoc, doc, collection, getDocs gibi gerekli fonksiyonları ekleyin
+        import { getFirestore, collection, getDocs, query, where, limit, updateDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
+
+        // ***************************************************************
+        // KRİTİK NOT: getFunctions(app) çağrısı Firebase Projenizde
+        //             Cloud Functions'ın aktif olduğunu varsayar.
+        // ***************************************************************
         
         // Firebase Config ve Başlatma
         const firebaseConfig = {
@@ -386,81 +397,124 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
+        const functions = getFunctions(app, "europe-west3"); // VEYA SİZİN BÖLGENİZ
+
         // HTML Elementleri
         const loadingMessage = document.getElementById('loadingMessage');
         const adminLogoutButton = document.getElementById('adminLogoutButton');
         const navItems = document.querySelectorAll('.nav-item');
         const contentTabs = document.querySelectorAll('.content-tab');
         const pageTitle = document.getElementById('pageTitle');
+        const toast = document.getElementById('toast');
+        const toastContent = document.getElementById('toastContent');
 
-        // YENİ ELEMANLAR
+        // YENİ VE İŞLEVSEL ELEMANLAR
         const searchUserButton = document.getElementById('searchUserButton');
         const userSearchEmail = document.getElementById('userSearchEmail');
         const userSearchResult = document.getElementById('userSearchResult');
         const moderationControls = document.getElementById('moderationControls');
+        const updateAccountTypeButton = document.getElementById('updateAccountTypeButton');
+        const resetPasswordButton = document.getElementById('resetPasswordButton');
+        const banUserButton = document.getElementById('banUserButton');
         const maintenanceModeToggle = document.getElementById('maintenanceModeToggle');
         const maintenanceStatus = document.getElementById('maintenanceStatus');
+        const filterLinksButton = document.getElementById('filterLinksButton');
+        const linksListContainer = document.getElementById('linksListContainer');
+        const filteredLinksTableBody = document.getElementById('filteredLinksTableBody');
 
         // Chart değişkenleri
         let userChartInstance = null;
         let countryChartInstance = null;
         
-        // --- Kullanıcı Arayüzü Güncellemesi (Firebase durumuna göre) ---
-        function updateAdminUI(user) {
-            if (user) {
-                adminLogoutButton.style.display = 'flex'; 
-                loadingMessage.textContent = `Oturum açık: ${user.email}. Veriler yükleniyor...`;
-            } else {
-                adminLogoutButton.style.display = 'none';
-                loadingMessage.textContent = 'Giriş yapılmadan erişildi. Sadece admin bilir.';
-            }
+        // --- TOAST BİLDİRİMİ GÖSTERME FONKSİYONU ---
+        function showToast(message, type = 'success') {
+            let icon = '';
+            let bgColor = '';
+            if (type === 'success') { icon = '<i class="fas fa-check-circle text-green-400"></i>'; bgColor = 'bg-green-800/50'; }
+            else if (type === 'error') { icon = '<i class="fas fa-times-circle text-red-400"></i>'; bgColor = 'bg-red-800/50'; }
+            else { icon = '<i class="fas fa-info-circle text-yellow-400"></i>'; bgColor = 'bg-yellow-800/50'; }
+
+            toastContent.innerHTML = `${icon} <span class="text-white">${message}</span>`;
+            toast.classList.remove('bg-green-800/50', 'bg-red-800/50', 'bg-yellow-800/50');
+            toast.classList.add(bgColor, 'show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
         }
 
         // --- Veri Çekme Fonksiyonu (Yönetim Panosu) ---
         async function loadDashboardData() {
+            // Firestore Bağlantı Durumu Kontrolü (Deneyerek)
             try {
-                // Not: Güvenlik Kuralları İhlali nedeniyle HATA almanız olasıdır.
+                 const testDoc = await getDocs(query(collection(db, "users"), limit(1)));
+                 document.getElementById('firestoreStatus').textContent = '✅ Bağlı';
+                 document.getElementById('firestoreStatus').classList.replace('text-yellow-500', 'text-green-500');
+            } catch(e) {
+                 document.getElementById('firestoreStatus').textContent = '❌ Bağlantı Yok (Kural İhlali)';
+                 document.getElementById('firestoreStatus').classList.replace('text-yellow-500', 'text-red-500');
+            }
+            
+            try {
+                // Toplam Kullanıcı Sayısı
                 const usersSnapshot = await getDocs(collection(db, "users"));
-                document.getElementById('totalUsers').textContent = usersSnapshot.size.toLocaleString('tr-TR');
+                const totalUsers = usersSnapshot.size;
+                document.getElementById('totalUsers').textContent = totalUsers.toLocaleString('tr-TR');
 
+                // Toplam Link Sayısı
                 const linksSnapshot = await getDocs(collection(db, "links"));
-                document.getElementById('totalLinks').textContent = linksSnapshot.size.toLocaleString('tr-TR');
-
+                const totalLinks = linksSnapshot.size;
+                document.getElementById('totalLinks').textContent = totalLinks.toLocaleString('tr-TR');
+                
+                // Aktif Premium Kullanıcı Sayısı
                 const premiumQuery = query(collection(db, "users"), where("accountType", "==", "PREMIUM"));
                 const premiumSnapshot = await getDocs(premiumQuery);
                 document.getElementById('premiumUsers').textContent = premiumSnapshot.size.toLocaleString('tr-TR');
+                
+                // Toplam Tıklama Sayısı (Varsayımsal, gerçekte bir sayaç belgesinden çekilir)
+                // Eğer links koleksiyonunda her link için 'clicks' alanı varsa:
+                let totalClicks = 0;
+                linksSnapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    if (data.clicks) totalClicks += data.clicks;
+                });
+                document.getElementById('linkClicks').textContent = totalClicks > 0 ? totalClicks.toLocaleString('tr-TR') : '18,500 (Sim.)';
+                
+                // Bekleyen Rapor Sayısı (Varsayımsal, 'reports' koleksiyonu olmalı)
+                try {
+                     const reportsSnapshot = await getDocs(query(collection(db, "reports"), where("status", "==", "pending")));
+                     document.getElementById('pendingReportsCount').textContent = reportsSnapshot.size;
+                } catch {
+                     document.getElementById('pendingReportsCount').textContent = '3 (Sim.)'; // Güvenlik kuralı hatası durumunda varsayılan
+                }
+
 
             } catch (e) {
-                console.error("Yönetim verileri yüklenirken hata (Güvenlik Kuralı İhlali Olası):", e);
+                console.error("Yönetim verileri yüklenirken hata:", e);
+                showToast(`Veri kartları yüklenemedi: ${e.message}. Güvenlik kurallarını kontrol edin.`, 'error');
                 // Hata durumunda varsayılan/sabit değer göster
-                document.getElementById('totalUsers').textContent = '2,540 (HATA)';
-                document.getElementById('totalLinks').textContent = '15,870 (HATA)';
-                document.getElementById('premiumUsers').textContent = '120 (HATA)';
+                document.getElementById('totalUsers').textContent = 'HATA';
+                document.getElementById('totalLinks').textContent = 'HATA';
+                document.getElementById('premiumUsers').textContent = 'HATA';
+                document.getElementById('linkClicks').textContent = 'HATA';
             }
         }
         
-        // --- YENİ ÖZELLİK: Analiz Grafiği Çizme (Varsayımsal Veri) ---
+        // --- YENİ ÖZELLİK: Analiz Grafiği Çizme (Gerçekçi Veri) ---
         function drawAnalyticsCharts() {
             if (userChartInstance) userChartInstance.destroy();
             if (countryChartInstance) countryChartInstance.destroy();
             
-            const days = Array.from({length: 7}, (_, i) => new Date(Date.now() - (7 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }));
-            const userCounts = [15, 22, 18, 25, 30, 45, 35];
+            // Gerçekçi Varsayımsal Veriler (Daha önceki verilerden daha fazla gün)
+            const days = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8', 'H9', 'H10']; // Son 10 gün
+            const userCounts = [15, 22, 18, 25, 30, 45, 35, 40, 50, 60];
             const countryData = { 'Türkiye': 4500, 'Almanya': 2500, 'ABD': 1500, 'Diğer': 1500 };
 
             // Kullanıcı Grafiği
             const userCtx = document.getElementById('userChart').getContext('2d');
             userChartInstance = new Chart(userCtx, {
                 type: 'bar',
-                data: {
-                    labels: days,
-                    datasets: [{
-                        label: 'Yeni Kullanıcılar',
-                        data: userCounts,
-                        backgroundColor: '#6c5ce7',
-                    }]
-                },
+                data: { labels: days, datasets: [{ label: 'Yeni Kullanıcılar', data: userCounts, backgroundColor: '#6c5ce7', }] },
                 options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: 'white' } }, x: { grid: { display: false }, ticks: { color: 'white' } } } }
             });
 
@@ -468,26 +522,33 @@
             const countryCtx = document.getElementById('countryChart').getContext('2d');
             countryChartInstance = new Chart(countryCtx, {
                 type: 'doughnut',
-                data: {
-                    labels: Object.keys(countryData),
-                    datasets: [{
-                        data: Object.values(countryData),
-                        backgroundColor: ['#6c5ce7', '#ffc107', '#20c997', '#e5e7eb'],
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { position: 'bottom', labels: { color: 'white' } } }
-                }
+                data: { labels: Object.keys(countryData), datasets: [{ data: Object.values(countryData), backgroundColor: ['#6c5ce7', '#ffc107', '#20c997', '#e5e7eb'], hoverOffset: 4 }] },
+                options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: 'white' } } } }
+            });
+            
+            // Top 10 Link Tablosu Doldurma (Varsayımsal, tıklama sayısına göre sıralanır)
+            const topLinks = [
+                { short: '/deneme1', target: 'https://google.com/test', clicks: 1250 },
+                { short: '/kampanya', target: 'https://example.com/prom', clicks: 890 },
+                { short: '/hizli-link', target: 'https://site.net/fast', clicks: 540 },
+                { short: '/link-a', target: 'https://example.com/a', clicks: 450 },
+                { short: '/link-b', target: 'https://example.com/b', clicks: 310 },
+            ];
+            const tableBody = document.getElementById('topLinksTableBody');
+            tableBody.innerHTML = '';
+            topLinks.forEach(link => {
+                tableBody.innerHTML += `<tr><td>${link.short}</td><td>${link.target.substring(0, 30)}...</td><td>${link.clicks}</td></tr>`;
             });
         }
+        
+        // --- Kullanıcı Arama İşlevi (Gerçekçi) ---
+        let currentTargetUserUID = null; // Güncel işlem yapılan kullanıcının UID'sini tutar
 
-        // --- Kullanıcı Arama İşlevi ---
         searchUserButton.addEventListener('click', async () => {
             const email = userSearchEmail.value.trim();
             userSearchResult.innerHTML = 'Kullanıcı aranıyor...';
             moderationControls.classList.add('hidden'); 
+            currentTargetUserUID = null; // Sıfırla
 
             if (!email) {
                 userSearchResult.innerHTML = '<span class="text-red-400">Lütfen bir e-posta adresi girin.</span>';
@@ -495,24 +556,27 @@
             }
 
             try {
-                // Auth ve Firestore kontrolü
+                // 1. Auth Kontrolü (Kullanıcı var mı?)
                 const methods = await fetchSignInMethodsForEmail(auth, email);
 
                 if (methods && methods.length > 0) {
+                    // 2. Firestore'dan Kullanıcı Verisini Çek
                     const userQuery = query(collection(db, "users"), where("email", "==", email), limit(1));
                     const userSnap = await getDocs(userQuery);
 
                     if (!userSnap.empty) {
                         const userData = userSnap.docs[0].data();
+                        currentTargetUserUID = userSnap.docs[0].id; // UID'yi kaydet
                         
                         userSearchResult.innerHTML = `
                             <div class="mt-4 p-4 border border-green-500 rounded-lg bg-gray-800">
                                 <h5 class="font-bold text-green-400">Kullanıcı Bulundu: ${email}</h5>
                                 <p>Hesap Tipi: <span class="font-semibold">${userData.accountType || 'TEMEL'}</span></p>
-                                <p>UID: ${userSnap.docs[0].id}</p>
+                                <p>UID: ${currentTargetUserUID}</p>
                             </div>
                         `;
                         moderationControls.classList.remove('hidden');
+                        document.getElementById('accountTypeSelect').value = userData.accountType || 'BASIC';
 
                     } else {
                         userSearchResult.innerHTML = `<span class="text-yellow-400">Auth'da var, ancak Firestore kaydı bulunamadı.</span>`;
@@ -523,10 +587,156 @@
 
             } catch (error) {
                 console.error("Kullanıcı arama hatası:", error);
-                userSearchResult.innerHTML = `<span class="text-red-400">Hata oluştu: ${error.message}</span>`;
+                showToast(`Kullanıcı arama hatası: ${error.message}`, 'error');
+            }
+        });
+
+        // --- BUTON İŞLEVSELLİĞİ: Hesap Tipini Güncelle (Firestore) ---
+        updateAccountTypeButton.addEventListener('click', async () => {
+            if (!currentTargetUserUID) {
+                showToast("Lütfen önce bir kullanıcı arayın.", 'info');
+                return;
+            }
+
+            const newType = document.getElementById('accountTypeSelect').value;
+
+            try {
+                // Not: Cloud Functions veya Admin SDK olmadan Firebase Auth yetkileri güncellenemez.
+                // Sadece Firestore'daki 'users' koleksiyonundaki alanı güncelliyoruz.
+                const userRef = doc(db, "users", currentTargetUserUID);
+                await updateDoc(userRef, {
+                    accountType: newType
+                });
+
+                showToast(`UID: ${currentTargetUserUID} kullanıcısının hesap tipi **${newType}** olarak güncellendi.`, 'success');
+                // Arayüzü güncellemek için tekrar ara
+                searchUserButton.click(); 
+
+            } catch (error) {
+                console.error("Hesap tipi güncelleme hatası:", error);
+                showToast(`Hata: Hesap tipi güncellenemedi. Cloud Functions veya Güvenlik Kurallarını kontrol edin.`, 'error');
             }
         });
         
+        // --- BUTON İŞLEVSELLİĞİ: Şifre Sıfırlama (Cloud Function Gerekli) ---
+        resetPasswordButton.addEventListener('click', async () => {
+             if (!currentTargetUserUID) {
+                showToast("Lütfen önce bir kullanıcı arayın.", 'info');
+                return;
+            }
+            // Normalde: await auth.sendPasswordResetEmail(email) VEYA Cloud Function çağrılır
+            showToast(`UID: ${currentTargetUserUID} için şifre sıfırlama maili başarıyla gönderildi (Sim.).`, 'success');
+        });
+
+        // --- BUTON İŞLEVSELLİĞİ: Kullanıcı Yasaklama (Cloud Function Gerekli) ---
+        banUserButton.addEventListener('click', async () => {
+             if (!currentTargetUserUID) {
+                showToast("Lütfen önce bir kullanıcı arayın.", 'info');
+                return;
+            }
+            if (confirm(`UID: ${currentTargetUserUID} kullanıcısını KALICI olarak yasaklamak istediğinizden emin misiniz?`)) {
+                 // Normalde Cloud Function çağrılır ve bu fonksiyon hem Auth'tan kullanıcıyı devre dışı bırakır hem de Firestore'da 'isBanned: true' işaretler.
+                 showToast(`UID: ${currentTargetUserUID} kullanıcısı başarıyla yasaklandı (Sim.).`, 'success');
+            }
+        });
+
+        // --- BUTON İŞLEVSELLİĞİ: Link Filtreleme (Gerçekçi) ---
+        filterLinksButton.addEventListener('click', async () => {
+            const filterText = document.getElementById('linkFilter').value.trim().toLowerCase();
+            const statusFilter = document.getElementById('linkStatusFilter').value;
+            
+            filteredLinksTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-yellow-500">Linkler filtreleniyor...</td></tr>';
+
+            let linkQuery = collection(db, "links");
+            let q;
+
+            try {
+                // Link durumuna göre filtreleme
+                if (statusFilter !== 'all') {
+                    q = query(linkQuery, where("status", "==", statusFilter), limit(50));
+                } else {
+                    q = query(linkQuery, limit(50));
+                }
+                
+                const linkSnap = await getDocs(q);
+                let links = linkSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                // Metin filtresi (Client-Side, hızlı olması için)
+                if (filterText) {
+                    links = links.filter(link => 
+                        link.shortCode?.toLowerCase().includes(filterText) ||
+                        link.targetUrl?.toLowerCase().includes(filterText) ||
+                        link.createdBy?.toLowerCase().includes(filterText) // createdBy genelde email olur
+                    );
+                }
+
+                filteredLinksTableBody.innerHTML = '';
+                if (links.length === 0) {
+                    filteredLinksTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500">Filtrenize uygun link bulunamadı.</td></tr>';
+                    return;
+                }
+
+                links.forEach(link => {
+                    const statusClass = link.status === 'reported' ? 'text-red-400' : link.status === 'frozen' ? 'text-yellow-400' : 'text-green-400';
+                    filteredLinksTableBody.innerHTML += `
+                        <tr>
+                            <td>/link/${link.id}</td>
+                            <td>${link.clicks || 0}</td>
+                            <td>${link.createdBy || 'Bilinmiyor'}</td>
+                            <td><span class="${statusClass}">${link.status || 'Aktif'}</span></td>
+                            <td><button data-link-id="${link.id}" class="link-action-btn text-red-400 hover:text-red-500 text-sm">Dondur</button></td>
+                        </tr>
+                    `;
+                });
+
+            } catch (error) {
+                console.error("Link filtreleme hatası:", error);
+                filteredLinksTableBody.innerHTML = `<tr><td colspan="5" class="text-center text-red-500">HATA: Veriler çekilemedi. Güvenlik kurallarını kontrol edin.</td></tr>`;
+                showToast(`Link filtreleme hatası: ${error.message}`, 'error');
+            }
+        });
+
+        // --- BUTON İŞLEVSELLİĞİ: Diğer İşlevler (Simülasyon) ---
+        maintenanceModeToggle.addEventListener('click', () => {
+            const isActive = maintenanceModeToggle.classList.contains('bg-red-600');
+            if (isActive) {
+                // Kapat
+                maintenanceModeToggle.classList.replace('bg-red-600', 'bg-gray-500');
+                maintenanceModeToggle.classList.replace('hover:bg-red-700', 'hover:bg-gray-600');
+                maintenanceModeToggle.innerHTML = '<i class="fas fa-toggle-off mr-2"></i> Bakım Modunu Aç';
+                maintenanceStatus.classList.add('hidden');
+                showToast("Bakım Modu Kapatıldı.", 'success');
+            } else {
+                // Aç
+                maintenanceModeToggle.classList.replace('bg-gray-500', 'bg-red-600');
+                maintenanceModeToggle.classList.replace('hover:bg-gray-600', 'hover:bg-red-700');
+                maintenanceModeToggle.innerHTML = '<i class="fas fa-toggle-on mr-2"></i> Bakım Modunu Kapat';
+                maintenanceStatus.classList.remove('hidden');
+                maintenanceStatus.textContent = 'UYARI: Sistem bakım modunda.';
+                maintenanceStatus.classList.add('text-red-400');
+                showToast("Bakım Modu AÇILDI. Site erişimi kısıtlanmış olabilir.", 'info');
+            }
+        });
+        
+        // Genel simülasyon butonları
+        document.getElementById('bulkFreezeAllButton').addEventListener('click', () => showToast("Tüm aktif linkler donduruluyor... (Simülasyon)", 'info'));
+        document.getElementById('bulkDeleteReportedButton').addEventListener('click', () => showToast("Raporlu linkler toplu silme işlemi başlatıldı (Simülasyon)", 'info'));
+        document.getElementById('saveBlacklistButton').addEventListener('click', () => showToast("Kara liste ayarları kaydedildi (Simülasyon)", 'success'));
+        document.getElementById('clearCacheButton').addEventListener('click', () => showToast("CDN önbelleği temizleme görevi gönderildi (Simülasyon)", 'success'));
+        
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('link-action-btn')) {
+                const linkId = e.target.getAttribute('data-link-id');
+                showToast(`Link ID: ${linkId} dondurma isteği gönderildi (Sim.)`, 'info');
+            }
+            if (e.target.classList.contains('report-action-btn')) {
+                 const reportId = e.target.getAttribute('data-report-id');
+                 const action = e.target.textContent.trim();
+                 showToast(`Rapor ID: ${reportId} için "${action}" eylemi uygulandı (Sim.)`, 'success');
+            }
+        });
+
+
         // --- Sayfa Geçişleri (Tab Switching) ---
         const switchTab = (targetContentId) => {
             contentTabs.forEach(tab => tab.classList.add('hidden'));
@@ -553,49 +763,18 @@
             if (targetContentId === 'analytics') {
                 drawAnalyticsCharts();
             }
+            if (targetContentId === 'links') {
+                 // Link sayfasına geçildiğinde varsayılan olarak bir arama yap
+                 filterLinksButton.click();
+            }
         };
-
-        // --- Olay Dinleyicileri ---
-        adminLogoutButton.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                window.location.reload(); 
-            } catch (error) {
-                console.error("Çıkış hatası:", error);
-                alert("Çıkış yapılırken bir hata oluştu.");
-            }
-        });
-
-        navItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.preventDefault();
-                switchTab(item.getAttribute('data-content'));
-            });
-        });
-
-        // Bakım Modu İşlevi
-        maintenanceModeToggle.addEventListener('click', () => {
-            const isActive = maintenanceModeToggle.classList.contains('bg-red-600');
-            if (isActive) {
-                maintenanceModeToggle.classList.replace('bg-red-600', 'bg-gray-500');
-                maintenanceModeToggle.classList.replace('hover:bg-red-700', 'hover:bg-gray-600');
-                maintenanceModeToggle.innerHTML = '<i class="fas fa-toggle-off mr-2"></i> Bakım Modunu Aç';
-                maintenanceStatus.classList.add('hidden');
-            } else {
-                maintenanceModeToggle.classList.replace('bg-gray-500', 'bg-red-600');
-                maintenanceModeToggle.classList.replace('hover:bg-gray-600', 'hover:bg-red-700');
-                maintenanceModeToggle.innerHTML = '<i class="fas fa-toggle-on mr-2"></i> Bakım Modunu Kapat';
-                maintenanceStatus.classList.remove('hidden');
-                maintenanceStatus.textContent = 'UYARI: Sistem bakım modunda.';
-                maintenanceStatus.classList.add('text-red-400');
-            }
-        });
 
         // --- Başlatma ---
         document.addEventListener('DOMContentLoaded', () => {
             switchTab('dashboard'); 
 
             onAuthStateChanged(auth, (user) => {
+                // Sadece yetkili kullanıcıların paneli görmesini sağlamak için buraya bir yetkilendirme kontrolü eklenebilir.
                 updateAdminUI(user);
             });
            
