@@ -218,23 +218,37 @@
     <script type="module" src="./firebase-auth-service.js"></script>
 
     <script type="module">
+        // GEREKLİ TÜM FIREBASE MODÜLLERİNİ CDN'DEN İÇE AKTARIN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"; 
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        // KRİTİK: firebase-auth-service.js dosyanızın uygulamasını içe aktarın
-        import { app } from "./firebase-auth-service.js"; 
+        
+        // 🚨 KRİTİK ADIM: KENDİ FIREBASE YAPILANDIRMA BİLGİLERİNİZİ BURAYA YAPIŞTIRIN!
+        // firebase-auth-service.js dosyanızdaki config nesnesi bu olmalı.
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfc0F8o5aVmwTw-gyLRZVI2OMUljFi6Ao",
+            authDomain: "baki-s2-yonetim.firebaseapp.com",
+            projectId: "baki-s2-yonetim",
+            storageBucket: "baki-s2-yonetim.firebasestorage.app",
+            messagingSenderId: "692508919425",
+            appId: "1:692508919425:web:fac963c81c11b7be70af80"
+        };
+        
+        // Uygulamayı Başlat
+        const app = initializeApp(firebaseConfig);
 
+        // Firebase Servislerini Başlat
         const auth = getAuth(app);
         const db = getFirestore(app);
         
         // DOM Elementleri
-        const loggedOutNav = document.getElementById('loggedOutNav'); 
+        const loggedOutNav = document.getElementById('loggedOutNav'); 
         const loggedInNav = document.getElementById('loggedInNav');
         const navDisplayName = document.getElementById('nav_display_name');
         const navAccountType = document.getElementById('nav_user_role');
         const navProfileInitials = document.getElementById('nav_profile_initials');
         const logoutButtonNav = document.getElementById('logoutButtonNav');
 
-        // ... (getInitials ve setActiveNavLink fonksiyonları burada olmalı) ...
         
         function getInitials(name) {
             if (!name) return '??';
@@ -246,7 +260,7 @@
         }
 
         function setActiveNavLink() {
-            const currentPath = window.location.pathname.split('/').pop(); 
+            const currentPath = window.location.pathname.split('/').pop(); 
             const navLinks = document.querySelectorAll('.nav-link');
             
             navLinks.forEach(link => {
@@ -256,7 +270,7 @@
                 
                 if (linkPath === currentPath || currentPath === '' || currentPath === 'index.html' && linkPath === 'panel.html') {
                     link.classList.add('nav-active');
-                } 
+                } 
             });
         }
         
@@ -270,7 +284,7 @@
                 loggedInNav.classList.remove('hidden');
 
                 let displayName = user.displayName || user.email.split('@')[0];
-                let accountType = "STANDART"; 
+                let accountType = "STANDART"; 
                 let photoURL = user.photoURL || '';
                 
                 // Firestore'dan veri çekme
@@ -287,7 +301,7 @@
                 if (navDisplayName) navDisplayName.textContent = displayName;
                 if (navAccountType) {
                     navAccountType.textContent = accountType.toUpperCase();
-                    // Rol renk kodlaması (Önceki yanıtta verdiğim renk kodları)
+                    
                     if (accountType.toUpperCase() === 'PREMIUM') {
                         navAccountType.style.backgroundColor = 'rgba(255, 193, 7, 0.3)';
                         navAccountType.style.color = '#FFC107';
@@ -302,12 +316,11 @@
                 
                 // PP veya Baş Harfler
                 if (navProfileInitials) {
-                    // ... (Baş harf/PP mantığı burada olmalı) ...
                     if (photoURL) {
                         navProfileInitials.style.backgroundImage = `url(${photoURL})`;
                         navProfileInitials.style.backgroundSize = 'cover';
-                        navProfileInitials.textContent = ''; 
-                        navProfileInitials.style.border = '2px solid #ffffff'; 
+                        navProfileInitials.textContent = ''; 
+                        navProfileInitials.style.border = '2px solid #ffffff'; 
                     } else {
                         navProfileInitials.textContent = getInitials(displayName);
                         navProfileInitials.style.backgroundImage = 'none';
@@ -325,7 +338,8 @@
         async function handleLogout() {
             try {
                 await signOut(auth);
-                window.location.href = 'girisyap.html'; 
+                // Çıkış yaptıktan sonra giriş sayfasına yönlendir
+                window.location.href = 'girisyap.html'; 
             } catch (error) {
                 console.error("Çıkış hatası:", error);
                 alert("Çıkış yaparken bir hata oluştu: " + error.message);
@@ -335,6 +349,7 @@
         // --- Başlatma ve Olay Dinleyicileri ---
         document.addEventListener('DOMContentLoaded', () => {
             // 1. Firebase Oturum Durumu Değişimini Dinle
+            // Bu dinleyici, giriş yapılıp yapılmadığını sayfa yüklenince anlar ve UI'ı günceller.
             onAuthStateChanged(auth, (user) => {
                 updateHeaderUI(user);
             });
