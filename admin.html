@@ -189,14 +189,13 @@
 
 
 <script type="module">
-    // ----------------------------------------------------------------------
-    // 🔴 1. ADIM: FIREBASE SDK VE YAPILANDIRMA (ARTIK BURADA)
-    // ----------------------------------------------------------------------
-    
-    // Firebase kütüphanelerini import et
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-    import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    // Hatalı: 9.22.2 kullanılıyordu
+    // DÜZELTİLMİŞ: Daha güncel 10.9.0 (veya daha yenisi) kullanın
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
+    // ... (Geri kalan kodunuz)
 
     // Kendi Firebase yapılandırma objenizi BURAYA YAPIŞTIRIN!
     const firebaseConfig = {
