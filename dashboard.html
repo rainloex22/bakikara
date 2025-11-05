@@ -14,9 +14,11 @@
         .dashboard-content { max-width: 1000px; margin: 40px auto; padding: 20px; background-color: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
         .welcome-msg { font-size: 1.2em; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
         .welcome-msg strong { color: #007bff; }
-        /* Panel kart stili (Saganetwork benzeri) */
+        /* Panel kart stili */
         .card { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #28a745; }
         .card h3 { color: #28a745; margin-top: 0; }
+        .instruction-box { border-left: 5px solid #ff9800; background-color: #fffaf0; padding: 20px; margin-top: 20px; }
+        .instruction-box a { color: #007bff; font-weight: 600; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -34,13 +36,28 @@
     <div class="card">
         <h3>Statik Hosting Hizmeti</h3>
         <p><strong>URL:</strong> <span id="siteUrl">bakikara.xyz/kullanici-adi</span></p>
-        <p><strong>Durum:</strong> Aktif</p>
-        <p><strong>Başvuru Tarihi:</strong> <span id="regDate">Yükleniyor...</span></p>
+        <p><strong>Durum:</strong> Dosya Bekleniyor</p>
+        <p><strong>Kayıt Tarihi:</strong> <span id="regDate">Yükleniyor...</span></p>
     </div>
 
+    <h2>Dosya Gönderimi ve Yayınlama</h2>
+    <div class="instruction-box">
+        <h3>Site Dosyalarınızı Nasıl Göndereceksiniz?</h3>
+        <p>Web sitenizi yayınlamak için, lütfen sitenizin tüm dosyalarını (HTML, CSS, görseller vb.) tek bir **.zip** dosyası halinde sıkıştırın.</p>
+        
+        <p style="font-weight: bold; margin-top: 15px;">Lütfen sıkıştırılmış .zip dosyasını (veya dosyanın Google Drive/Wetransfer bağlantısını) aşağıdaki e-posta adresine gönderin:</p>
+        
+        <p style="font-size: 1.1em; color: #dc3545; margin: 15px 0;">
+            <a href="mailto:SİZİN_EPOSTA_ADRESİNİZ@example.com">SİZİN_EPOSTA_ADRESİNİZ@example.com</a>
+        </p>
+
+        <p style="font-size: 0.9em;">Dosyanız bize ulaştıktan sonra, maksimum 24 saat içinde siteniz **bakikara.xyz/[Kullanıcı Adınız]** adresinde yayına alınacaktır. Yayınlandığında size e-posta ile bildirim yapılacaktır.</p>
     </div>
+
+</div>
 
 <script type="module">
+    // Firebase kütüphanelerini içe aktarırken path'in doğru olduğundan emin olun!
     import { auth, signOut, onAuthStateChanged, db, doc, getDoc } from './firebase-config.js'; 
 
     // Kullanıcının oturum durumunu kontrol et
@@ -49,14 +66,18 @@
             // Kullanıcı giriş yapmışsa
             document.getElementById('userEmail').innerText = user.email;
             
-            // Kullanıcı verisini Firestore'dan çek
+            // Firestore'dan kullanıcı verisini çek
             const docRef = doc(db, "users", user.uid);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
                 const userData = docSnap.data();
-                document.getElementById('siteUrl').innerText = `bakikara.xyz/${userData.email.split('@')[0]}`;
-                document.getElementById('regDate').innerText = userData.createdAt.toDate().toLocaleDateString();
+                // E-postanın '@' öncesi kısmını kullanıcı adı olarak kullanma
+                const username = user.email.split('@')[0]; 
+                
+                document.getElementById('siteUrl').innerText = `bakikara.xyz/${username}`;
+                // Tarihi temiz bir formatta gösterme
+                document.getElementById('regDate').innerText = userData.createdAt.toDate().toLocaleDateString('tr-TR');
             }
 
         } else {
@@ -68,7 +89,6 @@
     // Çıkış Yapma İşlemi
     window.handleLogout = function() {
         signOut(auth).then(() => {
-            // Başarıyla çıkış yapıldı
             window.location.href = 'login.html';
         }).catch((error) => {
             console.error("Çıkış hatası:", error);
