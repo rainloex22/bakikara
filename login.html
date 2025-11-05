@@ -8,20 +8,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
-        /* TEMA VE DEĞİŞKENLER (Önceki sayfalara uyumlu) */
+        /* THEME AND VARIABLES */
         :root {
-            --primary-color: #5d3f6a;       /* Kapalı Mor Vurgu */
-            --bg-dark: #12121e;             /* Çok Koyu Arka Plan */
-            --bg-card: #1e1e2d;             /* Koyu Kart Arka Planı */
-            --text-light: #e0e0e0;          /* Açık Metin */
-            --text-secondary: #a9a9b6;      /* İkincil Metin */
-            --border-dark: #2a2a3f;         /* Koyu Sınır */
-            --success-color: #28a745;       /* Yeşil (Başarılı) */
-            --danger-color: #e74c3c;        /* Kırmızı (Hata) */
+            --primary-color: #5d3f6a;       /* Deep Purple Accent */
+            --bg-dark: #12121e;             /* Very Dark Background */
+            --bg-card: #1e1e2d;             /* Dark Card Background */
+            --text-light: #e0e0e0;          /* Light Text */
+            --text-secondary: #a9a9b6;      /* Secondary Text */
+            --border-dark: #2a2a3f;         /* Dark Border */
+            --success-color: #28a745;       /* Green (Success) */
+            --danger-color: #e74c3c;        /* Red (Error) */
             --shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
         }
 
-        /* GENEL STİL VE ANİMASYONLAR */
+        /* GENERAL STYLES AND ANIMATIONS */
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--bg-dark);
@@ -34,7 +34,7 @@
             transition: background-color 0.5s;
         }
 
-        /* ANİMASYONLU KART KAPSAYICISI */
+        /* ANIMATED CARD CONTAINER */
         .auth-container {
             background-color: var(--bg-card);
             padding: 40px;
@@ -55,7 +55,7 @@
             }
         }
 
-        /* TAB STİLİ */
+        /* TAB STYLE */
         .tabs {
             display: flex;
             margin-bottom: 30px;
@@ -85,7 +85,7 @@
             color: var(--primary-color);
         }
 
-        /* FORM STİLİ */
+        /* FORM STYLE */
         .form-group { 
             margin-bottom: 20px; 
             position: relative;
@@ -115,7 +115,7 @@
             box-shadow: 0 0 10px rgba(93, 63, 106, 0.4);
         }
         
-        /* BUTON STİLİ */
+        /* BUTTON STYLE */
         .auth-btn { 
             width: 100%; 
             padding: 15px; 
@@ -139,7 +139,7 @@
             transform: translateY(0);
         }
 
-        /* MESAJ STİLİ */
+        /* MESSAGE STYLE */
         #authMessage { 
             margin-top: 20px; 
             padding: 15px; 
@@ -172,8 +172,9 @@
 
 <div class="auth-container">
     <div class="tabs">
-        <button class="tab-button active" onclick="showTab('login')"><i class="fas fa-sign-in-alt"></i> Giriş Yap</button>
-        <button class="tab-button" onclick="showTab('register')"><i class="fas fa-user-plus"></i> Kayıt Ol</button>
+        <!-- Added IDs for event listeners, removed inline onclick -->
+        <button class="tab-button active" id="tab-login"><i class="fas fa-sign-in-alt"></i> Giriş Yap</button>
+        <button class="tab-button" id="tab-register"><i class="fas fa-user-plus"></i> Kayıt Ol</button>
     </div>
 
     <div id="login" class="tab-content">
@@ -185,7 +186,8 @@
             <label for="loginPassword">Şifre</label>
             <input type="password" id="loginPassword" placeholder="En az 6 karakter">
         </div>
-        <button class="auth-btn" onclick="handleLogin()"><i class="fas fa-lock"></i> Giriş Yap</button>
+        <!-- Added ID for event listener, removed inline onclick -->
+        <button class="auth-btn" id="btnLogin"><i class="fas fa-lock"></i> Giriş Yap</button>
     </div>
 
     <div id="register" class="tab-content hidden">
@@ -197,44 +199,53 @@
             <label for="registerPassword">Şifre</label>
             <input type="password" id="registerPassword" placeholder="En az 6 karakter">
         </div>
-        <button class="auth-btn" onclick="handleRegister()"><i class="fas fa-paper-plane"></i> Kayıt Ol</button>
+        <!-- Added ID for event listener, removed inline onclick -->
+        <button class="auth-btn" id="btnRegister"><i class="fas fa-paper-plane"></i> Kayıt Ol</button>
     </div>
 
     <div id="authMessage" class="error"></div>
 </div>
 
 <script type="module">
-    // Firebase bağlantılarını ve modüllerini import ediyoruz
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInAnonymously, signInWithCustomToken, setPersistence, browserLocalPersistence, getRedirectResult, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    // Import Firebase dependencies
+    import { initializeApp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, setPersistence, browserLocalPersistence, getRedirectResult, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-    import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     
-    // Firestore log seviyesini ayarla (hata ayıklama için faydalı)
+    // Set Firestore log level (helpful for debugging)
     setLogLevel('Debug');
 
-    // Global Firebase Değişkenleri
+    // Global Firebase Variables
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
     const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
 
-    // Firebase'i başlat
+    // Initialize Firebase services
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Oturum kalıcılığını yerel depolamaya ayarla
+    // Set persistence to local storage
     setPersistence(auth, browserLocalPersistence);
 
-    // Tab geçiş işlevi
-    window.showTab = function(tabId) {
+    /**
+     * Toggles between the login and register tabs.
+     * @param {string} tabId - The ID of the tab to show ('login' or 'register').
+     */
+    function showTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
         document.getElementById(tabId).classList.remove('hidden');
         document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
-        document.querySelector(`.tab-button[onclick*='${tabId}']`).classList.add('active');
+        
+        // Use ID selectors for robustness
+        document.getElementById(`tab-${tabId}`).classList.add('active');
         document.getElementById('authMessage').style.display = 'none';
     }
 
-    // Mesaj gösterme işlevi
+    /**
+     * Displays a message to the user in the designated message box.
+     * @param {string} message - The message text.
+     * @param {boolean} isError - True if the message is an error, false for success.
+     */
     function displayMessage(message, isError) {
         const msgEl = document.getElementById('authMessage');
         msgEl.innerText = message;
@@ -243,26 +254,32 @@
         msgEl.style.display = 'block';
     }
 
-    // İlk kullanıcı verilerini Firestore'a kaydetme
+    /**
+     * Saves initial user profile data to Firestore.
+     * @param {object} user - The Firebase User object.
+     */
     async function saveInitialUserData(user) {
+        // Path: /artifacts/{appId}/users/{userId}/profile/data
         const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
         const initialUserData = {
             email: user.email,
             createdAt: new Date(),
             lastLogin: new Date(),
-            siteCount: 0, // Başlangıçta site sayısı 0
+            siteCount: 0, 
             package: 'none'
         };
         try {
             await setDoc(userDocRef, initialUserData, { merge: true });
-            console.log("İlk kullanıcı profili başarıyla oluşturuldu/güncellendi.");
+            console.log("Initial user profile created/updated successfully.");
         } catch (error) {
-            console.error("Kullanıcı profili oluşturulurken/güncellenirken hata:", error);
+            console.error("Error creating/updating user profile:", error);
         }
     }
 
-    // Kayıt İşlemi
-    window.handleRegister = async function() {
+    /**
+     * Handles the user registration process using Firebase Email/Password.
+     */
+    async function handleRegister() {
         const email = document.getElementById('registerEmail').value;
         const password = document.getElementById('registerPassword').value;
 
@@ -274,11 +291,11 @@
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            // Kullanıcı verilerini Firestore'a kaydet (İlk Veri)
+            // Save initial user data to Firestore
             await saveInitialUserData(user);
 
             displayMessage("Kayıt başarılı! Müşteri paneline yönlendiriliyorsunuz...", false);
-            // Başarılıysa paneli yönlendir
+            // Redirect to dashboard on success
             setTimeout(() => {
                 window.location.href = 'dashboard.html'; 
             }, 1500);
@@ -293,12 +310,14 @@
                 errorMessage = "Geçersiz e-posta formatı.";
             }
             displayMessage(errorMessage, true);
-            console.error("Kayıt Hatası:", error);
+            console.error("Registration Error:", error);
         }
     }
 
-    // Giriş İşlemi
-    window.handleLogin = async function() {
+    /**
+     * Handles the user login process using Firebase Email/Password.
+     */
+    async function handleLogin() {
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
 
@@ -310,12 +329,13 @@
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            // Firestore'daki son giriş tarihini güncelle
+            // Update last login time in Firestore
+            // Path: /artifacts/{appId}/users/{userId}/profile/data
             const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
             await setDoc(userDocRef, { lastLogin: new Date() }, { merge: true });
             
             displayMessage("Giriş başarılı! Yönlendiriliyorsunuz...", false);
-            // Başarılıysa paneli yönlendir
+            // Redirect to dashboard on success
             setTimeout(() => {
                 window.location.href = 'dashboard.html'; 
             }, 1000);
@@ -327,9 +347,25 @@
                 errorMessage = "Geçersiz e-posta formatı.";
             }
             displayMessage(errorMessage, true);
-            console.error("Giriş Hatası:", error);
+            console.error("Login Error:", error);
         }
     }
+
+    // CRITICAL: Attach event listeners after the DOM is fully loaded.
+    // This solves the issue where inline onclick attributes fail due to script type="module" scoping.
+    document.addEventListener('DOMContentLoaded', () => {
+        // Tab Listeners
+        document.getElementById('tab-login').addEventListener('click', () => showTab('login'));
+        document.getElementById('tab-register').addEventListener('click', () => showTab('register'));
+
+        // Form Button Listeners
+        document.getElementById('btnLogin').addEventListener('click', handleLogin);
+        document.getElementById('btnRegister').addEventListener('click', handleRegister);
+    });
+
+    // CRITICAL FIX: Manually call showTab('login') to ensure correct initial state
+    // in case the script loading caused initial DOM issues.
+    showTab('login');
 </script>
 </body>
 </html>
