@@ -203,18 +203,24 @@
 
     <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
     <script type="module" src="./firebase-auth-service.js"></script>
 
     <script type="module">
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { app } from "./firebase-auth-service.js";
+        import { app } from "./firebase-auth-service.js"; // app objesinin burada tanımlı olması gerekir
 
         const auth = getAuth(app);
         const db = getFirestore(app);
         
+        // 🚨 İyileştirme: Tüm DOM elementlerini bir kez ve global olarak tanımlıyoruz.
         const loggedOutNav = document.getElementById('loggedOutNav'); 
         const loggedInNav = document.getElementById('loggedInNav');
+        const navDisplayName = document.getElementById('nav_display_name');
+        const navAccountType = document.getElementById('nav_user_role');
+        const navProfileInitials = document.getElementById('nav_profile_initials');
+        const logoutButtonNav = document.getElementById('logoutButtonNav');
 
         function getInitials(name) {
             if (!name) return '??';
@@ -227,72 +233,72 @@
 
         /**
          * Header UI'yı kullanıcı oturum durumuna göre günceller.
-         * @param {Object|null} user - Firebase User objesi veya null
          */
         async function updateHeaderUI(user) {
-            if (loggedOutNav && loggedInNav) {
-                if (user && !user.isAnonymous) {
-                    // 1. KULLANICI GİRİŞ YAPMIŞ DURUMDA
-                    loggedOutNav.classList.add('hidden');
-                    loggedInNav.classList.remove('hidden');
+            if (!loggedOutNav || !loggedInNav) return;
 
-                    const navDisplayName = document.getElementById('nav_display_name');
-                    const navAccountType = document.getElementById('nav_user_role');
-                    const navProfileInitials = document.getElementById('nav_profile_initials');
-                    
-                    let displayName = user.displayName || user.email.split('@')[0];
-                    let accountType = "Standart"; 
-                    let photoURL = user.photoURL || '';
-                    
-                    // Firestore'dan Hesap Türünü çek
-                    try {
-                        const docSnap = await getDoc(doc(db, "users", user.uid));
-                        if (docSnap.exists()) {
-                            accountType = docSnap.data().accountType || "Standart";
-                        }
-                    } catch (e) {
-                        console.error("Firestore veri çekme hatası:", e);
-                    }
+            if (user && !user.isAnonymous) {
+                // 1. KULLANICI GİRİŞ YAPMIŞ DURUMDA
+                loggedOutNav.classList.add('hidden');
+                loggedInNav.classList.remove('hidden');
 
-                    // Bilgileri yerleştir
-                    if (navDisplayName) navDisplayName.textContent = displayName;
-                    if (navAccountType) {
-                        navAccountType.textContent = accountType.toUpperCase();
-                        // Rol rengi ayarlama
-                        if (accountType.toUpperCase() === 'PREMIUM') {
-                            navAccountType.style.backgroundColor = 'rgba(255, 193, 7, 0.3)';
-                            navAccountType.style.color = '#FFC107';
-                        } else if (accountType.toUpperCase() === 'ADMIN') {
-                            navAccountType.style.backgroundColor = 'rgba(255, 50, 50, 0.3)';
-                            navAccountType.style.color = '#FF3232';
-                        } else {
-                            navAccountType.style.backgroundColor = 'rgba(108, 92, 231, 0.3)';
-                            navAccountType.style.color = '#ffffff';
-                        }
+                let displayName = user.displayName || user.email.split('@')[0];
+                let accountType = "STANDART"; 
+                let photoURL = user.photoURL || '';
+                
+                // Firestore'dan Hesap Türünü çek
+                try {
+                    const docSnap = await getDoc(doc(db, "users", user.uid));
+                    if (docSnap.exists()) {
+                        accountType = docSnap.data().accountType || "Standart";
                     }
-                    
-                    // Profil Fotoğrafı/Baş Harfler
-                    if (navProfileInitials) {
-                        if (photoURL) {
-                            navProfileInitials.style.backgroundImage = `url(${photoURL})`;
-                            navProfileInitials.style.backgroundSize = 'cover';
-                            navProfileInitials.textContent = ''; 
-                            navProfileInitials.style.border = '2px solid #ffffff'; 
-                        } else {
-                            navProfileInitials.textContent = getInitials(displayName);
-                            navProfileInitials.style.backgroundImage = 'none';
-                            navProfileInitials.style.border = '2px solid var(--purple)';
-                        }
-                    }
-                    
-                    // Çıkış butonuna olayı bağla
-                    document.getElementById('logoutButtonNav')?.addEventListener('click', handleLogout);
-
-                } else {
-                    // 2. KULLANICI GİRİŞ YAPMAMIŞ DURUMDA
-                    loggedOutNav.classList.remove('hidden');
-                    loggedInNav.classList.add('hidden');
+                } catch (e) {
+                    console.error("Firestore veri çekme hatası:", e);
                 }
+
+                // Bilgileri yerleştir
+                if (navDisplayName) navDisplayName.textContent = displayName;
+                if (navAccountType) {
+                    navAccountType.textContent = accountType.toUpperCase();
+                    // Rol rengi ayarlama
+                    if (accountType.toUpperCase() === 'PREMIUM') {
+                        navAccountType.style.backgroundColor = 'rgba(255, 193, 7, 0.3)';
+                        navAccountType.style.color = '#FFC107';
+                    } else if (accountType.toUpperCase() === 'ADMIN') {
+                        navAccountType.style.backgroundColor = 'rgba(255, 50, 50, 0.3)';
+                        navAccountType.style.color = '#FF3232';
+                    } else {
+                        navAccountType.style.backgroundColor = 'rgba(108, 92, 231, 0.3)';
+                        navAccountType.style.color = '#ffffff';
+                    }
+                }
+                
+                // Profil Fotoğrafı/Baş Harfler
+                if (navProfileInitials) {
+                    if (photoURL) {
+                        navProfileInitials.style.backgroundImage = `url(${photoURL})`;
+                        navProfileInitials.style.backgroundSize = 'cover';
+                        navProfileInitials.textContent = ''; 
+                        navProfileInitials.style.border = '2px solid #ffffff'; 
+                    } else {
+                        navProfileInitials.textContent = getInitials(displayName);
+                        navProfileInitials.style.backgroundImage = 'none';
+                        navProfileInitials.style.border = '2px solid var(--purple)';
+                    }
+                }
+                
+                // Çıkış butonuna olayı bağla
+                if (logoutButtonNav) {
+                    // Olayı birden fazla kez bağlamamak için önlem alınmıştır
+                    const clone = logoutButtonNav.cloneNode(true);
+                    logoutButtonNav.parentNode.replaceChild(clone, logoutButtonNav);
+                    document.getElementById('logoutButtonNav')?.addEventListener('click', handleLogout);
+                }
+
+            } else {
+                // 2. KULLANICI GİRİŞ YAPMAMIŞ DURUMDA
+                loggedOutNav.classList.remove('hidden');
+                loggedInNav.classList.add('hidden');
             }
         }
 
