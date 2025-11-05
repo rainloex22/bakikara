@@ -13,12 +13,14 @@
             font-family: 'Poppins', sans-serif; 
             background-color: #1a0e21; 
             color: #ffffff; 
-            /* Sayfa geçişi için opacity ve transition */
             opacity: 0; 
             transition: opacity 0.5s ease-in-out;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+        }
+        body.loaded {
+            opacity: 1;
         }
         .header-bg { 
             background-color: rgba(26, 14, 33, 0.9); 
@@ -76,9 +78,44 @@
             background-color: #5c4cd9;
             transform: translateY(-1px);
         }
+        /* Mobile Menu */
+        #mobileMenu {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+        #mobileMenu.open {
+            transform: translateX(0);
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
+    <!-- Mobile Menu Toggle Button -->
+    <button id="mobileMenuButton" class="md:hidden p-2 text-white fixed top-5 right-4 z-50 rounded-full bg-purple-600 hover:bg-purple-700 transition duration-200">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+
+    <!-- Mobile Navigation Menu -->
+    <div id="mobileMenu" class="fixed top-0 right-0 h-full w-64 bg-[#1a0e21] shadow-2xl z-40 p-6 flex flex-col pt-20">
+        <button id="closeMobileMenuButton" class="absolute top-4 right-4 text-white text-2xl">
+            <i class="fas fa-times"></i>
+        </button>
+        <a href="panel.html" class="text-white hover:text-purple-400 py-3 border-b border-gray-700 font-medium">Ana Panel</a>
+        <a href="fiyatlandirma.html" class="text-white hover:text-purple-400 py-3 border-b border-gray-700 font-medium">Fiyatlandırma</a>
+        <a href="kullanicipaneli.html" class="text-white hover:text-purple-400 py-3 border-b border-gray-700 font-medium">Kullanıcı Paneli</a>
+        <a href="yardim.html" class="text-white hover:text-purple-400 py-3 mb-6 border-b border-gray-700 font-medium">Yardım</a>
+        
+        <div id="loggedOutMobile" class="flex flex-col space-y-4">
+            <a href="girisyap.html" class="px-5 py-2 rounded-lg font-semibold text-white border border-purple hover:bg-purple transition duration-200 text-center">Giriş Yap</a>
+            <a href="kaydol.html" class="btn-purple px-5 py-2 rounded-lg font-semibold text-white text-center">Kaydol</a> 
+        </div>
+
+        <div id="loggedInMobile" class="hidden flex flex-col space-y-4">
+            <a href="kullanicipaneli.html" class="btn-purple w-full text-center py-2 rounded-lg font-semibold text-white">Kontrol Paneli</a>
+            <button id="logoutButtonMobile" class="w-full text-center py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 transition duration-200">Çıkış Yap</button>
+        </div>
+    </div>
+
+    <!-- HEADER -->
     <header class="header-bg sticky top-0 z-20">
         <nav class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
             <a href="panel.html" class="text-2xl font-extrabold text-white flex items-center">
@@ -86,18 +123,21 @@
             </a>
 
             <div class="hidden md:flex space-x-8">
-                <a href="panel" class="text-purple-400 transition duration-200 font-medium border-b-2 border-purple-500 pb-1">Ana Panel</a>
-                <a href="fiyatlandirma" class="text-white hover:text-purple-400 transition duration-200 font-medium">Fiyatlandırma</a>
-                <a href="kullanicipaneli" class="text-white hover:text-purple-400 transition duration-200 font-medium">Kullanıcı Paneli</a>
-                <a href="yardim" class="text-white hover:text-purple-400 transition duration-200 font-medium">Yardım</a>
+                <a href="panel.html" class="text-white hover:text-purple-400 transition duration-200 font-medium">Ana Panel</a>
+                <a href="fiyatlandirma.html" class="text-white hover:text-purple-400 transition duration-200 font-medium">Fiyatlandırma</a>
+                <a href="kullanicipaneli.html" class="text-white hover:text-purple-400 transition duration-200 font-medium">Kullanıcı Paneli</a>
+                <a href="yardim.html" class="text-white hover:text-purple-400 transition duration-200 font-medium">Yardım</a>
+                <a href="#" class="text-purple-400 transition duration-200 font-medium border-b-2 border-purple-500 pb-1">Discord</a>
             </div>
 
-            <div class="flex space-x-3 items-center">
+            <div class="hidden md:flex space-x-3 items-center">
+                <!-- LOGGED OUT DESKTOP -->
                 <div id="loggedOutNav" class="flex space-x-3 items-center">
                     <a href="girisyap.html" class="px-5 py-2 rounded-lg font-semibold text-white border border-purple hover:bg-purple transition duration-200">Giriş Yap</a>
                     <a href="kaydol.html" class="btn-purple px-5 py-2 rounded-lg font-semibold text-white">Kaydol</a> 
                 </div>
 
+                <!-- LOGGED IN DESKTOP -->
                 <div id="loggedInNav" class="relative hidden"> 
                     <button id="profileMenuButton" class="flex items-center space-x-3 p-2 rounded-full hover:bg-gray-700 transition duration-200 focus:outline-none">
                         <span id="nav_profile_initials" class="profile-avatar-nav flex-shrink-0">...</span> 
@@ -124,6 +164,7 @@
         </nav>
     </header>
 
+    <!-- MAIN CONTENT -->
     <main class="flex-grow flex flex-col items-center justify-center py-20 px-4">
         <div class="discord-card p-8 md:p-12 w-full max-w-2xl text-center">
             
@@ -166,131 +207,179 @@
         </a>
     </main>
 
-    <footer class="footer-style text-gray-300 p-8 mt-auto">
-    <div class="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8">
+    <!-- FOOTER -->
+    <footer class="footer-style text-gray-300 p-8 mt-auto bg-gray-900 bg-opacity-30">
+        <div class="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8">
+            
+            <div>
+                <h4 class="text-xl font-bold text-white mb-4">BAKİ S2</h4>
+                <p class="text-sm">Tüm dijital bağlantılarınızı tek bir merkezde toplayın. Hız, güvenlik ve analiz odaklı çözüm.</p>
+            </div>
+
+            <div>
+                <h4 class="text-xl font-bold text-white mb-4">Yasal</h4>
+                <ul class="space-y-2">
+                    <li><a href="gizlilik-politikasi.html" class="text-sm hover:text-purple-400 transition duration-200">Gizlilik Politikası</a></li>
+                    <li><a href="kullanim-sartlari.html" class="text-sm hover:text-purple-400 transition duration-200">Kullanım Şartları</a></li>
+                    <li><a href="iade-iptal.html" class="text-sm hover:text-purple-400 transition duration-200">İade/İptal</a></li>
+                </ul>
+            </div>
+            
+            <div>
+                <h4 class="text-xl font-bold text-white mb-4">Site Haritası</h4>
+                <ul class="space-y-2">
+                    <li><a href="panel.html" class="text-sm hover:text-purple-400 transition duration-200">Panel</a></li>
+                    <li><a href="fiyatlandirma.html" class="text-sm hover:text-purple-400 transition duration-200">Fiyatlandırma</a></li>
+                    <li><a href="yardim.html" class="text-sm hover:text-purple-400 transition duration-200">Yardım Merkezi</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-xl font-bold text-white mb-4">İletişim</h4>
+                <ul class="space-y-2">
+                    <li><a href="discord.html" class="text-sm hover:text-purple-400 transition duration-200"><i class="fab fa-discord mr-2"></i> Discord</a></li>
+                    <li><a href="hizmet.html" class="text-sm hover:text-purple-400 transition duration-200"><i class="fas fa-shield-alt mr-2"></i> Hizmet Durumu</a></li>
+                </ul>
+            </div>
+        </div>
         
-        <div>
-            <h4 class="text-xl font-bold text-white mb-4">BAKİ S2</h4>
-            <p class="text-base">Tüm dijital bağlantılarınızı tek bir merkezde toplayın. Hız, güvenlik ve analiz odaklı çözüm.</p>
+        <div class="text-center text-sm mt-10 border-t border-gray-700 pt-6">
+            © 2025 BAKİ S2. Tüm hakları saklıdır.
         </div>
-
-        <div>
-            <h4 class="text-xl font-bold text-white mb-4">Yasal</h4>
-            <ul class="space-y-2">
-                <li><a href="gizlilik-politikasi.html" class="text-base hover:text-purple-400 transition duration-200">Gizlilik Politikası</a></li>
-                <li><a href="kullanim-sartlari.html" class="text-base hover:text-purple-400 transition duration-200">Kullanım Şartları</a></li>
-                <li><a href="iade-iptal.html" class="text-base hover:text-purple-400 transition duration-200">İade/İptal</a></li>
-            </ul>
-        </div>
-        
-        <div>
-            <h4 class="text-xl font-bold text-white mb-4">Site Haritası</h4>
-            <ul class="space-y-2">
-                <li><a href="panel.html" class="text-base hover:text-purple-400 transition duration-200">Panel</a></li>
-                <li><a href="fiyatlandirma.html" class="text-base hover:text-purple-400 transition duration-200">Fiyatlandırma</a></li>
-                <li><a href="yardim.html" class="text-base hover:text-purple-400 transition duration-200">Yardım Merkezi</a></li>
-            </ul>
-        </div>
-
-        <div>
-            <h4 class="text-xl font-bold text-white mb-4">İletişim</h4>
-            <ul class="space-y-2">
-                <li><a href="discord" class="text-base hover:text-purple-400 transition duration-200"><i class="fab fa-discord mr-2"></i> Discord</a></li>
-                <li><a href="hizmet.html" class="text-base hover:text-purple-400 transition duration-200"><i class="fas fa-shield-alt mr-2"></i> Hizmet Durumu</a></li>
-            </ul>
-        </div>
-    </div>
+    </footer>
     
-    <div class="text-center text-base mt-10 border-t border-gray-700 pt-6">
-        © 2025 BAKİ S2. Tüm hakları saklıdır.
-    </div>
-</footer>
-    
-    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
-    <script type="module" src="./firebase-auth-service.js"></script>
-    
-    <script>
-        // Bu script, yukarıdaki module script (Firebase hatalarından dolayı) çalışmasa bile body'i görünür yapar.
-        document.addEventListener('DOMContentLoaded', () => {
-             document.body.style.opacity = '1';
-        });
-    </script>
-
+    <!-- SINGLE FILE FIREBASE & DISCORD SCRIPT -->
     <script type="module">
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        // window.startClient() yerine module export kullanılıyorsa:
-        import { app } from "./firebase-auth-service.js"; 
 
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        // --- FIREBASE CONFIGURATION & GLOBALS ---
+        // Kullanıcının sağladığı yapılandırma bilgileri
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyBfc0F8o5aVmwTw-gyLRZVI2OMUljFi6Ao",
+            authDomain: "baki-s2-yonetim.firebaseapp.com",
+            projectId: "baki-s2-yonetim",
+            storageBucket: "baki-s2-yonetim.firebasestorage.app",
+            messagingSenderId: "692508919425",
+            appId: "1:692508919425:web:fac963c81c11b7be70af80",
+            measurementId: "G-Q52XG8GLB2"
+        };
+        
+        // Firestore path için kullanılan App ID'si (projectId kullanıldı)
+        const appId = FIREBASE_CONFIG.projectId || 'default-app-id';
+
+        // Canvas ortamından gelen başlangıç yetkilendirme tokenı (zorunlu)
+        // Eğer token yoksa, anonim giriş denenecektir.
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let app;
+        let auth;
+        let db;
+        let userId = null;
+
         const loggedOutNav = document.getElementById('loggedOutNav');
         const loggedInNav = document.getElementById('loggedInNav');
+        const loggedOutMobile = document.getElementById('loggedOutMobile');
+        const loggedInMobile = document.getElementById('loggedInMobile');
         const memberCountElement = document.getElementById('member-count');
         const onlineCountElement = document.getElementById('online-count');
         
-        // DİKKAT: Eğer veriler çekilmiyorsa, bu davet kodunu (YuHbprEFDE) kontrol edin.
+        // Discord API Bilgileri
+        // Lütfen bu davet kodunun (YuHbprEFDE) aktif ve widget'a izin veren bir sunucuya ait olduğundan emin olun.
         const inviteCode = 'YuHbprEFDE'; 
         const apiUrl = `https://discord.com/api/v10/invites/${inviteCode}?with_counts=true`;
 
         function getInitials(name) {
             if (!name) return '??';
-            const parts = name.split(' ');
+            const parts = name.trim().split(/\s+/);
             if (parts.length > 1) {
                 return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
             }
             return name[0].toUpperCase();
         }
 
-        async function updateHeaderUI(user) {
-            if (loggedOutNav && loggedInNav) {
-                if (user && !user.isAnonymous) {
-                    // KULLANICI GİRİŞ YAPMIŞ
-                    loggedOutNav.classList.add('hidden');
-                    loggedInNav.classList.remove('hidden');
-
-                    const navDisplayName = document.getElementById('nav_display_name');
-                    const navUserRole = document.getElementById('nav_user_role');
-                    const navProfileInitials = document.getElementById('nav_profile_initials');
-                    
-                    let displayName = user.displayName || user.email.split('@')[0];
-                    let accountType = "STANDART"; 
-                    
-                    try {
-                        const docSnap = await getDoc(doc(db, "users", user.uid));
-                        if (docSnap.exists()) {
-                            accountType = docSnap.data().accountType || "STANDART";
-                        }
-                    } catch (e) {
-                        console.error("Firestore veri çekme hatası:", e);
-                    }
-
-                    if (navDisplayName) navDisplayName.textContent = displayName;
-                    if (navUserRole) navUserRole.textContent = accountType;
-                    if (navProfileInitials) navProfileInitials.textContent = getInitials(displayName);
-                    
-                    document.getElementById('logoutButtonNav')?.addEventListener('click', handleLogout); 
-
+        async function startClient() {
+            // Yapılandırma hardcode edildi, başlat
+            app = initializeApp(FIREBASE_CONFIG);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
                 } else {
-                    // KULLANICI GİRİŞ YAPMAMIŞ
-                    loggedOutNav.classList.remove('hidden');
-                    loggedInNav.classList.add('hidden');
+                    await signInAnonymously(auth);
                 }
+            } catch (error) {
+                console.error("Auth hatası (Token/Anonim Giriş):", error);
+            }
+            
+            // Oturum durumunu dinle ve UI'yı güncelle
+            onAuthStateChanged(auth, (user) => {
+                userId = user?.uid || null;
+                updateHeaderUI(user);
+                document.body.classList.add('loaded'); // Oturum kontrolü tamamlandıktan sonra sayfayı göster
+            });
+        }
+
+        async function updateHeaderUI(user) {
+            const isLoggedIn = user && !user.isAnonymous;
+
+            if (loggedOutNav && loggedInNav) {
+                loggedOutNav.classList.toggle('hidden', isLoggedIn);
+                loggedInNav.classList.toggle('hidden', !isLoggedIn);
+                loggedOutMobile.classList.toggle('hidden', isLoggedIn);
+                loggedInMobile.classList.toggle('hidden', !isLoggedIn);
+            }
+
+            if (isLoggedIn) {
+                const navDisplayName = document.getElementById('nav_display_name');
+                const navUserRole = document.getElementById('nav_user_role');
+                const navProfileInitials = document.getElementById('nav_profile_initials');
+                
+                let displayName = user.displayName || user.email?.split('@')[0] || 'Kullanıcı';
+                let accountType = "STANDART"; 
+                
+                try {
+                    // Güvenlik kurallarına uygun Firestore yolu: /artifacts/{appId}/users/{userId}/profile/data
+                    const docPath = `artifacts/${appId}/users/${user.uid}/profile`;
+                    const docSnap = await getDoc(doc(db, docPath, 'data')); // 'data' doküman adını varsayalım
+                    
+                    if (docSnap.exists()) {
+                        accountType = docSnap.data().accountType || "STANDART";
+                    }
+                } catch (e) {
+                    console.error("Firestore veri çekme hatası (Kullanıcı Rolü):", e);
+                }
+
+                if (navDisplayName) navDisplayName.textContent = displayName;
+                if (navUserRole) navUserRole.textContent = accountType;
+                if (navProfileInitials) navProfileInitials.textContent = getInitials(displayName);
+                
+                document.getElementById('logoutButtonNav')?.addEventListener('click', handleLogout); 
+                document.getElementById('logoutButtonMobile')?.addEventListener('click', handleLogout); 
             }
         }
 
         async function handleLogout() {
             try {
+                // Sayfa geçiş animasyonu ekle
+                document.body.classList.remove('loaded');
                 await signOut(auth);
-                window.location.href = 'girisyap.html';
+                // Çıkış başarılı: Yönlendirme
+                setTimeout(() => {
+                    window.location.href = 'girisyap.html';
+                }, 500); // CSS geçiş süresi kadar bekle
             } catch (error) {
                 console.error("Çıkış hatası:", error);
-                alert("Çıkış yaparken bir hata oluştu: " + error.message);
+                // Kullanıcıya görünür bir hata göstermek yerine konsola logla
+                console.error("Çıkış yaparken bir hata oluştu: " + error.message);
+                document.body.classList.add('loaded'); // Hata olursa sayfayı tekrar göster
             }
         }
 
+        // --- DISCORD STATS LOGIC ---
         async function fetchDiscordStats() {
             if (!memberCountElement || !onlineCountElement) return;
 
@@ -299,7 +388,6 @@
                 const response = await fetch(apiUrl);
                 
                 if (!response.ok) {
-                    // Veri çekme başarısızsa buraya düşer. (Örn: Davet kodu hatalı veya süresi dolmuş)
                     throw new Error(`API Hatası: ${response.status} (${response.statusText})`);
                 }
                 
@@ -308,8 +396,8 @@
                 const totalMembers = data.approximate_member_count || 'N/A';
                 const onlineMembers = data.approximate_presence_count || 'N/A';
                 
-                memberCountElement.textContent = formatNumber(totalMembers);
-                onlineCountElement.textContent = formatNumber(onlineMembers);
+                memberCountElement.innerHTML = `<i class="fas fa-users mr-2"></i> ${formatNumber(totalMembers)}`;
+                onlineCountElement.innerHTML = `<i class="fas fa-user-friends mr-2"></i> ${formatNumber(onlineMembers)}`;
 
             } catch (error) {
                 console.error("Discord istatistikleri çekilirken hata oluştu:", error);
@@ -326,13 +414,9 @@
             return num;
         }
 
-        // Firebase oturum durumunu dinle
-        onAuthStateChanged(auth, (user) => {
-            updateHeaderUI(user);
-        });
-        
+        // --- DOMContentLoaded Events ---
         document.addEventListener('DOMContentLoaded', () => {
-            
+            startClient(); // Firebase başlatma ve oturum dinlemeyi başlat
             fetchDiscordStats(); // Discord verilerini çek
 
             // Dropdown açma/kapama
@@ -342,16 +426,22 @@
             });
 
             document.addEventListener('click', (event) => {
-                const menu = document.getElementById('loggedInNav');
-                const isClickInside = menu?.contains(event.target);
-                if (!isClickInside) {
-                    document.getElementById('profileDropdown')?.classList.add('hidden');
+                const dropdown = document.getElementById('profileDropdown');
+                const button = document.getElementById('profileMenuButton');
+                if (dropdown && !dropdown.contains(event.target) && button && !button.contains(event.target)) {
+                    dropdown.classList.add('hidden');
                 }
             });
+
+            // Mobile Menu Logic
+            const mobileMenu = document.getElementById('mobileMenu');
+            document.getElementById('mobileMenuButton')?.addEventListener('click', () => {
+                mobileMenu.classList.add('open');
+            });
+            document.getElementById('closeMobileMenuButton')?.addEventListener('click', () => {
+                mobileMenu.classList.remove('open');
+            });
         });
-        
-        // Firebase Auth Service'deki başlatma fonksiyonunu çağırın.
-        window.onload = window.startClient;
     </script>
 </body>
 </html>
