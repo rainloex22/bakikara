@@ -1,0 +1,45 @@
+<div class="main-content">
+    <div class="card-container">
+        
+        <div class="info-panel">
+            <h2>Hizmet Detayları</h2>
+            <ul>
+                <li><strong>Adres Formatı:</strong> <code>bakikara.xyz/site-adı</code></li>
+                <li><strong>Özel Alan Adı:</strong> İsteğe bağlı, ek depo gerektirir.</li>
+                <li><strong>Barındırma Tipi:</strong> Statik (HTML, CSS, JavaScript)</li>
+                <li><strong>Başvuru Süreci:</strong> Form → E-posta İletişimi → Dosya Gönderimi → Yayın.</li>
+            </ul>
+            <div style="margin-top: 30px;">
+                <h3 style="color: #555;">Dosya Yükleme Notu</h3>
+                <p style="font-size: 0.9em;">Dosyalarınızı (zip olarak) **bu formu gönderdikten sonra** sizinle paylaşacağımız e-posta adresine göndermeniz gerekecektir.</p>
+            </div>
+        </div>
+        
+        <div class="form-panel">
+            <h2>Başvuru Formunu Doldurun</h2>
+            
+            <form id="hostingBasvuruFormu" action="https://formspree.io/f/manlrnqz" method="POST"> 
+                
+                <label for="kullaniciAdi">İstenen Site Adı (URL Kısmı):</label>
+                <input type="text" id="kullaniciAdi" name="site_adi" placeholder="Örn: deneme-sitesi" required>
+
+                <label for="adSoyad">Adınız ve Soyadınız:</label>
+                <input type="text" id="adSoyad" name="ad_soyad" required>
+
+                <label for="eposta">E-posta Adresiniz:</label>
+                <input type="email" id="eposta" name="email" required>
+                
+                <label for="ozelDomain">Özel Alan Adı İsteği (isteğe bağlı):</label>
+                <input type="text" id="ozelDomain" name="ozel_alan_adi" placeholder="Örn: siteminadi.com">
+
+                <label for="aciklama">Proje Amacı ve Ek Açıklamalar:</label>
+                <textarea id="aciklama" name="message" rows="4" placeholder="Projenizin amacını kısaca belirtiniz."></textarea>
+                
+                <input type="hidden" name="_subject" value="Yeni Hosting Başvurusu: bakikara.xyz">
+
+                <button type="submit">Başvuruyu Tamamla ve Gönder</button>
+            </form>
+
+        </div>
+    </div>
+</div>
