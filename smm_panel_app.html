@@ -73,7 +73,7 @@
 <body class="min-h-screen">
 
     <!-- YÜKLEME PANELİ (Başlangıçta Gözükür) -->
-    <div id="loadingPanel" class="flex flex-col items-center justify-center space-y-4">
+    <div id="loadingPanel" class="flex flex-col items-center justify-center min-h-screen space-y-4">
         <div class="spinner"></div>
         <p class="text-xl font-semibold text-gray-700">Panel Yükleniyor...</p>
         <p id="loadingStatus" class="text-sm text-gray-500">Kimlik doğrulama kontrol ediliyor.</p>
@@ -82,11 +82,11 @@
     <!-- ANA UYGULAMA KONTAYNERİ -->
     <div id="appContainer" class="hidden min-h-screen">
         
-        <!-- YETKİLENDİRME GEREKTİRMEYEN SAYFALAR (Login/Register) -->
+        <!-- YETKİLENDİRME GEREKTİRMEYEN SAYFALAR (Login/Register/Forgot) -->
         <div id="authContainer" class="flex items-center justify-center min-h-screen p-4">
             
             <!-- Login Sayfası -->
-            <div id="loginPage" class="w-full max-w-md bg-white p-8 rounded-xl shadow-2xl transition duration-300">
+            <div id="loginPage" class="auth-page w-full max-w-md bg-white p-8 rounded-xl shadow-2xl transition duration-300">
                 <h2 class="text-3xl font-extrabold text-center text-primary-color mb-6">Giriş Yap</h2>
                 <form id="loginForm" class="space-y-4">
                     <div>
@@ -99,19 +99,15 @@
                     </div>
                     <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-lg shadow-lg text-sm font-medium text-white bg-primary-color hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-color transition duration-150">Giriş Yap</button>
                 </form>
-                <div class="mt-6 text-center">
-                    <button onclick="handleNavigation('register')" class="text-sm text-primary-color hover:text-primary-light">Hesabın yok mu? Kayıt Ol</button>
-                </div>
-                <div class="mt-4 text-center">
-                    <button onclick="handleGoogleSignInSimulation()" class="w-full py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition duration-150 flex items-center justify-center">
-                        <i class="fab fa-google mr-2"></i> Google ile Giriş Yap
-                    </button>
+                <div class="mt-4 flex justify-between text-sm">
+                    <button onclick="handleNavigation('register')" class="text-primary-color hover:text-primary-light font-medium">Hesabın yok mu? Kayıt Ol</button>
+                    <button onclick="handleNavigation('forgotPassword')" class="text-gray-500 hover:text-primary-light">Şifremi Unuttum</button>
                 </div>
                 <p id="authMessage" class="mt-4 text-center text-red-500 text-sm hidden"></p>
             </div>
             
             <!-- Register Sayfası (Gizli) -->
-            <div id="registerPage" class="w-full max-w-md bg-white p-8 rounded-xl shadow-2xl transition duration-300 hidden">
+            <div id="registerPage" class="auth-page w-full max-w-md bg-white p-8 rounded-xl shadow-2xl transition duration-300 hidden">
                 <h2 class="text-3xl font-extrabold text-center text-primary-color mb-6">Kayıt Ol</h2>
                 <form id="registerForm" class="space-y-4">
                     <div>
@@ -132,6 +128,23 @@
                     <button onclick="handleNavigation('login')" class="text-sm text-primary-color hover:text-primary-light">Zaten hesabın var mı? Giriş Yap</button>
                 </div>
                 <p id="registerMessage" class="mt-4 text-center text-red-500 text-sm hidden"></p>
+            </div>
+            
+            <!-- Şifremi Unuttum Sayfası (Gizli) -->
+            <div id="forgotPasswordPage" class="auth-page w-full max-w-md bg-white p-8 rounded-xl shadow-2xl transition duration-300 hidden">
+                <h2 class="text-3xl font-extrabold text-center text-primary-color mb-6">Şifremi Sıfırla</h2>
+                <p class="text-gray-600 mb-4 text-center text-sm">Hesabınızın e-posta adresini girin. Şifre sıfırlama linkini e-postanıza göndereceğiz.</p>
+                <form id="forgotPasswordForm" class="space-y-4">
+                    <div>
+                        <label for="forgotEmail" class="block text-sm font-medium text-gray-700">E-posta</label>
+                        <input type="email" id="forgotEmail" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-color focus:border-primary-color">
+                    </div>
+                    <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-lg shadow-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150">Sıfırlama Linki Gönder</button>
+                </form>
+                <div class="mt-6 text-center">
+                    <button onclick="handleNavigation('login')" class="text-sm text-primary-color hover:text-primary-light">Giriş sayfasına geri dön</button>
+                </div>
+                <p id="forgotMessage" class="mt-4 text-center text-sm hidden"></p>
             </div>
 
         </div>
@@ -168,6 +181,15 @@
                         <i class="fas fa-user-circle mr-3 w-5"></i>
                         Profil
                     </button>
+                    <button onclick="handleNavigation('support')" id="nav-support" class="nav-item w-full flex items-center p-3 text-gray-700 rounded-xl hover:bg-primary-color hover:text-white transition duration-150">
+                        <i class="fas fa-headset mr-3 w-5"></i>
+                        Destek Paneli
+                    </button>
+                    <!-- YÖNETİCİ PANELİ (Sadece Admin kullanıcılar için görünür) -->
+                    <button onclick="handleNavigation('admin')" id="nav-admin" class="nav-item w-full flex items-center p-3 text-gray-700 rounded-xl hover:bg-red-500 hover:text-white transition duration-150 hidden">
+                        <i class="fas fa-shield-alt mr-3 w-5"></i>
+                        YÖNETİCİ PANELİ
+                    </button>
                 </nav>
 
                 <div class="mt-12 pt-4 border-t border-gray-200">
@@ -184,8 +206,6 @@
             <!-- Ana İçerik -->
             <main class="flex-1 p-6 overflow-y-auto">
                 <div id="contentWrapper" class="space-y-6">
-                    <!-- Sayfa İçerikleri Buraya Yüklenir -->
-                    
                     <!-- Dashboard Sayfası (Default) -->
                     <section id="dashboardPageContent" class="page-content">
                         <h2 class="text-3xl font-extrabold text-gray-800 mb-6">Dashboard</h2>
@@ -363,6 +383,71 @@
                             </form>
                         </div>
                     </section>
+                    
+                    <!-- Destek Paneli Sayfası -->
+                    <section id="supportPageContent" class="page-content hidden">
+                        <h2 class="text-3xl font-extrabold text-gray-800 mb-6">Destek Paneli</h2>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <!-- Yeni Bilet Oluşturma -->
+                            <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg h-fit">
+                                <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center"><i class="fas fa-ticket-alt mr-2"></i> Yeni Destek Bileti</h3>
+                                <form id="newTicketForm" class="space-y-4">
+                                    <div>
+                                        <label for="ticketSubject" class="block text-sm font-medium text-gray-700">Konu</label>
+                                        <input type="text" id="ticketSubject" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-color focus:border-primary-color" placeholder="Örn: Siparişim Başlamadı">
+                                    </div>
+                                    <div>
+                                        <label for="ticketMessage" class="block text-sm font-medium text-gray-700">Mesajınız</label>
+                                        <textarea id="ticketMessage" required rows="4" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-color focus:border-primary-color" placeholder="Sipariş ID, sorun detayları vb."></textarea>
+                                    </div>
+                                    <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-lg shadow-lg text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 transition duration-150">Bilet Oluştur</button>
+                                    <p id="ticketMessageDisplay" class="mt-4 text-center text-sm hidden"></p>
+                                </form>
+                                <div class="mt-6 p-4 bg-gray-50 rounded-lg text-center">
+                                    <p class="text-sm text-gray-600 mb-2">Hızlı Destek İçin:</p>
+                                    <a href="https://discord.gg/simulasyon" target="_blank" class="text-primary-color hover:text-primary-light font-medium flex items-center justify-center">
+                                        <i class="fab fa-discord mr-2 text-xl"></i> Discord Sunucumuza Katılın (Simülasyon)
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <!-- Açık Biletler -->
+                            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+                                <h3 class="text-xl font-semibold text-gray-800 mb-4">Açık Destek Biletlerim</h3>
+                                <div id="openTicketsList" class="space-y-4">
+                                    <p class="text-sm text-gray-500">Açık bilet bulunmamaktadır.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- Yönetici Paneli Sayfası -->
+                    <section id="adminPageContent" class="page-content hidden">
+                        <h2 class="text-3xl font-extrabold text-red-600 mb-6 flex items-center"><i class="fas fa-exclamation-triangle mr-3"></i> YÖNETİCİ PANELİ</h2>
+                        <div class="bg-white p-6 rounded-xl shadow-lg">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Genel İstatistikler (Simülasyon)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                                <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+                                    <p class="text-sm text-gray-600">Toplam Kullanıcı</p>
+                                    <p id="adminTotalUsers" class="text-2xl font-bold text-red-600">0</p>
+                                </div>
+                                <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+                                    <p class="text-sm text-gray-600">Toplam Bakiye (Sim.)</p>
+                                    <p id="adminTotalBalance" class="text-2xl font-bold text-red-600">₺0.00</p>
+                                </div>
+                                <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+                                    <p class="text-sm text-gray-600">Açık Destek Bileti</p>
+                                    <p id="adminOpenTickets" class="text-2xl font-bold text-red-600">0</p>
+                                </div>
+                            </div>
+                            
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4 border-t pt-4">Tüm Açık Biletler</h3>
+                            <div id="adminOpenTicketsList" class="space-y-2">
+                                <p class="text-sm text-gray-500">Açık bilet bulunmamaktadır.</p>
+                            </div>
+                        </div>
+                    </section>
+
 
                     <!-- Genel Mesaj Kutusu (Modal/Snackbar yerine kullanılabilir) -->
                     <div id="statusMessage" class="fixed bottom-4 right-4 bg-primary-color text-white p-3 rounded-lg shadow-xl hidden transition-opacity duration-300 z-50"></div>
@@ -385,27 +470,31 @@
     <script type="module">
         // --- FIREBASE İMPORTLARI ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, updatePassword, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, addDoc, getDocs, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, updatePassword, setPersistence, browserSessionPersistence, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where, addDoc, serverTimestamp, setLogLevel, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // Firestore için Hata Ayıklama (Debug) seviyesini aç
         setLogLevel('Debug');
         
         // --- GLOBAL DURUM YÖNETİMİ ---
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // Simülasyon Admin E-postası
+        const ADMIN_EMAIL = 'admin@geminipanel.com';
+        
         let app, db, auth;
         let isFirebaseInitialized = false;
         let userId = null;
-        let isAuthReady = false; // Auth durumunun ilk kez kontrol edilip edilmediğini tutar
+        let isAuthReady = false; 
 
-        // Uygulamanın anlık durumunu tutar
         const appState = {
             isAuthenticated: false,
-            currentPage: 'loading', // Başlangıçta 'loading'
+            isAdmin: false,
+            currentPage: 'loading',
             balance: 0.00,
             userData: null,
             orders: [],
-            // Servis verilerini Firestore'dan veya mock'tan alacağız
+            tickets: [], // Destek biletleri
+            allTickets: [], // Admin için tüm biletler
             serviceData: {
                 platforms: {
                     instagram: {
@@ -416,12 +505,6 @@
                                 types: {
                                     high_quality: { name: "Yüksek Kalite", pricePer1000: 50.00, min: 100, max: 10000, desc: "Anlık başlangıç, garantisiz." },
                                     guaranteed: { name: "Garantili (30 Gün)", pricePer1000: 120.00, min: 500, max: 50000, desc: "Hızlı başlangıç, 30 gün telafi garantili." }
-                                }
-                            },
-                            likes: {
-                                name: "Beğeni",
-                                types: {
-                                    turkish_real: { name: "Türk Gerçek", pricePer1000: 75.00, min: 50, max: 100000, desc: "Türk hesaplardan organik artış." }
                                 }
                             }
                         }
@@ -441,36 +524,27 @@
             }
         };
 
-        // --- YARDIMCI FONKSİYONLAR ---
+        // --- YARDIMCI FONKSİYONLAR VE PATHLER ---
 
-        /**
-         * Firestore kullanıcı belgesinin yolu.
-         * @param {string} uid Kullanıcı ID'si
-         * @returns {string} Belge yolu
-         */
         const getUserDocPath = (uid) => {
             return `/artifacts/${appId}/users/${uid}/userData/profile`;
         };
 
-        /**
-         * Firestore siparişler koleksiyonunun yolu.
-         * @param {string} uid Kullanıcı ID'si
-         * @returns {string} Koleksiyon yolu
-         */
         const getOrdersCollectionPath = (uid) => {
             return `/artifacts/${appId}/users/${uid}/orders`;
         };
         
-        /**
-         * Basit bir mesaj kutusu gösterir.
-         * @param {string} message Gösterilecek mesaj
-         * @param {'success'|'error'|'info'} type Mesaj türü
-         */
+        // Destek Biletleri için Genel Koleksiyon Yolu (Admin erişimi için)
+        const getPublicTicketsCollectionPath = () => {
+             return `/artifacts/${appId}/public/data/supportTickets`;
+        };
+        
         const showStatusMessage = (message, type = 'info') => {
             const el = document.getElementById('statusMessage');
             let bgColor = 'bg-primary-color';
             if (type === 'error') bgColor = 'bg-red-600';
             if (type === 'success') bgColor = 'bg-green-600';
+            if (type === 'warning') bgColor = 'bg-yellow-600';
 
             el.textContent = message;
             el.className = `fixed bottom-4 right-4 ${bgColor} text-white p-3 rounded-lg shadow-xl transition-opacity duration-300 z-50`;
@@ -483,13 +557,6 @@
             }, 5000);
         };
 
-        /**
-         * Modal kutuyu açar.
-         * @param {string} title Modal başlığı
-         * @param {string} body Modal içeriği
-         * @param {boolean} showConfirm Onay butonu gösterilsin mi?
-         * @param {Function} onConfirm Onay butonuna basıldığında çalışacak fonksiyon
-         */
         const openModal = (title, body, showConfirm = false, onConfirm = () => {}) => {
             document.getElementById('modalTitle').textContent = title;
             document.getElementById('modalBody').textContent = body;
@@ -519,10 +586,11 @@
             document.getElementById('appModal').classList.add('hidden');
         };
 
+
         // --- VERİ İŞLEMLERİ (CRUD) ---
 
         /**
-         * Firestore'dan kullanıcının bakiye, siparişler ve diğer verilerini dinler.
+         * Firestore'dan kullanıcının bakiye, siparişler ve bilet verilerini dinler.
          */
         const setupDataListeners = () => {
             if (!db || !userId) return;
@@ -535,11 +603,14 @@
                     appState.userData = data;
                     appState.balance = data.balance || 0.00;
                     
-                    // UI güncellemelerini tetikle
+                    // Admin kontrolü (Sadece e-posta ile giriş yapanlar için geçerlidir)
+                    appState.isAdmin = data.email === ADMIN_EMAIL;
+                    
                     updateBalanceUI();
                     updateProfileUI();
+                    updateUI(); // Admin butonu için UI'ı yenile
                 } else {
-                    // Kullanıcı verisi yoksa, yeni bir belge oluştur (ilk kayıt/anonim giriş sonrası)
+                    // Kullanıcı verisi yoksa, yeni bir belge oluştur
                     if (auth.currentUser && auth.currentUser.email) {
                         setDoc(userDocRef, {
                             email: auth.currentUser.email,
@@ -554,13 +625,8 @@
             });
 
             // 2. Siparişler Koleksiyonu Dinleyicisi
-            const ordersColRef = collection(db, getOrdersCollectionPath(userId));
-            // Sadece ilk 10 siparişi tarihe göre tersten al
-            const q = query(ordersColRef); // Sıralama Firestore'da index gerektirebilir. Şimdilik sıralama yapmıyoruz.
-            
-            onSnapshot(q, (snapshot) => {
+            onSnapshot(collection(db, getOrdersCollectionPath(userId)), (snapshot) => {
                 appState.orders = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                // Siparişleri yerel olarak tarihe göre sıralayalım
                 appState.orders.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
                 
                 updateDashboardUI();
@@ -569,23 +635,42 @@
             }, (error) => {
                 console.error("Siparişler veri dinleyicisinde hata:", error);
             });
+            
+            // 3. Kullanıcının Destek Biletleri Dinleyicisi
+            const userTicketsQuery = query(collection(db, getPublicTicketsCollectionPath()), where('userId', '==', userId));
+            onSnapshot(userTicketsQuery, (snapshot) => {
+                appState.tickets = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                appState.tickets.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+                
+                updateSupportUI();
+            }, (error) => {
+                console.error("Kullanıcı biletleri dinleyicisinde hata:", error);
+            });
+
+            // 4. Admin Paneli için Tüm Biletler Dinleyicisi (Sadece admin için gereklidir, ancak dinleyiciyi kuruyoruz)
+            onSnapshot(collection(db, getPublicTicketsCollectionPath()), (snapshot) => {
+                appState.allTickets = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                appState.allTickets.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+                
+                if (appState.isAdmin) {
+                    updateAdminUI();
+                }
+            }, (error) => {
+                console.error("Tüm biletler dinleyicisinde hata:", error);
+            });
         };
         
         // --- AUTH İŞLEMLERİ ---
 
         const handleRegister = async (email, password, displayName) => {
-            const form = document.getElementById('registerForm');
             const messageEl = document.getElementById('registerMessage');
             messageEl.classList.add('hidden');
 
             try {
-                // E-posta ve şifre ile kullanıcı oluştur
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                
-                // Kullanıcı adını ayarla
                 await updateProfile(userCredential.user, { displayName: displayName });
 
-                // Firestore'da kullanıcı belgesini oluştur (Anonim hesaptan geçiş yaparken)
+                // Firestore'da kullanıcı belgesini oluştur
                 await setDoc(doc(db, getUserDocPath(userCredential.user.uid)), {
                     email: email,
                     displayName: displayName,
@@ -594,16 +679,14 @@
                 });
                 
                 showStatusMessage('Kayıt başarılı! Yönlendiriliyorsunuz.', 'success');
-                // onAuthStateChanged tetiklenecek ve UI'ı Dashboard'a yönlendirecek.
             } catch (error) {
                 console.error("Kayıt hatası:", error);
                 let errorMessage = 'Kayıt başarısız oldu. Lütfen bilgileri kontrol edin.';
 
-                // Firebase hata kodlarına göre daha spesifik mesajlar göster
                 if (error.code === 'auth/email-already-in-use') {
-                    errorMessage = 'Bu e-posta adresi zaten kullanılıyor. Lütfen giriş yapın veya farklı bir e-posta kullanın.';
+                    errorMessage = 'Bu e-posta adresi zaten kullanılıyor. Lütfen giriş yapın.';
                 } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'Geçersiz e-posta formatı. Lütfen kontrol edin.';
+                    errorMessage = 'Geçersiz e-posta formatı.';
                 } else if (error.code === 'auth/weak-password') {
                     errorMessage = 'Şifre en az 6 karakter uzunluğunda olmalıdır.';
                 }
@@ -615,27 +698,22 @@
         };
 
         const handleLogin = async (email, password) => {
-            const form = document.getElementById('loginForm');
             const messageEl = document.getElementById('authMessage');
             messageEl.classList.add('hidden');
 
             try {
-                // Oturum kalıcılığını ayarla
                 await setPersistence(auth, browserSessionPersistence);
-                
-                // E-posta ve şifre ile giriş yap
                 await signInWithEmailAndPassword(auth, email, password);
                 
                 showStatusMessage('Giriş başarılı! Hoş geldiniz.', 'success');
-                // onAuthStateChanged tetiklenecek ve UI'ı Dashboard'a yönlendirecek.
             } catch (error) {
                 console.error("Giriş hatası:", error);
                 let errorMessage = 'Giriş başarısız oldu. E-posta veya şifre hatalı.';
-                if (error.code === 'auth/user-not-found') {
-                    errorMessage = 'Bu e-posta adresine kayıtlı kullanıcı bulunamadı.';
-                } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                     errorMessage = 'Hatalı şifre. Lütfen tekrar deneyin.';
+                
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                     errorMessage = 'E-posta veya şifre hatalı.';
                 }
+
                 messageEl.textContent = errorMessage;
                 messageEl.classList.remove('hidden');
                 showStatusMessage(errorMessage, 'error');
@@ -646,25 +724,53 @@
             try {
                 await signOut(auth);
                 showStatusMessage('Başarıyla çıkış yaptınız.', 'info');
-                // onAuthStateChanged tetiklenecek ve UI'ı Login'e yönlendirecek.
             } catch (error) {
                 console.error("Çıkış hatası:", error);
                 showStatusMessage('Çıkış yaparken bir hata oluştu.', 'error');
             }
         };
+        
+        const handleForgotPassword = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('forgotEmail').value;
+            const messageEl = document.getElementById('forgotMessage');
+            messageEl.classList.add('hidden');
+            messageEl.classList.remove('text-red-500', 'text-green-500');
 
-        // Google Girişi için bir simülasyon fonksiyonu
-        const handleGoogleSignInSimulation = () => {
-             openModal('Google Giriş Simülasyonu', 'Gerçek bir uygulamada bu, Google pop-up\'ı açardı. Simülasyon olduğu için normal giriş yapmanız gerekmektedir.', false);
+            if (!email) {
+                messageEl.textContent = 'Lütfen e-posta adresinizi girin.';
+                messageEl.classList.add('text-red-500');
+                messageEl.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                await sendPasswordResetEmail(auth, email);
+                messageEl.textContent = `Şifre sıfırlama linki ${email} adresine gönderildi. E-postanızı kontrol edin.`;
+                messageEl.classList.add('text-green-500');
+                messageEl.classList.remove('hidden');
+                showStatusMessage('Sıfırlama linki gönderildi.', 'success');
+            } catch (error) {
+                console.error("Şifre sıfırlama hatası:", error);
+                let errorMessage = 'Sıfırlama linki gönderilemedi. Lütfen e-posta adresinizi kontrol edin.';
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'Bu e-posta adresine kayıtlı kullanıcı bulunamadı.';
+                }
+                messageEl.textContent = errorMessage;
+                messageEl.classList.add('text-red-500');
+                messageEl.classList.remove('hidden');
+                showStatusMessage(errorMessage, 'error');
+            }
         };
 
-        // --- İŞLEM FONKSİYONLARI ---
 
+        // --- İŞLEM FONKSİYONLARI ---
+        
         /**
-         * Yeni sipariş oluşturur.
+         * Yeni sipariş oluşturur. (handleNewOrder'ı değiştirmedim, daha önce ekliydi)
          */
         const handleNewOrder = async (e) => {
-            e.preventDefault();
+             e.preventDefault();
             
             if (!userId) {
                 showStatusMessage('Lütfen önce giriş yapın.', 'error');
@@ -683,7 +789,7 @@
             const service = appState.serviceData.platforms[platformKey]?.categories[categoryKey]?.types[serviceKey];
 
             if (!service || quantity < service.min || quantity > service.max) {
-                 messageEl.textContent = `Miktar, ${service.min} ile ${service.max} arasında olmalıdır.`;
+                 messageEl.textContent = `Miktar, ${service.min.toLocaleString()} ile ${service.max.toLocaleString()} arasında olmalıdır.`;
                  messageEl.classList.remove('hidden');
                  showStatusMessage('Miktar aralığı geçersiz!', 'error');
                  return;
@@ -697,7 +803,7 @@
                  return;
             }
 
-            openModal('Sipariş Onayı', `Toplam ${quantity} adet ${service.name} servisi için ₺${totalCost.toFixed(2)} harcayacaksınız. Onaylıyor musunuz?`, true, async () => {
+            openModal('Sipariş Onayı', `Toplam ${quantity.toLocaleString()} adet ${service.name} servisi için ₺${totalCost.toFixed(2)} harcayacaksınız. Onaylıyor musunuz?`, true, async () => {
                 try {
                     // 1. Bakiyeyi Düş
                     const userDocRef = doc(db, getUserDocPath(userId));
@@ -730,7 +836,7 @@
         };
 
         /**
-         * Bakiye yükleme işlemini simüle eder.
+         * Bakiye yükleme işlemini simüle eder. (handleFund'ı değiştirmedim, daha önce ekliydi)
          */
         const handleFund = async (e) => {
             e.preventDefault();
@@ -761,9 +867,6 @@
                         updatedAt: serverTimestamp()
                     });
 
-                    // İşlem geçmişine kaydet (Opsiyonel)
-                    // ...
-
                     showStatusMessage(`₺${amount.toFixed(2)} bakiye başarıyla yüklendi!`, 'success');
                     document.getElementById('fundForm').reset();
                 } catch (error) {
@@ -772,89 +875,74 @@
                 }
             });
         };
-
+        
         /**
-         * Profil bilgilerini günceller (Simülasyon/Şifre hariç).
+         * Yeni destek bileti oluşturur.
          */
-        const handleUpdateProfile = async (e) => {
-            e.preventDefault();
-            // Kullanıcı adı güncelleme formu burada işlenebilir.
-            // Şimdilik sadece şifre güncelleme formu var.
-        };
+        const handleNewTicket = async (e) => {
+             e.preventDefault();
+             if (!userId) return;
 
-        /**
-         * Şifre güncelleme işlemini gerçekleştirir.
-         */
-        const handleUpdatePassword = async (e) => {
-            e.preventDefault();
-            
-            if (!auth.currentUser || auth.currentUser.isAnonymous) {
-                showStatusMessage('Şifre güncellemek için e-posta/şifre ile giriş yapmış olmanız gerekir.', 'error');
-                return;
-            }
+             const subject = document.getElementById('ticketSubject').value;
+             const message = document.getElementById('ticketMessage').value;
+             const messageEl = document.getElementById('ticketMessageDisplay');
+             messageEl.classList.add('hidden');
+             
+             try {
+                 await addDoc(collection(db, getPublicTicketsCollectionPath()), {
+                     userId: userId,
+                     displayName: appState.userData?.displayName || 'Anonim',
+                     email: appState.userData?.email || 'N/A',
+                     subject: subject,
+                     message: message,
+                     status: 'Open',
+                     createdAt: serverTimestamp()
+                 });
 
-            const newPassword = document.getElementById('newPassword').value;
-            const messageEl = document.getElementById('passwordMessage');
-            messageEl.classList.add('hidden');
-            
-            if (newPassword.length < 6) {
-                 messageEl.textContent = 'Şifre en az 6 karakter olmalıdır.';
+                 showStatusMessage('Destek biletiniz başarıyla oluşturuldu!', 'success');
+                 e.target.reset();
+             } catch (error) {
+                 console.error("Bilet oluşturma hatası:", error);
+                 messageEl.textContent = 'Bilet oluşturulurken bir hata oluştu.';
                  messageEl.classList.remove('hidden');
-                 return;
-            }
-
-            try {
-                await updatePassword(auth.currentUser, newPassword);
-                showStatusMessage('Şifreniz başarıyla güncellendi.', 'success');
-                e.target.reset();
-            } catch (error) {
-                console.error("Şifre güncelleme hatası:", error);
-                // Genellikle 'auth/requires-recent-login' hatası alınır.
-                messageEl.textContent = 'Şifre güncellenemedi. Güvenlik nedeniyle yakın zamanda tekrar giriş yapmanız gerekebilir.';
-                messageEl.classList.remove('hidden');
-                showStatusMessage('Şifre güncellenirken hata oluştu.', 'error');
-            }
+                 showStatusMessage('Bilet oluşturulurken hata oluştu.', 'error');
+             }
         };
 
         // --- UI GÜNCELLEME İŞLEMLERİ ---
 
-        /**
-         * Sayfa navigasyonunu yönetir.
-         * @param {string} page Gidilecek sayfa adı ('dashboard', 'newOrder', vb. veya 'login', 'register')
-         */
         const handleNavigation = (page) => {
+            // Admin olmayan kullanıcı admin sayfasına gitmeye çalışırsa engelle
+            if (page === 'admin' && !appState.isAdmin) {
+                 showStatusMessage('Yönetici yetkiniz bulunmamaktadır.', 'error');
+                 return;
+            }
             appState.currentPage = page;
             updateUI();
         };
 
-        /**
-         * Genel UI'ı mevcut appState'e göre günceller.
-         */
         const updateUI = () => {
-            // Yükleme paneli kontrolü
+            // 1. Yükleme ve Ana Container Kontrolü
             if (isAuthReady) {
                 document.getElementById('loadingPanel').classList.add('hidden');
                 document.getElementById('appContainer').classList.remove('hidden');
             } else {
-                // Auth hazır değilse sadece yükleme panelini göster
-                document.getElementById('appContainer').classList.add('hidden');
-                document.getElementById('loadingPanel').classList.remove('hidden');
                 return;
             }
 
-
-            const isAuthPage = appState.currentPage === 'login' || appState.currentPage === 'register';
+            const isAuthPage = appState.currentPage === 'login' || appState.currentPage === 'register' || appState.currentPage === 'forgotPassword';
             
-            // Ana Container görünürlüğünü ayarla
+            // 2. Auth Container vs Main App Kontrolü
             document.getElementById('mainApp').classList.toggle('hidden', isAuthPage || !appState.isAuthenticated);
             document.getElementById('authContainer').classList.toggle('hidden', !isAuthPage && appState.isAuthenticated);
+            
+            // 3. Auth Alt Sayfalarının Görünürlüğünü ayarla
+            document.querySelectorAll('.auth-page').forEach(page => page.classList.add('hidden'));
+            document.getElementById(`${appState.currentPage}Page`)?.classList.remove('hidden');
 
-            // Giriş/Kayıt Sayfası Görünürlüğünü ayarla
-            document.getElementById('loginPage').classList.toggle('hidden', appState.currentPage !== 'login');
-            document.getElementById('registerPage').classList.toggle('hidden', appState.currentPage !== 'register');
 
             if (appState.isAuthenticated) {
-                // Sidebar Navigasyonunu Güncelle
+                // 4. Sidebar Navigasyonunu Güncelle
                 document.querySelectorAll('.nav-item').forEach(btn => {
                     btn.classList.remove('active');
                 });
@@ -862,8 +950,11 @@
                 if (activeNavButton) {
                     activeNavButton.classList.add('active');
                 }
+                
+                // Admin butonu görünürlüğünü ayarla
+                document.getElementById('nav-admin').classList.toggle('hidden', !appState.isAdmin);
 
-                // İçerik Sayfalarını Güncelle
+                // 5. İçerik Sayfalarını Güncelle
                 document.querySelectorAll('.page-content').forEach(section => {
                     section.classList.add('hidden');
                 });
@@ -872,29 +963,20 @@
                     activeContent.classList.remove('hidden');
                 }
 
-                // Kullanıcı ID'sini Sidebar'da göster
                 document.getElementById('currentUserId').textContent = userId || 'Anonim';
                 
-                // Sayfalara özel UI güncellemeleri
-                if (appState.currentPage === 'newOrder') {
-                    populateOrderForm();
-                }
-                
-                // Firestore dinleyicileri veriyi güncellediği için ayrıca çağırmaya gerek yok,
-                // ancak formlar için ilk yüklemede çağrılmalı.
-                if (appState.currentPage === 'fund') {
-                    document.getElementById('currentBalanceFund').textContent = `₺${appState.balance.toFixed(2)}`;
-                }
+                // 6. Sayfalara özel UI güncellemeleri
+                if (appState.currentPage === 'newOrder') populateOrderForm();
+                if (appState.currentPage === 'fund') document.getElementById('currentBalanceFund').textContent = `₺${appState.balance.toFixed(2)}`;
+                if (appState.currentPage === 'admin' && appState.isAdmin) updateAdminUI();
+
             }
         };
         
-        /**
-         * Sadece Dashboard kartlarını günceller.
-         */
         const updateDashboardUI = () => {
+            // ... (Mevcut Dashboard Kodu)
             const totalOrders = appState.orders.length;
             const pendingOrders = appState.orders.filter(o => o.status === 'Pending').length;
-            // Son harcama (en son 'cost' alanına sahip işlem)
             const lastExpenseOrder = appState.orders.find(o => o.cost > 0);
             const lastExpense = lastExpenseOrder ? lastExpenseOrder.cost : 0.00;
 
@@ -903,11 +985,10 @@
             document.getElementById('pendingOrdersDisplay').textContent = pendingOrders.toString();
             document.getElementById('lastExpenseDisplay').textContent = `₺${lastExpense.toFixed(2)}`;
             
-            // Son İşlemleri Göster
             const tableBody = document.getElementById('recentTransactionsTable');
             tableBody.innerHTML = '';
             
-            const recentOrders = appState.orders.slice(0, 5); // En son 5 sipariş
+            const recentOrders = appState.orders.slice(0, 5);
             if (recentOrders.length === 0) {
                  tableBody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">Henüz bir sipariş yapılmadı.</td></tr>';
             } else {
@@ -930,21 +1011,9 @@
                 });
             }
         };
-
-        /**
-         * Bakiye gösterimini günceller.
-         */
-        const updateBalanceUI = () => {
-            document.getElementById('balanceDisplay').textContent = `₺${appState.balance.toFixed(2)}`;
-            if (document.getElementById('currentBalanceFund')) {
-                document.getElementById('currentBalanceFund').textContent = `₺${appState.balance.toFixed(2)}`;
-            }
-        };
         
-        /**
-         * Siparişler tablosunu günceller.
-         */
         const updateOrdersTable = () => {
+             // ... (Mevcut Siparişler Tablo Kodu)
             const tableBody = document.getElementById('ordersTableBody');
             if (!tableBody) return;
             
@@ -977,9 +1046,99 @@
             });
         };
         
-        /**
-         * Profil sayfasındaki bilgileri günceller.
-         */
+        const updateSupportUI = () => {
+            const listEl = document.getElementById('openTicketsList');
+            if (!listEl) return;
+            
+            listEl.innerHTML = '';
+            
+            if (appState.tickets.length === 0) {
+                listEl.innerHTML = '<p class="text-sm text-gray-500">Açık biletiniz bulunmamaktadır.</p>';
+                return;
+            }
+
+            appState.tickets.forEach(ticket => {
+                const ticketEl = document.createElement('div');
+                ticketEl.className = 'bg-gray-50 p-3 rounded-lg border border-gray-200';
+                const date = ticket.createdAt ? new Date(ticket.createdAt.seconds * 1000).toLocaleDateString('tr-TR') : 'N/A';
+
+                let statusClass = 'bg-yellow-100 text-yellow-800';
+                if (ticket.status === 'Closed') statusClass = 'bg-green-100 text-green-800';
+
+                ticketEl.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="font-semibold text-gray-800">${ticket.subject}</p>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full ${statusClass}">${ticket.status === 'Open' ? 'Açık' : 'Kapalı'}</span>
+                    </div>
+                    <p class="text-xs text-gray-600 mb-2">${ticket.message.substring(0, 100)}${ticket.message.length > 100 ? '...' : ''}</p>
+                    <p class="text-xs text-gray-400">Tarih: ${date} | ID: ${ticket.id.substring(0, 6)}</p>
+                `;
+                listEl.appendChild(ticketEl);
+            });
+        };
+        
+        const updateAdminUI = async () => {
+            if (!appState.isAdmin || appState.currentPage !== 'admin') return;
+
+            // 1. İstatistikler
+            document.getElementById('adminOpenTickets').textContent = appState.allTickets.filter(t => t.status === 'Open').length.toString();
+            
+            // Kullanıcı verilerini çek ve istatistikleri güncelle
+            try {
+                const usersCollectionRef = collection(db, `/artifacts/${appId}/users`);
+                const userDocs = await getDocs(usersCollectionRef);
+                
+                let totalBalanceSim = 0;
+                userDocs.docs.forEach(userSnapshot => {
+                    // Profile alt koleksiyonundaki belgeyi çek
+                    // Bu senaryoda tüm kullanıcıları listelemek zor, sadece istatistikleri hesaplayalım
+                    // Firestore'da tüm kullanıcıları bu şekilde almak zordur. Sadece mevcut verilerle simülasyon yapalım.
+                });
+                
+                // Basit istatistik simülasyonu
+                const totalUsers = userDocs.docs.length; 
+                document.getElementById('adminTotalUsers').textContent = totalUsers.toString();
+                document.getElementById('adminTotalBalance').textContent = '₺' + (totalUsers * 1000).toFixed(2); // Simülasyon
+
+            } catch (error) {
+                 console.error("Admin istatistikleri çekme hatası:", error);
+            }
+            
+            // 2. Tüm Açık Biletler
+            const adminTicketsListEl = document.getElementById('adminOpenTicketsList');
+            adminTicketsListEl.innerHTML = '';
+            
+            const openTickets = appState.allTickets.filter(t => t.status === 'Open');
+
+            if (openTickets.length === 0) {
+                 adminTicketsListEl.innerHTML = '<p class="text-sm text-gray-500">Açık bilet bulunmamaktadır.</p>';
+                 return;
+            }
+            
+            openTickets.forEach(ticket => {
+                const ticketEl = document.createElement('div');
+                ticketEl.className = 'bg-red-50 p-3 rounded-lg border border-red-200';
+                const date = ticket.createdAt ? new Date(ticket.createdAt.seconds * 1000).toLocaleDateString('tr-TR') : 'N/A';
+
+                ticketEl.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <p class="font-semibold text-gray-800">${ticket.subject} (Kullanıcı: ${ticket.displayName})</p>
+                        <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-800">AÇIK</span>
+                    </div>
+                    <p class="text-xs text-gray-600 mb-2">${ticket.message.substring(0, 150)}...</p>
+                    <p class="text-xs text-gray-400">E-posta: ${ticket.email} | ID: ${ticket.id.substring(0, 6)} | Tarih: ${date}</p>
+                `;
+                adminTicketsListEl.appendChild(ticketEl);
+            });
+        };
+
+        const updateBalanceUI = () => {
+            document.getElementById('balanceDisplay').textContent = `₺${appState.balance.toFixed(2)}`;
+            if (document.getElementById('currentBalanceFund')) {
+                document.getElementById('currentBalanceFund').textContent = `₺${appState.balance.toFixed(2)}`;
+            }
+        };
+        
         const updateProfileUI = () => {
             if (appState.userData) {
                 document.getElementById('profileDisplayName').textContent = appState.userData.displayName || 'Kullanıcı Adı Yok';
@@ -988,18 +1147,14 @@
             }
         };
 
-        // --- YENİ SİPARİŞ FORMU İŞLEMLERİ ---
+        // --- YENİ SİPARİŞ FORMU İŞLEMLERİ (Aynı kaldı) ---
 
-        /**
-         * Formdaki Platform, Kategori ve Servis seçeneklerini doldurur.
-         */
         const populateOrderForm = () => {
-            const platformSelect = document.getElementById('platformSelect');
+             const platformSelect = document.getElementById('platformSelect');
             const categorySelect = document.getElementById('categorySelect');
             const serviceTypeSelect = document.getElementById('serviceTypeSelect');
 
-            // 1. Platformları Doldur
-            if (platformSelect.options.length <= 1) { // Sadece varsayılan option varsa doldur
+            if (platformSelect.options.length <= 1) { 
                 Object.keys(appState.serviceData.platforms).forEach(key => {
                     const option = document.createElement('option');
                     option.value = key;
@@ -1008,7 +1163,6 @@
                 });
             }
 
-            // 2. Event Listener'ları kur (Sadece bir kez)
             if (!platformSelect._listenersSet) {
                 platformSelect.addEventListener('change', () => {
                     const selectedPlatform = platformSelect.value;
@@ -1056,7 +1210,7 @@
                     const selectedCategory = categorySelect.value;
                     const selectedService = serviceTypeSelect.value;
                     const detailsDiv = document.getElementById('serviceDetails');
-                    document.getElementById('quantityInput').value = ''; // Miktarı sıfırla
+                    document.getElementById('quantityInput').value = ''; 
                     calculateTotalCost();
 
                     if (selectedPlatform && selectedCategory && selectedService) {
@@ -1077,13 +1231,9 @@
                 platformSelect._listenersSet = true;
             }
             
-            // UI'ı tetikle (ilk yüklendiğinde servis detaylarının doğru hesaplanmasını sağlar)
             platformSelect.dispatchEvent(new Event('change'));
         };
 
-        /**
-         * Seçilen miktar ve servise göre toplam maliyeti hesaplar.
-         */
         const calculateTotalCost = () => {
             const platformKey = document.getElementById('platformSelect').value;
             const categoryKey = document.getElementById('categorySelect').value;
@@ -1114,19 +1264,13 @@
 
         // --- BAŞLATMA VE AUTH MANTIĞI ---
 
-        /**
-         * Firebase'i başlatır ve ilk yetkilendirme akışını yönetir.
-         */
         const initializeAndAuthenticate = async () => {
             document.getElementById('loadingStatus').textContent = 'Firebase Yapılandırması Yükleniyor...';
             
             try {
                 const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
                 
-                if (Object.keys(firebaseConfig).length === 0) {
-                    console.error("Firebase yapılandırması eksik.");
-                    throw new Error("Eksik Firebase Yapılandırması");
-                }
+                if (Object.keys(firebaseConfig).length === 0) throw new Error("Eksik Firebase Yapılandırması");
                 
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
@@ -1135,25 +1279,19 @@
                 
                 document.getElementById('loadingStatus').textContent = 'Kimlik doğrulama dinleyicisi kuruluyor...';
 
-                // 1. Oturum kalıcılığını ayarla
                 await setPersistence(auth, browserSessionPersistence);
 
                 let authCheckCompleted = false;
                 
-                // 2. Yetkilendirme Durumu Dinleyicisi
                 onAuthStateChanged(auth, async (user) => {
-                    console.log("onAuthStateChanged tetiklendi. Kullanıcı:", user ? user.uid : "Yok");
-
                     userId = user ? user.uid : crypto.randomUUID();
-                    appState.isAuthenticated = !!user; // Kullanıcı varsa true
+                    appState.isAuthenticated = !!user; 
                     
                     if (!isAuthReady) {
                         isAuthReady = true;
                         
-                        // Yönlendirme mantığı
                         if (appState.isAuthenticated) {
                             appState.currentPage = 'dashboard';
-                            // Oturum açtıysa veri dinleyicilerini başlat
                             if (!authCheckCompleted) {
                                 setupDataListeners();
                                 authCheckCompleted = true;
@@ -1163,30 +1301,22 @@
                         }
                     }
 
-                    // UI'ı güncelle
                     updateUI(); 
-                    
-                    document.getElementById('loadingPanel').classList.add('hidden'); // Yükleme ekranını kaldır
+                    document.getElementById('loadingPanel').classList.add('hidden');
                 });
 
-                // 3. İlk Jetonlu Giriş/Anonim Giriş Denemesi (Sadece İlk Yüklemede)
-                // Eğer Canvas bir jeton sağladıysa, onu kullanarak giriş yap
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     document.getElementById('loadingStatus').textContent = 'Özel jeton ile giriş deneniyor...';
                     await signInWithCustomToken(auth, __initial_auth_token);
-                    console.log("Özel jeton ile giriş başarılı.");
                 } else if (!auth.currentUser) {
-                    // Jeton yoksa ve oturum açılmamışsa anonim giriş yap
                     document.getElementById('loadingStatus').textContent = 'Anonim giriş deneniyor...';
                     await signInAnonymously(auth);
-                    console.log("Anonim giriş başarılı.");
                 }
 
             } catch (e) {
                 console.error("Firebase Başlatma/Giriş Hatası:", e);
                 isFirebaseInitialized = false;
                 
-                // Hata durumunda yükleme ekranını kaldır ve login sayfasına yönlendir
                 isAuthReady = true;
                 appState.currentPage = 'login';
                 showStatusMessage('Uygulama başlatılırken bir hata oluştu. Lütfen tekrar deneyin.', 'error');
@@ -1199,7 +1329,6 @@
         // --- EVENT LISTENERS ---
         
         const attachEventListeners = () => {
-            // Auth formlarını yakala
             const loginForm = document.getElementById('loginForm');
             if (loginForm) {
                 loginForm.addEventListener('submit', (e) => {
@@ -1221,35 +1350,42 @@
                 });
             }
             
-            // Yeni Sipariş Formu
+            const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+            if (forgotPasswordForm) {
+                 forgotPasswordForm.addEventListener('submit', handleForgotPassword);
+            }
+            
             const newOrderForm = document.getElementById('newOrderForm');
             if (newOrderForm) {
                 newOrderForm.addEventListener('submit', handleNewOrder);
             }
             
-            // Bakiye Yükleme Formu
             const fundForm = document.getElementById('fundForm');
             if (fundForm) {
                 fundForm.addEventListener('submit', handleFund);
             }
             
-            // Şifre Güncelleme Formu
             const updatePasswordForm = document.getElementById('updatePasswordForm');
             if (updatePasswordForm) {
                 updatePasswordForm.addEventListener('submit', handleUpdatePassword);
+            }
+            
+            const newTicketForm = document.getElementById('newTicketForm');
+            if (newTicketForm) {
+                newTicketForm.addEventListener('submit', handleNewTicket);
             }
         };
 
         // --- GLOBAL ERİŞİM İÇİN EŞLEŞTİRMELER --
         window.handleNavigation = handleNavigation;
         window.handleLogout = handleLogout;
-        window.handleGoogleSignInSimulation = handleGoogleSignInSimulation;
-        window.closeModal = closeModal; // Modal kapatmayı global yap
+        window.closeModal = closeModal; 
+        // Google giriş simülasyonu kaldırıldı, Şifremi Unuttum eklendi.
 
         // --- UYGULAMA BAŞLANGICI ---
         window.onload = () => {
             attachEventListeners();
-            initializeAndAuthenticate(); // Başlatma ve kimlik doğrulama sürecini başlat
+            initializeAndAuthenticate();
         };
 
     </script>
