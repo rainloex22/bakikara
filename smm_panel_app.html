@@ -66,7 +66,11 @@
 
     <!-- Ana Uygulama Kapsayıcısı -->
     <div id="appContainer" class="flex min-h-screen">
-        <!-- Bu alan JS ile doldurulacaktır -->
+        <!-- Başlangıçta Yükleniyor Göstergesi -->
+        <div id="initialLoader" class="flex flex-1 items-center justify-center text-gray-500">
+            <i class="fas fa-spinner fa-spin text-4xl text-blue-500 mr-3"></i>
+            <span class="text-lg font-medium">Uygulama Yükleniyor...</span>
+        </div>
     </div>
 
     <!-- Başlangıçta Görünmeyen Modal Yapısı -->
@@ -84,13 +88,29 @@
         import { getFirestore, doc, getDoc, addDoc, setDoc, onSnapshot, collection, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- GLOBAL CONFIGURATION AND INITIALIZATION ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-smm-app';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
         
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        let app, auth, db;
+        let isFirebaseInitialized = false;
+        
+        try {
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-smm-app';
+            const firebaseConfigString = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+            const firebaseConfig = JSON.parse(firebaseConfigString);
+            
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            isFirebaseInitialized = true;
+            console.log("Firebase başarıyla başlatıldı.");
+            
+        } catch (e) {
+            console.error("KRİTİK HATA: Firebase başlatılamadı veya config hatası. Uygulama, veri tabanı bağlantısı olmadan devam ediyor.", e);
+            // Firebase başarısız olursa dummy objeler ile devam et
+            auth = { onAuthStateChanged: (cb) => cb(null), currentUser: null }; 
+            db = {};
+            isFirebaseInitialized = false;
+        }
+
 
         // --- GLOBAL STATE ---
         const appState = {
@@ -143,6 +163,14 @@
             appState.currentPage = page;
             updateUI();
         }
+        
+        /**
+         * Başlangıç yükleyiciyi gizler.
+         */
+        function hideLoader() {
+            const loader = document.getElementById('initialLoader');
+            if (loader) loader.classList.add('hidden');
+        }
 
         /**
          * Modalı açar ve içeriği ayarlar.
@@ -182,7 +210,9 @@
          * Firestore'dan kullanıcı profilini yükler veya oluşturur.
          */
         async function loadOrCreateUserProfile(user) {
-            const profileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
+            if (!isFirebaseInitialized) return;
+
+            const profileRef = doc(db, 'artifacts', 'default-smm-app', 'users', user.uid, 'profile', 'data');
             const docSnap = await getDoc(profileRef);
 
             if (docSnap.exists()) {
@@ -222,8 +252,11 @@
          * Siparişleri ve destek taleplerini dinler.
          */
         function startFirestoreListeners(userId) {
+            if (!isFirebaseInitialized) return;
+            const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-smm-app';
+
             // 1. Siparişler Dinleyicisi
-            const ordersRef = collection(db, 'artifacts', appId, 'users', userId, 'orders');
+            const ordersRef = collection(db, 'artifacts', currentAppId, 'users', userId, 'orders');
             const qOrders = query(ordersRef, orderBy('orderDate', 'desc'));
             onSnapshot(qOrders, (snapshot) => {
                 currentServiceState.orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -234,7 +267,7 @@
             }, (error) => console.error("Sipariş Dinleme Hatası:", error));
 
             // 2. Destek Talepleri Dinleyicisi
-            const ticketsRef = collection(db, 'artifacts', appId, 'users', userId, 'tickets');
+            const ticketsRef = collection(db, 'artifacts', currentAppId, 'users', userId, 'tickets');
             const qTickets = query(ticketsRef, orderBy('createdAt', 'desc'));
             onSnapshot(ticketsRef, (snapshot) => {
                 currentServiceState.tickets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -249,6 +282,10 @@
          * Google ile Kayıt Ol/Giriş Yap simülasyonu (Firestore entegrasyonlu).
          */
         async function handleGoogleSignInSimulation() {
+            if (!isFirebaseInitialized) {
+                return displayMessage("Firebase başlatılamadı. Giriş/Kayıt yapılamaz.", true);
+            }
+
             const tempEmail = `google_user_${Math.random().toString(36).substring(2, 9)}@geminipanel.com`;
             const tempPassword = Math.random().toString(36);
             const displayName = `Google Kullanıcısı ${Math.floor(Math.random() * 1000)}`;
@@ -265,8 +302,6 @@
                 
             } catch (error) {
                 if (error.code === 'auth/email-already-in-use') {
-                    // Bu senaryoda normalde Google ile giriş yapılır. Bizim simülasyonumuzda bu olmaz, 
-                    // ancak bir hata durumunda kullanıcıyı bilgilendirelim.
                     displayMessage('Bu e-posta adresi zaten kullanılıyor. Normalde Google bu hesaba giriş yapardı.', true);
                 } else {
                     displayMessage(`Google simülasyonu başarısız: ${error.message}`, true);
@@ -278,6 +313,9 @@
          * Formdan alınan verilerle giriş yapar.
          */
         async function handleLogin(email, password) {
+             if (!isFirebaseInitialized) {
+                return displayMessage("Firebase başlatılamadı. Giriş/Kayıt yapılamaz.", true);
+            }
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 openModal('Başarılı', `<p class="text-green-600">Başarıyla giriş yapıldı. Yönlendiriliyorsunuz...</p>`);
@@ -295,6 +333,9 @@
          * Formdan alınan verilerle yeni kullanıcı kaydı yapar.
          */
         async function handleRegister(email, password, displayName) {
+             if (!isFirebaseInitialized) {
+                return displayMessage("Firebase başlatılamadı. Giriş/Kayıt yapılamaz.", true);
+            }
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 await updateProfile(userCredential.user, { displayName: displayName });
@@ -315,6 +356,12 @@
          * Kullanıcıyı uygulamadan çıkarır.
          */
         async function handleLogout() {
+             if (!isFirebaseInitialized) {
+                appState.isLoggedIn = false;
+                appState.user = null;
+                handleNavigation('home');
+                return;
+            }
             try {
                 await signOut(auth);
                 // Auth listener state'i güncelleyecektir
@@ -326,39 +373,42 @@
         }
 
         // --- FIREBASE AUTH LISTENER ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                appState.isLoggedIn = true;
-                appState.user = user;
-                await loadOrCreateUserProfile(user);
-                
-                if (appState.currentPage === 'home' || appState.currentPage === 'login' || appState.currentPage === 'register') {
-                    handleNavigation('dashboard');
-                }
-            } else {
-                appState.isLoggedIn = false;
-                appState.user = null;
-                appState.profile.userId = null;
-                
-                if (initialAuthToken) {
-                    // Custom token varsa otomatik giriş yap
-                    try {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } catch (error) {
-                        console.error("Custom token ile giriş başarısız, anonim olarak deneniyor.", error);
-                        await signInAnonymously(auth);
+        if (isFirebaseInitialized) {
+            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+            
+            onAuthStateChanged(auth, async (user) => {
+                hideLoader();
+                if (user) {
+                    appState.isLoggedIn = true;
+                    appState.user = user;
+                    await loadOrCreateUserProfile(user);
+                    
+                    if (appState.currentPage === 'home' || appState.currentPage === 'login' || appState.currentPage === 'register') {
+                        handleNavigation('dashboard');
                     }
                 } else {
-                    // Token yoksa anonim giriş yap
-                    await signInAnonymously(auth);
-                }
+                    appState.isLoggedIn = false;
+                    appState.user = null;
+                    appState.profile.userId = null;
+                    
+                    if (initialAuthToken) {
+                        try {
+                            await signInWithCustomToken(auth, initialAuthToken);
+                        } catch (error) {
+                            console.error("Özel token ile giriş başarısız, anonim olarak deneniyor.", error);
+                            await signInAnonymously(auth).catch(e => console.error("Anonim giriş de başarısız.", e));
+                        }
+                    } else {
+                        await signInAnonymously(auth).catch(err => console.error("Anonim giriş başarısız.", err));
+                    }
 
-                if (appState.currentPage !== 'home' && appState.currentPage !== 'login' && appState.currentPage !== 'register' && appState.currentPage !== 'policies') {
-                    handleNavigation('home');
+                    if (appState.currentPage !== 'home' && appState.currentPage !== 'login' && appState.currentPage !== 'register' && appState.currentPage !== 'policies') {
+                        handleNavigation('home');
+                    }
                 }
-            }
-            updateUI();
-        });
+                updateUI();
+            });
+        }
 
 
         // --- UI COMPONENTS & RENDERERS ---
@@ -380,9 +430,10 @@
             
             // Eğer varsa, 5 saniye sonra gizle.
             setTimeout(() => {
-                 if (document.getElementById('authMessage')) {
-                     document.getElementById('authMessage').innerHTML = '';
-                 }
+                 const authMsg = document.getElementById('authMessage');
+                 const panelMsg = document.getElementById('panelMessage');
+                 if (authMsg) authMsg.innerHTML = '';
+                 if (panelMsg) panelMsg.innerHTML = '';
             }, 5000);
         }
 
@@ -439,6 +490,8 @@
                         </button>
                     </div>
                     `}
+                    
+                    ${!isFirebaseInitialized ? `<div class="mt-4 p-2 bg-red-100 text-red-700 text-xs rounded-lg text-center">Veri Bağlantısı Yok</div>` : ''}
                 </div>
             `;
         }
@@ -489,7 +542,7 @@
                         <input type="email" id="email" placeholder="E-posta Adresi" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                         <input type="password" id="password" placeholder="Şifre (min 6 karakter)" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                         
-                        <button type="submit" class="w-full p-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                        <button type="submit" class="w-full p-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors" ${!isFirebaseInitialized ? 'disabled' : ''}>
                             ${title}
                         </button>
                         
@@ -499,9 +552,11 @@
                             <hr class="flex-grow border-gray-300">
                         </div>
                         
-                        <button type="button" onclick="handleGoogleSignInSimulation()" class="google-btn w-full p-3 font-semibold rounded-lg flex items-center justify-center">
+                        <button type="button" onclick="handleGoogleSignInSimulation()" class="google-btn w-full p-3 font-semibold rounded-lg flex items-center justify-center" ${!isFirebaseInitialized ? 'disabled' : ''}>
                             <i class="fab fa-google mr-2"></i> Google ile ${title} (Simülasyon)
                         </button>
+                        
+                        ${!isFirebaseInitialized ? `<p class="text-xs text-red-500 mt-2 text-center">Giriş/Kayıt, veri bağlantısı olmadığı için devre dışıdır.</p>` : ''}
                     </form>
 
                     <p class="text-center text-sm mt-6">
@@ -579,19 +634,21 @@
                 // Miktar, Link ve Servis seçimi kontrolü
                 const linkValid = document.getElementById('targetLink')?.value.trim() !== '';
                 const quantityValid = quantity >= selectedService?.min && quantity <= selectedService?.max;
-                const canPlaceOrder = selectedService && linkValid && quantityValid;
+                const canPlaceOrder = selectedService && linkValid && quantityValid && isFirebaseInitialized;
 
                 const orderBtn = document.getElementById('btnPlaceOrder');
                 if (orderBtn) {
                      orderBtn.disabled = !canPlaceOrder;
                 }
                 
-                if (!quantityValid && selectedService) {
+                if (!quantityValid && selectedService && quantity !== 0) {
                     displayMessage(`Miktar ${selectedService.min} ve ${selectedService.max} arasında olmalıdır.`, true);
-                } else if (!linkValid && selectedService) {
-                    // Sadece link boşsa uyarı gösterme, butonu devre dışı bırak.
                 } else {
-                    document.getElementById('panelMessage').innerHTML = ''; // Hatalı mesajı temizle
+                    // Diğer hataları temizle
+                    const msgContainer = document.getElementById('panelMessage');
+                    if(msgContainer && !msgContainer.textContent.includes("Bakiyeniz yetersiz")) {
+                       msgContainer.innerHTML = ''; 
+                    }
                 }
             };
             
@@ -735,6 +792,7 @@
                         <button type="button" id="btnPlaceOrder" onclick="handlePlaceOrder()" class="w-full p-4 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400" disabled>
                             <i class="fas fa-check-circle mr-2"></i> Siparişi Tamamla
                         </button>
+                        ${!isFirebaseInitialized ? `<p class="text-xs text-red-500 mt-2 text-center">Veri bağlantısı olmadığı için sipariş verme devre dışıdır.</p>` : ''}
                     </form>
                 </div>
             `;
@@ -746,6 +804,9 @@
         window.handlePlaceOrder = async function() {
             if (!appState.isLoggedIn) {
                  return displayMessage("Sipariş vermek için lütfen giriş yapın.", true);
+            }
+             if (!isFirebaseInitialized) {
+                return displayMessage("Sipariş sistemi şu an aktif değil. Lütfen daha sonra tekrar deneyin.", true);
             }
             if (!currentServiceState.selectedService || document.getElementById('btnPlaceOrder').disabled) {
                 return displayMessage("Lütfen tüm alanları doğru şekilde doldurun.", true);
@@ -760,6 +821,7 @@
                  return displayMessage(`Bakiyeniz (${appState.profile.balance.toFixed(2)} TL) yetersiz. Gereken: ${totalAmount.toFixed(2)} TL.`, true);
             }
 
+            const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-smm-app';
             const orderData = {
                 platform: currentServiceState.selectedPlatform,
                 category: currentServiceState.selectedCategory,
@@ -780,12 +842,12 @@
 
             try {
                 // 1. Siparişi kaydet
-                const ordersCollectionRef = collection(db, 'artifacts', appId, 'users', appState.profile.userId, 'orders');
+                const ordersCollectionRef = collection(db, 'artifacts', currentAppId, 'users', appState.profile.userId, 'orders');
                 await addDoc(ordersCollectionRef, orderData);
                 
                 // 2. Bakiyeyi düş
                 const newBalance = appState.profile.balance - totalAmount;
-                const profileRef = doc(db, 'artifacts', appId, 'users', appState.profile.userId, 'profile', 'data');
+                const profileRef = doc(db, 'artifacts', currentAppId, 'users', appState.profile.userId, 'profile', 'data');
                 await setDoc(profileRef, { balance: newBalance }, { merge: true });
                 
                 openModal('Sipariş Başarılı', `<p class="text-green-600">Siparişiniz başarıyla alındı ve işlenmeye başlandı! Yeni bakiyeniz: ${newBalance.toFixed(2)} TL</p>`);
@@ -830,7 +892,7 @@
                     <h2 class="text-3xl font-bold text-gray-800">Siparişlerim</h2>
                     
                     <div class="bg-white p-6 rounded-xl shadow-md overflow-x-auto">
-                        ${orders.length === 0 ? `<p class="text-gray-500 text-center py-10">Henüz tamamlanmış bir siparişiniz bulunmamaktadır.</p>` : `
+                        ${!isFirebaseInitialized ? `<p class="text-red-500 text-center py-10">Veri bağlantısı olmadığı için sipariş geçmişi gösterilemiyor.</p>` : (orders.length === 0 ? `<p class="text-gray-500 text-center py-10">Henüz tamamlanmış bir siparişiniz bulunmamaktadır.</p>` : `
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
@@ -859,7 +921,7 @@
                                 `).join('')}
                             </tbody>
                         </table>
-                        `}
+                        `)}
                     </div>
                 </div>
             `;
@@ -882,7 +944,11 @@
                 if (!appState.isLoggedIn) {
                      return displayMessage("Destek talebi oluşturmak için giriş yapmalısınız.", true);
                 }
+                if (!isFirebaseInitialized) {
+                    return displayMessage("Veri bağlantısı olmadığı için talep oluşturulamıyor.", true);
+                }
 
+                const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-smm-app';
                 const ticketData = {
                     subject: subject,
                     message: message,
@@ -897,7 +963,7 @@
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Gönderiliyor...';
 
                 try {
-                    const ticketsCollectionRef = collection(db, 'artifacts', appId, 'users', appState.profile.userId, 'tickets');
+                    const ticketsCollectionRef = collection(db, 'artifacts', currentAppId, 'users', appState.profile.userId, 'tickets');
                     await addDoc(ticketsCollectionRef, ticketData);
                     
                     openModal('Talep Başarılı', '<p class="text-green-600">Destek talebiniz başarıyla oluşturuldu. En kısa sürede size dönüş yapılacaktır.</p>');
@@ -930,16 +996,17 @@
                         <form id="ticketForm" class="space-y-4">
                             <input type="text" id="ticketSubject" placeholder="Konu Başlığı (Örn: Bakiye Sorunu, Sipariş 123)" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                             <textarea id="ticketMessage" rows="5" placeholder="Detaylı Mesajınız" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"></textarea>
-                            <button type="button" id="btnCreateTicket" onclick="handleCreateTicket()" class="w-full p-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors">
+                            <button type="button" id="btnCreateTicket" onclick="handleCreateTicket()" class="w-full p-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors" ${!isFirebaseInitialized ? 'disabled' : ''}>
                                 <i class="fas fa-paper-plane mr-2"></i> Talep Oluştur
                             </button>
+                            ${!isFirebaseInitialized ? `<p class="text-xs text-red-500 mt-2 text-center">Veri bağlantısı olmadığı için talep oluşturma devre dışıdır.</p>` : ''}
                         </form>
                     </div>
 
                     <!-- Mevcut Talepler Listesi -->
                     <div class="bg-white p-6 rounded-xl shadow-md">
                         <h3 class="text-xl font-semibold mb-4 text-gray-800 border-b pb-2"><i class="fas fa-list mr-2"></i> Açık/Kapanmış Talepleriniz</h3>
-                        ${tickets.length === 0 ? `<p class="text-gray-500 text-center py-5">Henüz oluşturulmuş bir destek talebiniz bulunmamaktadır.</p>` : `
+                        ${!isFirebaseInitialized ? `<p class="text-red-500 text-center py-5">Veri bağlantısı olmadığı için destek talepleri gösterilemiyor.</p>` : (tickets.length === 0 ? `<p class="text-gray-500 text-center py-5">Henüz oluşturulmuş bir destek talebiniz bulunmamaktadır.</p>` : `
                         <div class="space-y-4">
                             ${tickets.map(ticket => `
                             <div class="border border-gray-200 p-4 rounded-lg hover:bg-gray-50 transition-colors">
@@ -955,7 +1022,7 @@
                             </div>
                             `).join('')}
                         </div>
-                        `}
+                        `)}
                     </div>
                 </div>
             `;
@@ -1027,16 +1094,20 @@
                     isCentered = true;
                     break;
                 case 'dashboard':
-                    mainContentHtml = renderDashboard();
+                    if (appState.isLoggedIn) mainContentHtml = renderDashboard();
+                    else { mainContentHtml = renderHomepage(); isCentered = true; } // Güvenlik önlemi
                     break;
                 case 'newOrder':
-                    mainContentHtml = renderNewOrderPage();
+                    if (appState.isLoggedIn) mainContentHtml = renderNewOrderPage();
+                    else { mainContentHtml = renderHomepage(); isCentered = true; }
                     break;
                 case 'orders':
-                    mainContentHtml = renderOrderHistoryPage();
+                    if (appState.isLoggedIn) mainContentHtml = renderOrderHistoryPage();
+                    else { mainContentHtml = renderHomepage(); isCentered = true; }
                     break;
                 case 'support':
-                    mainContentHtml = renderSupportPage();
+                    if (appState.isLoggedIn) mainContentHtml = renderSupportPage();
+                    else { mainContentHtml = renderHomepage(); isCentered = true; }
                     break;
                 case 'policies':
                     mainContentHtml = renderPolicyPage();
@@ -1065,6 +1136,9 @@
                  `;
             }
             
+            // Yükleyiciyi gizle
+            hideLoader();
+
             // 4. Form Submit Dinleyicilerini Ekler (Sadece Auth Sayfası İçin)
             const authForm = document.getElementById('authForm');
             if (authForm) {
@@ -1084,6 +1158,7 @@
             
              // 5. Order sayfasında UI'ı tetikle (JS ile tetiklenmesi gereken DOM eventleri)
             if (appState.currentPage === 'newOrder') {
+                // Bu olayların çağrılması, ilk yüklendiğinde servis detaylarının doğru hesaplanmasını sağlar
                 document.getElementById('platformSelect')?.dispatchEvent(new Event('change'));
                 document.getElementById('categorySelect')?.dispatchEvent(new Event('change'));
                 document.getElementById('serviceTypeSelect')?.dispatchEvent(new Event('change'));
@@ -1095,8 +1170,13 @@
         window.handleLogout = handleLogout;
         window.handleGoogleSignInSimulation = handleGoogleSignInSimulation;
 
-        // Uygulama yüklendiğinde ilk arayüzü çiz
-        updateUI();
+        // --- SON YÜKLEME KONTROLÜ ---
+        
+        // Eğer Firebase başlatılmamışsa (try/catch blokunda hata oluşmuşsa),
+        // auth listener'ın çağrılmasını beklemeyiz. UI'ı hemen başlatırız.
+        if (!isFirebaseInitialized) {
+            updateUI(); 
+        }
 
     </script>
 </body>
