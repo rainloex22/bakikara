@@ -25,7 +25,7 @@
             --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
-        /* GENEL STİL */
+        /* GENEL STİL ve diğer stiller (Öncekiyle aynı) */
         body { 
             font-family: 'Roboto', sans-serif; 
             background-color: var(--bg-dark); 
@@ -35,7 +35,7 @@
             min-height: 100vh;
         }
         .container {
-            max-width: 1600px; /* Genişletildi */
+            max-width: 1600px; 
             margin: 0 auto;
             padding: 40px 20px;
         }
@@ -46,15 +46,12 @@
             padding-bottom: 10px;
             margin-bottom: 30px;
         }
-        
-        /* ARAMA VE ÖZET ALANI */
         .controls-area {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
         }
-
         .summary-card {
             background-color: var(--bg-card);
             padding: 15px 25px;
@@ -66,7 +63,6 @@
             font-size: 1.5em;
             color: var(--primary-color);
         }
-        
         #searchFilter {
             padding: 10px;
             width: 300px;
@@ -75,8 +71,6 @@
             background-color: var(--bg-dark);
             color: var(--text-light);
         }
-
-        /* MÜŞTERİ TABLOSU */
         .admin-table {
             width: 100%;
             border-collapse: collapse;
@@ -101,13 +95,10 @@
         .admin-table tr:hover td {
             background-color: #2e3046;
         }
-        
         .admin-table td {
             color: var(--text-light);
             font-size: 0.9em;
         }
-
-        /* DURUM VURGULARI */
         .status-badge {
             display: inline-block;
             padding: 5px 10px;
@@ -115,7 +106,7 @@
             font-size: 0.8em;
             font-weight: 600;
             text-transform: uppercase;
-            min-width: 100px; /* Okunurluk için minimum genişlik */
+            min-width: 100px; 
             text-align: center;
         }
         .status-pending { background-color: var(--warning-color); color: #333; }
@@ -123,9 +114,6 @@
         .status-file { background-color: var(--info-color); color: white; }
         .status-suspended { background-color: var(--suspend-color); color: white; }
         .status-passive { background-color: var(--passive-color); color: white; }
-
-
-        /* BUTONLAR */
         .action-btn {
             background-color: var(--info-color);
             color: white;
@@ -158,8 +146,6 @@
             top: 20px;
             right: 20px;
         }
-        
-        /* HATA VEYA YÜKLEME DURUMU */
         #loading, #error-message {
             text-align: center;
             padding: 50px;
@@ -203,20 +189,34 @@
 
 
 <script type="module">
-    // Firestore'dan tüm belgeleri çekmek için gereken import'lar
-    import { 
-        auth, 
-        signOut, 
-        onAuthStateChanged, 
-        db, 
-        collection, 
-        getDocs, 
-        doc, 
-        updateDoc,
-        deleteDoc 
-    } from './firebase-config.js'; 
+    // ----------------------------------------------------------------------
+    // 🔴 1. ADIM: FIREBASE SDK VE YAPILANDIRMA (ARTIK BURADA)
+    // ----------------------------------------------------------------------
+    
+    // Firebase kütüphanelerini import et
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
-    // 🔴 YÖNETİCİ E-POSTASINI BURAYA YAZIN!
+    // Kendi Firebase yapılandırma objenizi BURAYA YAPIŞTIRIN!
+    const firebaseConfig = {
+        apiKey: "AIzaSyATqhJsWJGv3AxdvLmCKS-T9UlDycwhXys",             // ⬅️ BURAYI DÜZELTİN
+        authDomain: "baki-s2-hosting.firebaseapp.com",     // ⬅️ BURAYI DÜZELTİN
+        projectId: "baki-s2-hosting",       // ⬅️ BURAYI DÜZELTİN
+        storageBucket: "baki-s2-hosting.firebasestorage.app", // ⬅️ BURAYI DÜZELTİN
+        messagingSenderId: "1096636788468", // ⬅️ BURAYI DÜZELTİN
+        appId: "1:1096636788468:web:ef3365f47930ab98a738a1"                // ⬅️ BURAYI DÜZELTİN
+    };
+
+    // Firebase'i Başlat
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    // ----------------------------------------------------------------------
+    // 2. ADIM: YÖNETİCİ AYARI VE DEĞİŞKENLER
+    // ----------------------------------------------------------------------
+    
     const ADMIN_EMAIL = "mehmeteminacan13@gmail.com"; 
     
     const loading = document.getElementById('loading');
@@ -224,15 +224,10 @@
     const tableBody = document.getElementById('customerTableBody');
     const errorMessage = document.getElementById('error-message');
     const totalCustomersSpan = document.getElementById('totalCustomers');
-    let allCustomers = []; // Filtreleme için tüm müşterileri tutan dizi
+    let allCustomers = []; 
 
     /**
-     * Müşteri Durumları:
-     * ACTIVE: Yayında
-     * PENDING: Admin Onayı Bekliyor (Dosya yüklenmiş olabilir)
-     * FILE_WAITING: Dosya Bekleniyor
-     * SUSPENDED: Askıya Alındı
-     * PASSIVE: Pasif
+     * Müşteri Durumları ve Etiket Oluşturma Fonksiyonu
      */
     function getStatusBadge(status) {
         let className = 'status-file';
@@ -264,10 +259,14 @@
         return `<span class="status-badge ${className}" data-status="${status}">${text}</span>`;
     }
 
+    // ----------------------------------------------------------------------
+    // 3. ADIM: TABLO VE İŞLEV FONKSİYONLARI
+    // ----------------------------------------------------------------------
+
     // Tablonun içini dolduran ana render fonksiyonu
     function renderTable(customers) {
         tableBody.innerHTML = '';
-        totalCustomersSpan.innerText = customers.length; // Toplam müşteri sayısını güncelle
+        totalCustomersSpan.innerText = customers.length; 
 
         if (customers.length === 0) {
             tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--warning-color);">Filtreye uyan müşteri bulunamadı.</td></tr>`;
@@ -310,7 +309,6 @@
             const username = userEmail.split('@')[0].toLowerCase();
             const status = (user.serviceStatus || 'FILE_WAITING').toLowerCase();
             
-            // E-posta, kullanıcı adı veya durum ile arama
             return userEmail.includes(searchText) || username.includes(searchText) || status.includes(searchText);
         });
 
@@ -338,7 +336,6 @@
                 ...doc.data()
             }));
 
-            // Tabloyu başlangıçta tüm verilerle doldur
             renderTable(allCustomers);
 
             loading.style.display = 'none';
@@ -364,7 +361,7 @@
                 serviceStatus: newStatus
             });
             alert(`Durum başarıyla ${newStatus} olarak güncellendi.`);
-            fetchCustomers(); // Tabloyu yeniden yükle
+            fetchCustomers(); 
         } catch (error) {
             console.error("Durum güncellenirken hata oluştu:", error);
             alert("Durum güncellenirken hata oluştu: " + error.message);
@@ -378,13 +375,9 @@
         }
 
         try {
-            // Firestore'dan sil
             await deleteDoc(doc(db, "users", userId));
-            
-            // (İSTEĞE BAĞLI: Authentication'dan da silmek için admin SDK gerekir, bu client-side JS ile mümkün değildir)
-            
             alert(`Kullanıcı başarıyla silindi.`);
-            fetchCustomers(); // Tabloyu yeniden yükle
+            fetchCustomers(); 
         } catch (error) {
             console.error("Kullanıcı silinirken hata oluştu:", error);
             alert("Kullanıcı silinirken hata oluştu: " + error.message);
@@ -396,19 +389,6 @@
         window.open(`http://${siteUrl}`, '_blank');
     }
 
-
-    // Yetkilendirme Kontrolü
-    onAuthStateChanged(auth, (user) => {
-        if (user && user.email === ADMIN_EMAIL) {
-            // Yöneticinin email adresi eşleşiyorsa
-            fetchCustomers();
-        } else {
-            // Eşleşmiyorsa veya giriş yapılmamışsa giriş sayfasına yönlendir
-            alert("Erişim Reddedildi. Bu sayfa sadece yöneticilere aittir.");
-            window.location.href = 'login.html'; 
-        }
-    });
-
     // Çıkış Yapma İşlemi
     window.handleLogout = function() {
         signOut(auth).then(() => {
@@ -418,6 +398,19 @@
             alert("Çıkış yaparken bir hata oluştu.");
         });
     }
+
+    // ----------------------------------------------------------------------
+    // 4. ADIM: YETKİLENDİRME KONTROLÜ
+    // ----------------------------------------------------------------------
+
+    onAuthStateChanged(auth, (user) => {
+        if (user && user.email === ADMIN_EMAIL) {
+            fetchCustomers();
+        } else {
+            alert("Erişim Reddedildi. Bu sayfa sadece yöneticilere aittir.");
+            window.location.href = 'login.html'; 
+        }
+    });
 </script>
 </body>
 </html>
