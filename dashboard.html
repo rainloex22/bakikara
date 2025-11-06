@@ -201,9 +201,8 @@
       authDomain: "baki-s2-hosting.firebaseapp.com",
       projectId: "baki-s2-hosting",
       storageBucket: "baki-s2-hosting.firebasestorage.app",
-      messagingSenderId: "1096636788468",
-      appId: "1:1096636788468:web:ef3365f47930ab98a738a1",
-      measurementId: "G-3QDCRYR2RE"
+      appId: "1:1096636788468:web:ef3365f47930ab98a738a1"
+      // measurementId'yi kaldırdık, çünkü sadece bir uyarıya neden oluyor.
     };
 
     // SIMULASYON VERİLERİ (Firestore'da veri yoksa varsayılan değerler)
@@ -214,35 +213,27 @@
     // 🔥 KRİTİK KONTROL: LocalStorage'dan token'ı al
     const userToken = localStorage.getItem('baki_auth_token');
     
-    // Eğer token yoksa, kullanıcıyı giriş sayfasına yönlendir
+    // Eğer token yoksa, kullanıcıyı anında login sayfasına yönlendir (Firebase beklemesine gerek yok)
     if (!userToken) {
         window.location.href = 'login.html'; 
     }
-
-    // Firebase CDN importları (Burada sadece CDN üzerinden alınıyor, login sayfasındaki gibi ayrı 'firebase-config.js' dosyasına ihtiyaç duyulmaz)
+    
+    // Firebase CDN importları
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInWithCustomToken, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
     
     // Firebase servislerinin başlatılması
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // Firestore Yol Sabitleri
-    const USER_DATA_COLLECTION = 'user_data';
-    const USER_DATA_DOC = 'profile'; 
-    
-    // NOT: Login sayfasındaki 'users' koleksiyonunu baz alarak, Firestore yolunu güncelledik:
-    // doc(db, "users", user.uid) -> Bu, login.html'deki yoldur. 
-    // Eğer dashboard'da daha karmaşık bir yapı kullanılıyorsa, onu baz alın:
-    // const userDocRef = doc(db, 'artifacts', firebaseConfig.projectId, 'users', user.uid, USER_DATA_COLLECTION, USER_DATA_DOC);
-    
-    // Şimdilik login.html ile uyumlu olması için basit yolu kullanıyoruz (Eğer 'user_data/profile' alt koleksiyonları gerekiyorsa üstteki satırı açın)
+    // Firestore Yol Sabitleri (Login ile uyumlu: "users" koleksiyonu)
     const FirestoreCollectionRoot = 'users';
 
     // --- YARDIMCI FONKSİYONLAR ---
     
+    // ... (updateCard, setLoadingState, calculateDuration fonksiyonları aynı kalır) ...
     function updateCard(elementId, value, messageId = null, message = null) {
         const element = document.getElementById(elementId);
         if (element) element.innerHTML = value;
@@ -253,7 +244,6 @@
     }
     
     function setLoadingState() {
-        // ... (Yükleniyor durumları aynı kalır) ...
         updateCard('userEmail', 'Veriler Yükleniyor...');
         updateCard('siteUrl', 'Yükleniyor...');
         updateCard('serviceStatus', 'Kontrol Ediliyor...');
@@ -288,8 +278,7 @@
         
         return result.trim();
     }
-
-
+    // ... (switchContent ve handleCopy fonksiyonları aynı kalır) ...
     window.switchContent = function(newTab) {
         document.querySelectorAll('.content-section').forEach(section => {
             section.classList.add('hidden');
@@ -317,14 +306,13 @@
         alert(`✅ ${text} adresi panoya kopyalandı!`); 
     }
 
-    // 🔥 GÜVENLİ ÇIKIŞ İŞLEVİ (Token'ı LocalStorage'dan temizler)
     window.handleLogout = function() {
         if (!confirm('Güvenli çıkış yapmak istediğinizden emin misiniz?')) {
             return;
         }
         signOut(auth).then(() => {
-             localStorage.removeItem('baki_auth_token'); // KRİTİK: Token'ı sil
-             window.location.href = 'login.html'; // Giriş sayfasına yönlendir
+             localStorage.removeItem('baki_auth_token');
+             window.location.href = 'login.html';
         }).catch((error) => {
             console.error("Çıkış hatası:", error);
             alert('❌ Çıkış yapılırken bir sorun oluştu. Lütfen tekrar deneyin.');
@@ -344,16 +332,30 @@
             });
         });
         switchContent('dashboard');
+        
+        // 🔥 ANINDA GİRİŞ DENEMESİ
+        // Token varsa, beklemeden hemen giriş yapmayı dene
+        if (userToken) {
+            // signInWithCustomToken, Firebase ID token'ı ile çalışabilir.
+            signInWithCustomToken(auth, userToken)
+                .catch(err => {
+                    console.error("Token ile giriş başarısız. Oturum sonlandırılıyor.", err);
+                    // Token geçersizse temizle ve login'e at
+                    localStorage.removeItem('baki_auth_token');
+                    window.location.href = 'login.html';
+                });
+        }
     });
 
 
     // --- FIREBASE VERİ AKIŞI ---
 
+    // onAuthStateChanged, hem giriş durumunu izler, hem de token ile giriş denemesinin sonucunu anında yakalar.
     onAuthStateChanged(auth, async (user) => {
-        setLoadingState();
-
+        setLoadingState(); // Yükleniyor durumunu burada ayarlıyoruz
+        
         if (user) {
-            // Kullanıcı zaten oturum açmış (token geçerli)
+            // Kullanıcı oturum açtı (Veya token ile giriş başarılı oldu)
             
             const displayEmail = user.email || 'tanımlı-email-yok@bakikara.com';
             const username = displayEmail.split('@')[0];
@@ -361,10 +363,10 @@
             
             updateCard('userEmail', `<strong>${upperUsername}</strong>`);
             
-            // Firestore yolunu oluştur (login.html ile uyumlu 'users' koleksiyonu)
+            // Firestore yolunu oluştur
             const userDocRef = doc(db, FirestoreCollectionRoot, user.uid);
             
-            // Gerçek Zamanlı Veri Dinleyicisi
+            // Gerçek Zamanlı Veri Dinleyicisi (En hızlı veri çekme metodu)
             const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
                 const statusCard = document.getElementById('serviceStatus').parentElement;
                 let userData;
@@ -372,7 +374,7 @@
                 if (docSnap.exists()) {
                     userData = docSnap.data();
                 } else {
-                    // Login sayfasında veri kaydedilmediyse, varsayılanları kullan
+                    // Veri yoksa, simülasyon/varsayılan verilerle kartları doldur
                     console.warn("Firestore'da kullanıcı verisi bulunamadı. Simülasyon verileri kullanılıyor.");
                     
                     const regTimestamp = user.metadata && user.metadata.creationTime ? parseInt(user.metadata.creationTime) : SIMULATED_REG_DATE;
@@ -387,14 +389,11 @@
                     }; 
                 }
 
-                // --- KART VERİLERİNİ GÜNCELLEME ---
+                // --- KART VERİLERİNİ GÜNCELLEME --- (Bu kısım anında gerçekleşir)
                 
-                // Firestore Timestamp nesnesini Date nesnesine çevirme
                 const regDate = userData.createdAt && userData.createdAt.toDate ? userData.createdAt.toDate() : (userData.createdAt || new Date(SIMULATED_REG_DATE));
                 const formattedRegDate = regDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
-                
                 const durationText = calculateDuration(regDate);
-                
                 const lastPaymentDate = userData.lastPayment && userData.lastPayment.toDate ? userData.lastPayment.toDate() : (userData.lastPayment || new Date(SIMULATED_LAST_PAYMENT));
                 const formattedLastPayment = lastPaymentDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -404,6 +403,7 @@
                 document.getElementById('siteUrlLink').href = `http://${sitePath}`;
 
                 // 2. Hizmet Durumu
+                // ... (Durum kartı mantığı aynı) ...
                 statusCard.classList.remove('card-success', 'card-warning', 'card-danger');
                 let statusText, statusMessage;
                 if (userData.isPublished === true) {
@@ -420,7 +420,7 @@
                     statusCard.classList.add('card-warning');
                 }
                 updateCard('serviceStatus', statusText, 'serviceMessage', statusMessage);
-                
+
                 // 3. Hesap Bakiyesi
                 const balance = parseFloat(userData.balance || SIMULATED_BALANCE).toFixed(2);
                 updateCard('accountBalance', `₺ ${balance}`);
@@ -431,34 +431,22 @@
                 
                 // --- DİĞER SEKME VERİLERİ ---
                 updateCard('lastPaymentDate', formattedLastPayment);
-
-                // Ayarlar Sekmesi Verileri
                 updateCard('settingsUID', user.uid);
                 updateCard('settingsEmail', displayEmail);
                 updateCard('settingsRegDate', formattedRegDate);
 
             }, (error) => {
-                updateCard('userEmail', 'Veri Çekme Hatası! 😵');
-                updateCard('serviceStatus', 'KRİTİK HATA', 'serviceMessage', 'Veri akışı kesildi. Destek ile iletişime geçin.');
+                // Hata durumunda uyar ve oturumu sonlandır
+                updateCard('userEmail', 'Kritik Hata! 😵');
+                updateCard('serviceStatus', 'BAĞLANTI KOPTU', 'serviceMessage', 'Veri akışı kesildi. Tekrar giriş yapın.');
                 statusCard.classList.remove('card-success', 'card-warning', 'card-primary');
                 statusCard.classList.add('card-danger'); 
                 console.error("Firestore Snapshot Hatası:", error);
             });
             
         } else {
-            // Kullanıcı oturum açmamışsa (veya token'ı süresi dolmuşsa), LocalStorage'dan aldığımız token ile giriş denemesi yap:
-            if (userToken) {
-                signInWithCustomToken(auth, userToken)
-                    .catch(err => {
-                        console.error("Token ile giriş başarısız. Oturum sonlandırılıyor.", err);
-                        localStorage.removeItem('baki_auth_token');
-                        window.location.href = 'login.html';
-                    });
-            } else {
-                 // Token yoksa (zaten en başta yönlendirdik)
-                 console.warn("Token bulunamadı. Login sayfasına yönlendiriliyor.");
-                 window.location.href = 'login.html';
-            }
+            // Kullanıcı oturum açmamış veya token'ı geçersiz
+            // Zaten en başta login'e yönlendirdiğimiz için burası genellikle boş kalır.
         }
     });
 </script>
