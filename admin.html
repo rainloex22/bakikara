@@ -747,7 +747,7 @@
         // Koleksiyon adının 'users' olduğundan emin olun
         const usersRef = collection(db, "users"); 
         
-        const unsubscribe = onSnapshot(query(usersRef), (snapshot) => {
+        const unsubscribe = onSnapshot(query(usersRef), (snapshot) => { /* ... */ });
             
             // 🔥 DEBUG KODU BAŞLANGIÇ - KONSOLE KONTROLÜ 🔥
             console.log("Firestore Bağlantısı Başarılı. Çekilen belge sayısı:", snapshot.docs.length);
