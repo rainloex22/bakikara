@@ -445,7 +445,7 @@
                 <th onclick="sortCustomers('created_at')">Kayıt Tarihi <span id="sortCreated_at" class="sort-icon fas fa-sort-down"></span></th> 
                 <th onclick="sortCustomers('balance')">Bakiye (₺) <span id="sortBalance" class="sort-icon fas fa-sort"></span></th>
                 <th>Site Adresi (Öneri)</th>
-                <th onclick="sortCustomers('service_status')">Durum <span id="sortService_status" class="sort-icon fas fa-sort"></span></th> 
+                <th onclick="sortCustomers('servicestatus')">Durum <span id="sortServicestatus" class="sort-icon fas fa-sort"></span></th>
                 <th>İşlemler</th>
             </tr>
         </thead>
@@ -514,13 +514,17 @@
     const SUPABASE_URL = 'https://rqbbxjuncwwgtkbcqtet.supabase.co'; 
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxYmJ4anVuY3d3Z3RrYmNxdGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0MzM1NjAsImV4cCI6MjA3ODAwOTU2MH0.8dzDoL8MEgbrL7b-ocJ79c9ts9qtSbFT3EashQZXyZQ'; 
     
+    // CDN üzerinden global olarak eklenen Supabase client'ı başlat
     const { createClient } = supabase; 
     const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: { 
+            // Geçici olarak Auth persistSession özelliğini kapatıyoruz. 
+            // Yönetici girişi için bu kısım sonradan Supabase Auth ile değiştirilmelidir.
             persistSession: false 
         }
     });
 
+    // 🔥 DİKKAT: Yönetici Kontrolü geçici olarak devre dışı bırakılmıştır.
     const ADMIN_EMAIL = "mehmeteminacan13@gmail.com"; 
     
     const loading = document.getElementById('loading');
@@ -539,9 +543,12 @@
     let sortDirection = 'desc'; 
 
     // ----------------------------------------------------------------------
-    // 2. ÖZEL MODAL İŞLEVLERİ
+    // 1. ÖZEL MODAL İŞLEVLERİ (Aynı kaldı)
     // ----------------------------------------------------------------------
 
+    /**
+     * Özel bir onay (confirm) veya bildirim (alert) penceresi gösterir.
+     */
     function showModal(title, message, type = 'alert', callback = () => {}) {
         const modal = document.getElementById('customModal');
         document.getElementById('modalTitle').innerText = title;
@@ -574,40 +581,61 @@
 
 
     // ----------------------------------------------------------------------
-    // 3. MÜŞTERİ TABLOSU ve FİLTRE/SIRA İŞLEVLERİ
+    // 2. MÜŞTERİ TABLOSU ve FİLTRE/SIRA İŞLEVLERİ
     // ----------------------------------------------------------------------
     
+    /**
+     * Müşteri Durumları ve Etiket Oluşturma Fonksiyonu
+     */
     function getStatusBadge(status) {
         let className = 'status-file';
         let text = 'Dosya Bekleniyor';
         
         switch (status) {
-            case 'ACTIVE': className = 'status-active'; text = 'YAYINDA'; break;
-            case 'PENDING': className = 'status-pending'; text = 'Onay Bekliyor'; break;
-            case 'SUSPENDED': className = 'status-suspended'; text = 'ASKIYA ALINDI'; break;
-            case 'PASSIVE': className = 'status-passive'; text = 'PASİF'; break;
-            case 'FILE_WAITING': default: className = 'status-file'; text = 'Dosya Bekleniyor'; break;
+            case 'ACTIVE':
+                className = 'status-active';
+                text = 'YAYINDA';
+                break;
+            case 'PENDING':
+                className = 'status-pending';
+                text = 'Onay Bekliyor';
+                break;
+            case 'SUSPENDED':
+                className = 'status-suspended';
+                text = 'ASKIYA ALINDI';
+                break;
+            case 'PASSIVE':
+                className = 'status-passive';
+                text = 'PASİF';
+                break;
+            case 'FILE_WAITING':
+            default:
+                className = 'status-file';
+                text = 'Dosya Bekleniyor';
+                break;
         }
         return `<span class="status-badge ${className}" data-status="${status}">${text}</span>`;
     }
 
+    /**
+     * Müşteri verilerini tabloya işleyen ana render fonksiyonu
+     */
     function renderTable(customers) {
         // Sıralama uygula
         customers.sort((a, b) => {
             let aVal = a[sortKey];
             let bVal = b[sortKey];
 
+            // created_at için tarih sıralaması
             if (sortKey === 'created_at') { 
                 aVal = aVal ? new Date(aVal).getTime() : 0;
                 bVal = bVal ? new Date(bVal).getTime() : 0;
             }
+            // balance için sayısal sıralama
             if (sortKey === 'balance') {
                 aVal = parseFloat(aVal) || 0;
                 bVal = parseFloat(bVal) || 0;
             }
-
-            if (typeof aVal === 'string') aVal = aVal.toLowerCase();
-            if (typeof bVal === 'string') bVal = bVal.toLowerCase();
 
             if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
             if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
@@ -622,17 +650,17 @@
             icon.classList.add('fa-sort');
         });
         
-        // 🔥 DÜZELTME: service_status alanını dinamik olarak bulmak için mantık güncellendi
-        let activeIconId;
+        let iconId = '';
         if (sortKey === 'created_at') {
-            activeIconId = 'sortCreated_at';
-        } else if (sortKey === 'service_status') {
-            activeIconId = 'sortService_status'; // HTML'deki yeni ID'miz
+            iconId = 'sortCreated_at';
+        // 🔥 DÜZELTME: servicestatus için özel eşleştirme
+        } else if (sortKey === 'servicestatus') {
+            iconId = 'sortServicestatus'; 
         } else {
-            activeIconId = `sort${sortKey.charAt(0).toUpperCase() + sortKey.slice(1)}`;
+            iconId = `sort${sortKey.charAt(0).toUpperCase() + sortKey.slice(1)}`;
         }
-
-        const currentSortIcon = document.getElementById(activeIconId);
+        
+        const currentSortIcon = document.getElementById(iconId);
         
         if (currentSortIcon) {
              currentSortIcon.classList.remove('fa-sort');
@@ -646,12 +674,11 @@
 
         customers.forEach(user => {
             const userEmail = user.email || 'Bilinmiyor';
-            const siteName = user.site_adi || userEmail.split('@')[0] || 'site-adı-yok';
-            const siteUrl = `bakikara.xyz/${siteName}`; 
-
+            const username = userEmail.split('@')[0];
+            const siteUrl = `bakikara.xyz/${user.site_adi || username}`; 
             const regDate = user.created_at ? new Date(user.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Bilinmiyor';
-            // 🔥 DÜZELTME: user.service_status kullanılıyor
-            const status = user.service_status || 'FILE_WAITING'; 
+            // 🔥 DÜZELTME: user.servicestatus kullanılıyor
+            const status = user.servicestatus || 'FILE_WAITING'; 
             const balance = (user.balance || 0).toFixed(2); 
 
             const row = tableBody.insertRow();
@@ -675,6 +702,9 @@
         });
     }
 
+    /**
+     * Tablo başlığına tıklandığında sıralama yapar
+     */
     window.sortCustomers = function(key) {
         if (sortKey === key) {
             sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
@@ -683,20 +713,24 @@
             sortDirection = 'asc'; 
             if (key === 'created_at' || key === 'balance') sortDirection = 'desc'; 
         }
-        filterCustomers(); 
+        filterCustomers(); // Veriyi yeniden render et
     }
 
+    /**
+     * Arama ve Durum Filtreleme Fonksiyonu
+     */
     window.filterCustomers = function() {
         const searchText = document.getElementById('searchFilter').value.toLowerCase();
         const statusFilter = document.getElementById('statusFilter').value; 
 
         const filtered = allCustomers.filter(user => {
             const userEmail = (user.email || '').toLowerCase();
+            const username = userEmail.split('@')[0].toLowerCase();
             const siteAdi = (user.site_adi || '').toLowerCase();
-            // 🔥 DÜZELTME: user.service_status kullanılıyor
-            const status = (user.service_status || 'FILE_WAITING');
+            // 🔥 DÜZELTME: user.servicestatus kullanılıyor
+            const status = (user.servicestatus || 'FILE_WAITING');
             
-            const textMatch = userEmail.includes(searchText) || siteAdi.includes(searchText);
+            const textMatch = userEmail.includes(searchText) || username.includes(searchText) || siteAdi.includes(searchText);
             const statusMatch = statusFilter === 'ALL' || status === statusFilter;
 
             return textMatch && statusMatch;
@@ -705,17 +739,15 @@
         renderTable(filtered);
     }
 
-    window.openCustomerSite = function(siteUrl) {
-        window.open(`http://${siteUrl}`, '_blank');
-    }
-
     // ----------------------------------------------------------------------
-    // 4. GERÇEK ZAMANLI VERİ ÇEKME 
+    // 3. GERÇEK ZAMANLI VERİ ÇEKME (SUPABASE REALTIME)
     // ----------------------------------------------------------------------
 
+    /**
+     * Veriyi bir kez çeken ana fonksiyon
+     */
     async function fetchAndRenderCustomers() {
         loading.style.display = 'block';
-        table.style.display = 'none';
 
         try {
             const { data: customers, error } = await supabaseClient
@@ -730,22 +762,27 @@
             loading.style.display = 'none';
             table.style.display = 'table';
             
-            // user_id'yi userId olarak eşle
+            if (!customers || customers.length === 0) {
+                loading.innerText = 'Henüz kayıtlı müşteri bulunmamaktadır.';
+                loading.style.display = 'block';
+                allCustomers = [];
+                renderTable([]);
+                
+                totalCustomersSpan.innerText = '0';
+                activeCustomersSpan.innerText = '0';
+                pendingCustomersSpan.innerText = '0';
+                return;
+            }
+
             allCustomers = customers.map(doc => ({
                 userId: doc.user_id, 
                 ...doc
             }));
 
-            if (allCustomers.length === 0) {
-                loading.innerText = 'Henüz kayıtlı müşteri bulunmamaktadır.';
-                loading.style.display = 'block';
-                return;
-            }
-
             // Özet Kartları Güncelle
-            // 🔥 DÜZELTME: service_status kullanılıyor
-            const activeCount = allCustomers.filter(u => u.service_status === 'ACTIVE').length;
-            const pendingCount = allCustomers.filter(u => u.service_status === 'PENDING' || u.service_status === 'FILE_WAITING').length; 
+            // 🔥 DÜZELTME: u.servicestatus kullanılıyor
+            const activeCount = allCustomers.filter(u => u.servicestatus === 'ACTIVE').length;
+            const pendingCount = allCustomers.filter(u => u.servicestatus === 'PENDING' || u.servicestatus === 'FILE_WAITING').length; 
             
             totalCustomersSpan.innerText = allCustomers.length;
             activeCustomersSpan.innerText = activeCount;
@@ -762,14 +799,19 @@
     }
 
 
+    /**
+     * Müşteri Verilerini Gerçek Zamanlı Dinleme ve Özet Kartları Güncelleme
+     */
     function listenForCustomers() {
-        fetchAndRenderCustomers();
+        loading.style.display = 'block';
+        table.style.display = 'none';
+        errorMessage.style.display = 'none';
         
         const channel = supabaseClient
             .channel('customer_changes') 
             .on(
                 'postgres_changes',
-                { event: '*', schema: 'public', table: 'customers' },
+                { event: '*', schema: 'public', table: 'customers' }, 
                 (payload) => {
                     console.log('Gerçek Zamanlı Veri Değişikliği Algılandı:', payload);
                     fetchAndRenderCustomers();
@@ -777,18 +819,21 @@
             )
             .subscribe(); 
 
+        fetchAndRenderCustomers();
+
         return channel;
     };
     
-    // ----------------------------------------------------------------------
-    // 5. DUYURU YÖNETİMİ (SUPABASE INSERT)
-    // ----------------------------------------------------------------------
-
+    /**
+     * En son yayınlanan duyuruları (aktivite) çeker.
+     */
     async function listenForRecentActivity() {
+        console.log("Aktivite dinleyicisi başlatıldı...");
+        
         try {
             const { data: announcements, error } = await supabaseClient
                 .from('announcements')
-                .select('text, created_at')
+                .select('text, created_at') 
                 .order('created_at', { ascending: false })
                 .limit(5);
 
@@ -818,6 +863,13 @@
         }
     }
 
+    // ----------------------------------------------------------------------
+    // 4. DUYURU YÖNETİMİ (SUPABASE INSERT)
+    // ----------------------------------------------------------------------
+
+    /**
+     * Yeni Duyuru Ekleme Fonksiyonu
+     */
     async function publishAnnouncement() {
         const textElement = document.getElementById('announcementText');
         const messageElement = document.getElementById('announcementMessage');
@@ -836,8 +888,13 @@
 
         try {
             const { error } = await supabaseClient
-                .from('announcements')
-                .insert([{ text: announcementText, publishedBy: ADMIN_EMAIL }]);
+                .from('announcements') 
+                .insert([
+                    {
+                        text: announcementText,
+                        publishedBy: ADMIN_EMAIL 
+                    }
+                ]);
 
             if (error) throw error;
 
@@ -858,11 +915,11 @@
     }
     
     // ----------------------------------------------------------------------
-    // 6. MÜŞTERİ İŞLEM FONKSİYONLARI (UPDATE/DELETE)
+    // 5. MÜŞTERİ İŞLEM FONKSİYONLARI (SUPABASE UPDATE/DELETE)
     // ----------------------------------------------------------------------
 
     /**
-     * Müşteri Durumunu Güncelleme (lastUpdated kaldırıldı, serviceStatus -> service_status yapıldı)
+     * Müşteri Durumunu Güncelleme
      */
     window.updateCustomerStatus = function(userId, newStatus) {
         let statusText = '';
@@ -879,9 +936,9 @@
                     try {
                         const { error } = await supabaseClient
                             .from('customers')
-                            // 🔥 DÜZELTME: lastUpdated kaldırıldı ve serviceStatus -> service_status yapıldı
-                            .update({ service_status: newStatus }) 
-                            .eq('user_id', userId);
+                            // 🔥 DÜZELTME: servicestatus kullanılıyor
+                            .update({ servicestatus: newStatus, lastUpdated: new Date().toISOString() }) 
+                            .eq('user_id', userId); 
 
                         if (error) throw error;
 
@@ -896,7 +953,7 @@
     }
 
     /**
-     * Müşteriyi Silme (Çalışıyor)
+     * Müşteriyi Silme
      */
     window.deleteCustomer = function(userId) {
         showModal(
@@ -909,7 +966,7 @@
                         const { error } = await supabaseClient
                             .from('customers')
                             .delete()
-                            .eq('user_id', userId);
+                            .eq('user_id', userId); 
 
                         if (error) throw error;
                             
@@ -923,8 +980,15 @@
         );
     }
     
+    /**
+     * Müşterinin Sitesini Açma
+     */
+    window.openCustomerSite = function(siteUrl) {
+        window.open(`http://${siteUrl}`, '_blank');
+    }
+
     // ----------------------------------------------------------------------
-    // 7. DETAY/DÜZENLE MODALI İŞLEVLERİ 
+    // 6. DETAY/DÜZENLE MODALI İŞLEVLERİ (SUPABASE UPDATE)
     // ----------------------------------------------------------------------
     
     window.showCustomerDetailModal = function(userId) {
@@ -935,20 +999,17 @@
         
         document.getElementById('detailEmail').value = user.email || '';
         document.getElementById('detailSiteName').value = user.site_adi || '';
-        document.getElementById('detailBalance').value = (user.balance || 0);
-        // 🔥 DÜZELTME: user.service_status kullanılıyor
-        document.getElementById('detailStatus').value = user.service_status || 'FILE_WAITING';
+        document.getElementById('detailBalance').value = (user.balance || 0); 
+        // 🔥 DÜZELTME: user.servicestatus kullanılıyor
+        document.getElementById('detailStatus').value = user.servicestatus || 'FILE_WAITING';
         document.getElementById('detailNotes').value = user.admin_notes || '';
         document.getElementById('detailMessage').innerText = ''; 
         
         document.getElementById('detailModal').style.display = 'flex';
     }
     
-    /**
-     * Müşteri Detaylarını Kaydetme Fonksiyonu (lastUpdated kaldırıldı, serviceStatus -> service_status yapıldı)
-     */
     window.saveCustomerDetails = async function() {
-        if (!currentEditingUser || !currentEditingUser.userId) return;
+        if (!currentEditingUser) return;
 
         const btn = document.getElementById('saveDetailsBtn');
         const messageElement = document.getElementById('detailMessage');
@@ -960,14 +1021,16 @@
         try {
             const newBalance = parseFloat(document.getElementById('detailBalance').value) || 0; 
             
+            // Supabase ile Toplu Güncelleme
             const { error } = await supabaseClient
                 .from('customers')
-                // 🔥 DÜZELTME: lastUpdated kaldırıldı ve serviceStatus -> service_status yapıldı
                 .update({
                     site_adi: document.getElementById('detailSiteName').value.trim(),
-                    service_status: document.getElementById('detailStatus').value,
+                    // 🔥 DÜZELTME: servicestatus kullanılıyor
+                    servicestatus: document.getElementById('detailStatus').value,
                     admin_notes: document.getElementById('detailNotes').value.trim(),
-                    balance: newBalance
+                    balance: newBalance,
+                    lastUpdated: new Date().toISOString()
                 })
                 .eq('user_id', currentEditingUser.userId); 
 
@@ -998,35 +1061,19 @@
     document.getElementById('saveDetailsBtn').addEventListener('click', saveCustomerDetails);
 
     // ----------------------------------------------------------------------
-    // 8. YETKİLENDİRME ve ÇIKIŞ 
+    // 7. YETKİLENDİRME ve BAŞLATMA
     // ----------------------------------------------------------------------
 
     /**
-     * Çıkış Yapma İşlemi (Supabase Auth ile oturumu sonlandırır)
+     * Çıkış Yapma İşlemi
      */
     window.handleLogout = function() {
-        showModal("Çıkış Onayı", "Yönetici panelinden çıkış yapmak istediğinizden emin misiniz?", 'confirm', async (isConfirmed) => {
-            if (isConfirmed) {
-                try {
-                    // Supabase Auth ile çıkış yap
-                    const { error } = await supabaseClient.auth.signOut();
-                    
-                    if (error) {
-                        console.error("Supabase çıkış hatası (yönlendiriliyor):", error);
-                    }
-                    
-                    // Başarılı veya hatalı (oturum zaten bitmiş olabilir) çıkış sonrası login sayfasına yönlendir
-                    window.location.href = 'login.html'; 
-
-                } catch (error) {
-                    console.error("Genel çıkış hatası (yönlendiriliyor):", error);
-                    window.location.href = 'login.html'; 
-                }
-            }
+        showModal("GÜVENSİZ KULLANIM", "Şu anda yönetici yetkilendirme sistemi (Auth) devre dışıdır. Çıkış yapmak için login.html sayfasına yönlendiriliyorsunuz.", 'alert', () => {
+             window.location.href = 'login.html';
         });
     }
 
-    // BAŞLANGIÇ
+    // Başlangıç fonksiyonlarını çağır
     listenForCustomers();
     listenForRecentActivity(); 
     
