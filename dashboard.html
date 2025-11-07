@@ -7,6 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         /* CSS BÖLÜMÜ - TEMA RENKLERİ */
         :root {
@@ -210,28 +212,20 @@
 </div>
 
 <script type="module">
-    // 🔥 SİZİN GERÇEK FIREBASE YAPILANDIRMANIZ (Admin paneli ile aynı olmalı)
-    const firebaseConfig = {
-      apiKey: "AIzaSyATqhJsWJGv3AxdvLmCKS-T9UlDycwhXys",
-      authDomain: "baki-s2-hosting.firebaseapp.com",
-      projectId: "baki-s2-hosting",
-      storageBucket: "baki-s2-hosting.firebasestorage.app",
-      messagingSenderId: "1096636788468",
-      appId: "1:1096636788468:web:ef3365f47930ab98a738a1"
-    };
+    // ----------------------------------------------------------------------
+    // 🔥 ADIM 1: SUPABASE BAĞLANTI AYARLARI (Login.html ile aynı olmalı)
+    // ----------------------------------------------------------------------
+    const SUPABASE_URL = 'https://rqbbxjuncwwgtkbcqtet.supabase.co'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxYmJ4anVuY3d3Z3RrYmNxdGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0MzM1NjAsImV4cCI6MjA3ODAwOTU2MH0.8dzDoL8MEgbrL7b-ocJ79c9ts9qtSbFT3EashQZXyZQ'; 
     
-    // GEREKLİ CDN İMPORTLARI
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getAuth, signInWithCustomToken, signOut, onAuthStateChanged, getIdToken } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-    import { getFirestore, doc, onSnapshot, query, collection, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-    
-    // Firebase servislerinin başlatılması
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+    // Supabase Kütüphanesini içeri aktar
+    const { createClient } = supabase; 
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Firestore Yol Sabitleri
-    const FirestoreCollectionRoot = 'users'; 
+    // Tablo İsimleri Sabitleri
+    const CUSTOMER_TABLE = 'customers'; // Kullanıcı verilerinin tutulduğu tablo
+    const ANNOUNCEMENTS_TABLE = 'announcements'; // Duyuruların tutulduğu tablo
+
     const FALLBACK_SITE_DOMAIN = 'bakikara.xyz'; // Varsayılan site domaini
 
     // --- YARDIMCI FONKSİYONLAR ---
@@ -263,16 +257,16 @@
         statusCard.className = 'info-card card-warning'; // Yükleme sırasında varsayılan sarı
     }
     
-    // Tarih formatlama (Kayıt Tarihi ve Ödeme Tarihi için)
+    // Tarih formatlama 
     function formatDate(timestamp) {
         if (!timestamp) return 'Bilinmiyor';
         
         let date;
-        if (timestamp.toDate) {
-            date = timestamp.toDate();
-        } else {
-            date = new Date(timestamp);
-        }
+        // Supabase'den gelen ISO string'i Date nesnesine çevir
+        date = new Date(timestamp);
+        
+        // Geçersiz tarihse
+        if (isNaN(date)) return 'Bilinmiyor'; 
         
         return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
     }
@@ -294,23 +288,27 @@
         }
     }
     
-    // En son duyuruyu çeker ve gösterir
+    // En son duyuruyu çeker ve gösterir (Supabase'e uyarlandı)
     function listenForLatestAnnouncement() {
-        const announcementsRef = collection(db, "announcements");
-        const q = query(announcementsRef, orderBy('createdAt', 'desc'), limit(1));
-        
-        onSnapshot(q, (snapshot) => {
-            const announcementBar = document.getElementById('adminAnnouncement');
-            const announcementText = document.getElementById('announcementText');
-            
-            if (!snapshot.empty) {
-                const latest = snapshot.docs[0].data();
+        supabaseClient
+            .from(ANNOUNCEMENTS_TABLE)
+            .select('text')
+            .order('createdAt', { ascending: false })
+            .limit(1)
+            .then(({ data, error }) => {
+                const announcementBar = document.getElementById('adminAnnouncement');
+                const announcementText = document.getElementById('announcementText');
+                
+                if (error || !data || data.length === 0) {
+                    console.error("Duyuru çekilirken hata:", error);
+                    announcementBar.style.display = 'none';
+                    return;
+                }
+                
+                const latest = data[0];
                 announcementText.innerText = latest.text;
                 announcementBar.style.display = 'block';
-            } else {
-                announcementBar.style.display = 'none';
-            }
-        });
+            });
     }
 
     // --- NAVİGASYON, KOPYALAMA ve ÇIKIŞ ---
@@ -341,20 +339,80 @@
         alert(`✅ ${text} adresi panoya kopyalandı!`); 
     }
 
+    // Supabase Çıkış İşlemi
     window.handleLogout = function() {
         if (!confirm('Güvenli çıkış yapmak istediğinizden emin misiniz?')) {
             return;
         }
-        signOut(auth).then(() => {
-             localStorage.removeItem('baki_auth_token'); // KRİTİK: Token'ı sil
+        
+        supabaseClient.auth.signOut().then(() => {
+             // Supabase oturumu sonlandırıldı
              window.location.href = 'login.html'; // Giriş sayfasına yönlendir
         }).catch((error) => {
             console.error("Çıkış hatası:", error);
             alert('❌ Çıkış yapılırken bir sorun oluştu. Lütfen tekrar deneyin.');
+            window.location.href = 'login.html'; // Hata olsa bile yönlendir
         });
     }
 
     // --- BAŞLATMA VE VERİ AKIŞI ---
+
+    // Supabase'den gelen veriyi işleyen fonksiyon
+    function processUserData(userData, user) {
+        if (!userData) {
+             console.error("Kullanıcı verisi boş.");
+             return;
+        }
+        
+        const displayEmail = user.email || 'Bilinmiyor';
+        const username = displayEmail.split('@')[0];
+
+        // --- VERİLER ---
+        // Supabase'de 'created_at' veya 'createdAt' kullanılabilir.
+        const regDate = userData.created_at || userData.createdAt; 
+        const balance = userData.balance || 0.00; 
+        const lastPayment = userData.lastPayment;
+        const serviceStatus = userData.serviceStatus || 'FILE_WAITING'; 
+        const siteAdi = userData.site_adi || username; 
+        const adminNotes = userData.admin_notes || 'Yönetici tarafından henüz not eklenmemiş.';
+        
+        const statusCard = document.getElementById('serviceStatus').parentElement;
+        const statusInfo = getStatusInfo(serviceStatus);
+
+        // --- KART VERİLERİNİ GÜNCELLEME ---
+        
+        // 1. Site Adresi
+        const sitePath = `${FALLBACK_SITE_DOMAIN}/${siteAdi}`; 
+        updateCard('siteUrl', sitePath);
+        document.getElementById('siteUrlLink').href = `http://${sitePath}`;
+
+        // 2. Hizmet Durumu
+        statusCard.className = `info-card ${statusInfo.color}`;
+        updateCard('serviceStatus', statusInfo.text, 'serviceMessage', statusInfo.message);
+        
+        // 3. Hesap Bakiyesi
+        updateCard('accountBalance', `₺ ${parseFloat(balance).toFixed(2)}`);
+        updateCard('billingBalance', `₺ ${parseFloat(balance).toFixed(2)}`); 
+
+        // 4. Kayıt Tarihi 
+        updateCard('serviceDuration', formatDate(regDate));
+        
+        // --- DİĞER SEKME VERİLERİ ---
+        updateCard('lastPaymentDate', formatDate(lastPayment)); 
+
+        // Ayarlar Sekmesi Verileri
+        updateCard('settingsUID', user.id); // Supabase user ID
+        updateCard('settingsEmail', displayEmail);
+        updateCard('settingsRegDate', formatDate(regDate));
+        updateCard('settingsAdminNotes', adminNotes);
+    }
+
+    function handleDataFetchError() {
+        updateCard('userEmail', 'Veri Çekme Hatası! 😵');
+        const statusCard = document.getElementById('serviceStatus').parentElement;
+        statusCard.className = 'info-card card-danger';
+        updateCard('serviceStatus', 'VERİ HATASI', 'serviceMessage', 'Veri akışı kesildi. Sayfayı yenileyin.');
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
         // Navigasyon tıklamalarını bağla
@@ -368,94 +426,61 @@
         
         setLoadingState();
         listenForLatestAnnouncement(); // Duyuru dinleyicisini başlat
-    });
 
-    // onAuthStateChanged, hem oturum açma durumunu kontrol eder hem de token yenilemeyi yönetir.
-    onAuthStateChanged(auth, async (user) => {
-        // 🔥 KRİTİK KONTROL: Eğer kullanıcı yoksa veya token geçersizse hemen yönlendir
-        if (!user) {
-            const userToken = localStorage.getItem('baki_auth_token');
-            if (userToken) {
-                // Token varsa, Custom Token ile giriş yapmayı dene (bu, login.html'de de olmalı)
-                try {
-                    await signInWithCustomToken(auth, userToken);
-                    // Başarılıysa, onAuthStateChanged tekrar çalışır ve aşağıdaki if (user) bloğuna girer.
-                    return; 
-                } catch (err) {
-                    console.error("Token ile giriş başarısız. Yönlendiriliyor:", err);
-                    localStorage.removeItem('baki_auth_token');
-                    window.location.href = 'login.html';
-                    return;
-                }
-            } else {
-                // Token zaten yoksa, direkt login'e at
-                 window.location.href = 'login.html';
-                 return;
+        // Oturum Kontrolü ve Veri Çekme (Supabase)
+        supabaseClient.auth.getSession().then(({ data: { session } }) => {
+            if (!session) {
+                // Oturum yoksa veya geçersizse direkt login'e at
+                window.location.href = 'login.html';
+                return;
             }
-        }
-        
-        // Kullanıcı oturum açtı (Veya token ile giriş başarılı oldu)
-        const displayEmail = user.email || 'Bilinmiyor';
-        const username = displayEmail.split('@')[0];
-        const upperUsername = username.charAt(0).toUpperCase() + username.slice(1);
-        
-        updateCard('userEmail', `<strong>${upperUsername}</strong>`);
-        
-        // Firestore Gerçek Zamanlı Dinleyici
-        const userDocRef = doc(db, FirestoreCollectionRoot, user.uid);
-        
-        onSnapshot(userDocRef, (docSnap) => {
-            const statusCard = document.getElementById('serviceStatus').parentElement;
-            let userData = docSnap.exists() ? docSnap.data() : {};
             
-            // --- FIREBASE VERİLERİ ---
-            const regDate = userData.createdAt;
-            const balance = userData.balance || 0.00; // Yönetici panelinde 0.00 olarak ayarlandıysa
-            const lastPayment = userData.lastPayment;
-            const serviceStatus = userData.serviceStatus || 'FILE_WAITING'; // Admin panelinden gelen durum
-            const siteAdi = userData.site_adi || username; // Admin panelinde atanmış site adı veya varsayılan kullanıcı adı
-            const adminNotes = userData.admin_notes || 'Yönetici tarafından henüz not eklenmemiş.';
+            const user = session.user; // Supabase user object
             
-            const statusInfo = getStatusInfo(serviceStatus);
-
-            // --- KART VERİLERİNİ GÜNCELLEME ---
+            const displayEmail = user.email || 'Bilinmiyor';
+            const username = displayEmail.split('@')[0];
+            const upperUsername = username.charAt(0).toUpperCase() + username.slice(1);
             
-            // 1. Site Adresi
-            const sitePath = `${FALLBACK_SITE_DOMAIN}/${siteAdi}`; 
-            updateCard('siteUrl', sitePath);
-            document.getElementById('siteUrlLink').href = `http://${sitePath}`;
-
-            // 2. Hizmet Durumu
-            statusCard.className = `info-card ${statusInfo.color}`;
-            updateCard('serviceStatus', statusInfo.text, 'serviceMessage', statusInfo.message);
+            updateCard('userEmail', `<strong>${upperUsername}</strong>`);
             
-            // 3. Hesap Bakiyesi
-            updateCard('accountBalance', `₺ ${parseFloat(balance).toFixed(2)}`);
-            updateCard('billingBalance', `₺ ${parseFloat(balance).toFixed(2)}`); 
+            // Supabase Gerçek Zamanlı Dinleyici (Customer verisi için)
+            supabaseClient
+                .channel('customer_data')
+                .on(
+                    'postgres_changes',
+                    { event: '*', schema: 'public', table: CUSTOMER_TABLE, filter: `user_id=eq.${user.id}` },
+                    (payload) => {
+                        processUserData(payload.new || payload.old, user); // Yeni veriyi işle
+                    }
+                )
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        // İlk veriyi çekmek için bir SELECT sorgusu yap
+                        supabaseClient
+                            .from(CUSTOMER_TABLE)
+                            .select('*')
+                            .eq('user_id', user.id)
+                            .single() // Tek bir sonuç bekliyoruz
+                            .then(({ data, error }) => {
+                                if (error) {
+                                    console.error("Initial Supabase data fetch error:", error);
+                                    handleDataFetchError();
+                                    return;
+                                }
+                                processUserData(data, user);
+                            });
+                    } else if (status === 'CHANNEL_ERROR') {
+                        console.error("Supabase Realtime Channel Error:", status);
+                        handleDataFetchError();
+                    }
+                });
 
-            // 4. Kayıt Tarihi (Hizmet Süresi yerine)
-            updateCard('serviceDuration', formatDate(regDate));
-            
-            // --- DİĞER SEKME VERİLERİ ---
-            updateCard('lastPaymentDate', formatDate(lastPayment));
-
-            // Ayarlar Sekmesi Verileri
-            updateCard('settingsUID', user.uid);
-            updateCard('settingsEmail', displayEmail);
-            updateCard('settingsRegDate', formatDate(regDate));
-            updateCard('settingsAdminNotes', adminNotes);
-
-        }, (error) => {
-            // Veri çekme hatası (Bağlantı kesintisi vs.)
-            updateCard('userEmail', 'Veri Çekme Hatası! 😵');
-            console.error("Firestore Snapshot Hatası:", error);
-            // Kullanıcıyı uyarmak yerine, sadece kartı kırmızıya çevirebiliriz.
-            const statusCard = document.getElementById('serviceStatus').parentElement;
-            statusCard.className = 'info-card card-danger';
-            updateCard('serviceStatus', 'VERİ HATASI', 'serviceMessage', 'Veri akışı kesildi. Sayfayı yenileyin.');
+        }).catch(error => {
+            // getSession() hatası veya ağ hatası
+            console.error("Kritik Oturum Hatası:", error);
+            window.location.href = 'login.html';
         });
     });
 </script>
-
 </body>
 </html>
