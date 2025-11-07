@@ -703,7 +703,7 @@
     }
 
     // ----------------------------------------------------------------------
-    // 4. GERÇEK ZAMANLI VERİ ÇEKME (DÜZELTİLDİ)
+    // 4. GERÇEK ZAMANLI VERİ ÇEKME 
     // ----------------------------------------------------------------------
 
     async function fetchAndRenderCustomers() {
@@ -711,7 +711,6 @@
         table.style.display = 'none';
 
         try {
-            // Veri çekme mantığı düzeltildi, tüm veriyi doğrudan çekip kullanıyoruz.
             const { data: customers, error } = await supabaseClient
                 .from('customers') 
                 .select('*') 
@@ -724,7 +723,6 @@
             loading.style.display = 'none';
             table.style.display = 'table';
             
-            // 🔥 DÜZELTME: Hatalı map işlemi kaldırıldı. user_id zaten var.
             allCustomers = customers;
 
             if (allCustomers.length === 0) {
@@ -855,7 +853,7 @@
     // ----------------------------------------------------------------------
 
     /**
-     * Müşteri Durumunu Güncelleme (Çalışıyor)
+     * Müşteri Durumunu Güncelleme (lastUpdated kaldırıldı)
      */
     window.updateCustomerStatus = function(userId, newStatus) {
         let statusText = '';
@@ -872,7 +870,8 @@
                     try {
                         const { error } = await supabaseClient
                             .from('customers')
-                            .update({ serviceStatus: newStatus, lastUpdated: new Date().toISOString() }) 
+                            // 🔥 DÜZELTME: lastUpdated kaldırıldı
+                            .update({ serviceStatus: newStatus }) 
                             .eq('user_id', userId);
 
                         if (error) throw error;
@@ -916,11 +915,10 @@
     }
     
     // ----------------------------------------------------------------------
-    // 7. DETAY/DÜZENLE MODALI İŞLEVLERİ (DÜZELTİLDİ)
+    // 7. DETAY/DÜZENLE MODALI İŞLEVLERİ 
     // ----------------------------------------------------------------------
     
     window.showCustomerDetailModal = function(userId) {
-        // 🔥 DÜZELTME: Tutarsızlık giderildi. Artık sadece 'user_id' kullanılıyor.
         const user = allCustomers.find(u => u.user_id === userId); 
         if (!user) return;
 
@@ -937,10 +935,9 @@
     }
     
     /**
-     * Müşteri Detaylarını Kaydetme Fonksiyonu (Çalışıyor)
+     * Müşteri Detaylarını Kaydetme Fonksiyonu (lastUpdated kaldırıldı)
      */
     window.saveCustomerDetails = async function() {
-        // 🔥 DÜZELTME: Tutarsızlık giderildi. user_id kullanılıyor.
         if (!currentEditingUser || !currentEditingUser.user_id) return;
 
         const btn = document.getElementById('saveDetailsBtn');
@@ -955,14 +952,13 @@
             
             const { error } = await supabaseClient
                 .from('customers')
+                // 🔥 DÜZELTME: lastUpdated kaldırıldı
                 .update({
                     site_adi: document.getElementById('detailSiteName').value.trim(),
                     serviceStatus: document.getElementById('detailStatus').value,
                     admin_notes: document.getElementById('detailNotes').value.trim(),
-                    balance: newBalance,
-                    lastUpdated: new Date().toISOString() 
+                    balance: newBalance
                 })
-                // 🔥 DÜZELTME: Doğru alan (user_id) kullanılıyor
                 .eq('user_id', currentEditingUser.user_id); 
 
             if (error) throw error;
@@ -970,6 +966,7 @@
             messageElement.style.color = 'var(--success-color)';
             messageElement.innerText = '✅ Detaylar başarıyla güncellendi!';
             
+            // Veri güncellendikten sonra modalı kapat
             setTimeout(() => {
                 document.getElementById('detailModal').style.display = 'none';
                 currentEditingUser = null;
@@ -992,7 +989,7 @@
     document.getElementById('saveDetailsBtn').addEventListener('click', saveCustomerDetails);
 
     // ----------------------------------------------------------------------
-    // 8. YETKİLENDİRME ve ÇIKIŞ (DÜZELTİLDİ)
+    // 8. YETKİLENDİRME ve ÇIKIŞ 
     // ----------------------------------------------------------------------
 
     /**
