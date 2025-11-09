@@ -1,303 +1,328 @@
-// auth.js - FULL Yetkilendirme (Auth), UI ve Yorum Yönetimi
+// ==============================================================================
+// 🎯 Supabase Yapılandırması
+// ==============================================================================
+const SUPABASE_URL = 'https://pkwqrupzawkwnpkqijqw.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrd3FydXB6YXdrd25wa3FijqwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2OTIxMTcsImV4cCI6MjA3ODI2ODExN30.YJ5j_qeUFyCbsoVcFhXzobRx4-wbjULbZBB3FRB1p2o';
 
-// NOT: Bu dosyanın çalışması için HTML dosyanızda <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-// kütüphanesinin yüklenmiş olması gerekmektedir.
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// --- KRİTİK SABİTLER (DEĞİŞMEYENLER) ---
-const SUPABASE_URL = 'https://ywxhworspkocuzsygsgc.supabase.co'; 
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3eGh3b3JzcGtvY3V6c3lnc2djIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0MzEzMTcsImV4cCI6MjA3ODAwNzMxN30.x7IMaG9C1bF8_RIbv50NfyeymsTu5cwsBRnQy9ZRa8Y'; 
-const RENDER_API_URL = 'https://sosyalpro-api-1.onrender.com'; 
+// ==============================================================================
+// 🚀 Yardımcı Fonksiyonlar
+// ==============================================================================
 
-// Supabase istemcisini oluştur
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// Auth Form Durumu
-let isSignUpMode = false; // Başlangıçta Giriş Yap modunda
-
-// Global Alert Kutusu (sosyal.html'den gelir)
-if (typeof showAlert !== 'function') {
-    // showAlert HTML'de tanımlı değilse hata vermemek için bir fallback
-    window.showAlert = (message, type = 'green') => {
-        console.log(`[ALERT] ${type.toUpperCase()}: ${message}`);
-    };
-}
-
-
-// =========================================================================
-// UI YÖNETİMİ
-// =========================================================================
-
-/**
- * Kullanıcı oturum durumuna göre Navbar, Auth Formu ve Yorum Formunu günceller.
- * Bu fonksiyon, kullanıcının giriş yapıp yapmadığını kontrol eder
- * ve UI'da profil kartını gösterir veya gizler.
- * @param {object} session - Supabase oturum nesnesi.
- */
-function updateUIForAuth(session) {
-    const authButtons = document.getElementById('auth-buttons'); // Giriş/Kayıt butonu alanı (Oturum kapalıyken görünür)
-    const profileArea = document.getElementById('profile-area'); // Profil kartı alanı (Oturum açıkken görünür)
-    const authFormArea = document.getElementById('auth-form-area'); // Giriş/Kayıt formu alanı
-    const commentInputArea = document.getElementById('comment-input-area'); // Yorum gönderme formu alanı
-    const userInfo = document.getElementById('user-info'); // Kullanıcı adı gösterim alanı
-    
-    // Gerekli tüm elemanların var olduğundan emin olun
-    if (!authButtons || !profileArea || !authFormArea || !commentInputArea || !userInfo) {
-        console.error("KRİTİK HATA: UI elementlerinden biri veya birkaçı bulunamadı.");
-        return; 
-    }
-
-    if (session?.user) {
-        // ⭐ KULLANICI GİRİŞ YAPMIŞ DURUMU (PROFİL KARTI GÖRÜNÜR)
-        const email = session.user.email;
-        
-        // Navbar Düzeltmeleri
-        authButtons.classList.add('hidden'); // Giriş/Kayıt butonu gizlenir
-        profileArea.classList.remove('hidden'); // Profil alanı GÖRÜNÜR olur
-
-        // Kullanıcı Adını Göster: E-posta adının @'den önceki kısmını alır
-        if (userInfo) userInfo.textContent = email ? email.split('@')[0] : 'Kullanıcı'; 
-
-        // Form Düzeltmeleri (Yorum formunu açar)
-        authFormArea.classList.add('hidden');
-        commentInputArea.classList.remove('hidden');
-        
+// Sayfadaki global showAlert fonksiyonunu kullanır (sosyal.html ve fiyatlar.html'de tanımlı)
+function showGlobalAlert(message, type = 'green') {
+    if (typeof window.showAlert === 'function') {
+        window.showAlert(message, type);
     } else {
-        // KULLANICI ÇIKIŞ YAPMIŞ DURUMU (PROFİL KARTI GİZLİ)
-        
-        // Navbar Düzeltmeleri
-        authButtons.classList.remove('hidden'); // Giriş/Kayıt butonu GÖRÜNÜR olur
-        profileArea.classList.add('hidden'); // Profil alanı gizlenir
-
-        // Form Düzeltmeleri (Auth formunu açar)
-        authFormArea.classList.remove('hidden');
-        commentInputArea.classList.add('hidden');
-        
-        // Formu başlangıç moduna döndür
-        setAuthMode(false);
+        console.warn('showAlert fonksiyonu bulunamadı. Mesaj:', message);
     }
 }
 
-/**
- * Giriş Yap ve Kayıt Ol formu arasında geçiş yapar.
- * @param {boolean} isSignUp - Kayıt Ol modu ise true, Giriş Yap modu ise false.
- */
-function setAuthMode(isSignUp) {
-    isSignUpMode = isSignUp;
-    const authTitle = document.getElementById('auth-title');
-    const authSubmitBtn = document.getElementById('auth-submit-btn');
-    const toggleAuthModeBtn = document.getElementById('toggle-auth-mode');
+// Oturum durumuna göre sayfa elementlerini günceller.
+function updateUI(user) {
+    const isUserLoggedIn = !!user;
     
-    if (!authTitle || !authSubmitBtn || !toggleAuthModeBtn) {
-        console.error("Auth UI elementleri bulunamadı. setAuthMode çalışamıyor.");
-        return;
+    // Genel Navigasyon Elementleri
+    const loginCta = document.getElementById('login-cta'); // Fiyatlar.html
+    const logoutCta = document.getElementById('logout-cta'); // Fiyatlar.html
+    const authButtons = document.getElementById('auth-buttons'); // Sosyal.html
+    const profileArea = document.getElementById('profile-area'); // Sosyal.html
+    const userInfo = document.getElementById('user-info'); // Sosyal.html
+    
+    // Yorum Bölümü Elementleri (Fiyatlar.html)
+    const commentLoginWarning = document.getElementById('comment-login-warning');
+    const yorumGonderFormuFiyatlar = document.getElementById('yorum-gonder-formu');
+    
+    // Yorum Bölümü Elementleri (Sosyal.html)
+    const authFormAreaSosyal = document.getElementById('auth-form-area');
+    const commentInputAreaSosyal = document.getElementById('comment-input-area');
+    
+    if (loginCta && logoutCta) { // Fiyatlar.html UI Güncelleme
+        loginCta.classList.toggle('hidden', isUserLoggedIn);
+        logoutCta.classList.toggle('hidden', !isUserLoggedIn);
+    }
+    
+    if (authButtons && profileArea) { // Sosyal.html UI Güncelleme
+        authButtons.classList.toggle('hidden', isUserLoggedIn);
+        profileArea.classList.toggle('hidden', !isUserLoggedIn);
+        if (isUserLoggedIn && userInfo) {
+            userInfo.textContent = user.email.split('@')[0]; // E-posta adının ilk kısmını göster
+        }
     }
 
-    if (isSignUp) {
-        authTitle.textContent = 'Yeni Hesap Oluştur';
-        authSubmitBtn.textContent = 'Kayıt Ol';
-        toggleAuthModeBtn.textContent = 'Giriş Yap';
-    } else {
-        authTitle.textContent = 'Giriş Yap';
-        authSubmitBtn.textContent = 'Giriş Yap';
-        toggleAuthModeBtn.textContent = 'Kayıt Ol';
+    // Yorum UI Güncelleme (Fiyatlar.html)
+    if (commentLoginWarning && yorumGonderFormuFiyatlar) {
+        commentLoginWarning.classList.toggle('hidden', isUserLoggedIn);
+        yorumGonderFormuFiyatlar.classList.toggle('hidden', !isUserLoggedIn);
     }
+
+    // Yorum UI Güncelleme (Sosyal.html)
+    if (authFormAreaSosyal && commentInputAreaSosyal) {
+        authFormAreaSosyal.classList.toggle('hidden', isUserLoggedIn);
+        commentInputAreaSosyal.classList.toggle('hidden', !isUserLoggedIn);
+    }
+    
+    // Yorumları yükle (Kullanıcı giriş yapsa da yapmasa da yorumlar yüklenmeli)
+    fetchComments();
 }
 
-
-// =========================================================================
-// YETKİLENDİRME (AUTH) İŞLEMLERİ
-// =========================================================================
-
-/** Kullanıcı girişini dener. */
-async function signIn(email, password) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    
-    if (error) {
-        showAlert(`Giriş hatası: ${error.message}`, 'red');
-        return false;
-    }
-    showAlert('Başarıyla giriş yaptınız!');
-    return true;
-}
-
-/** Yeni kullanıcı kaydını dener. */
-async function signUp(email, password) {
-    const { error } = await supabase.auth.signUp({ email, password });
-
-    if (error) {
-        showAlert(`Kayıt hatası: ${error.message}`, 'red');
-        return false;
-    }
-    
-    // Kayıt başarılı olduğunda kullanıcıyı giriş yapma moduna döndür.
-    showAlert('Kayıt başarılı! Lütfen giriş yapın.');
-    setAuthMode(false); 
-    return true;
-}
-
-/** Form gönderimini işler (Giriş veya Kayıt). */
-async function handleAuthFormSubmit(e) {
-    e.preventDefault();
-
-    const email = document.getElementById('auth-email').value;
-    const password = document.getElementById('auth-password').value;
-
-    if (!email || password.length < 6) {
-        showAlert('E-posta ve en az 6 karakterli şifre girin.', 'red');
-        return;
-    }
-    
-    if (isSignUpMode) {
-        await signUp(email, password);
-    } else {
-        await signIn(email, password);
-    }
-}
-
-/** Kullanıcının oturumunu sonlandırır. */
-async function signOut() {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-        showAlert(`Çıkış hatası: ${error.message}`, 'red');
-    } else {
-        showAlert('Başarıyla çıkış yaptınız.');
-        updateUIForAuth(null); // UI'ı oturum kapalı duruma getir
-    }
-}
-
-
-// =========================================================================
-// YORUM İŞLEMLERİ
-// =========================================================================
-
-/**
- * Yeni gönderilen yorumu yorum listesine ekler (Geçici Simülasyon).
- */
-function renderNewComment(comment) {
-    const list = document.getElementById('comments-list');
-    const loadingMessage = document.getElementById('loading-message');
-    if (loadingMessage) loadingMessage.remove(); 
-
-    const newCommentDiv = document.createElement('div');
-    newCommentDiv.className = 'p-5 primary-light rounded-xl border border-slate-700 section-animate';
-    newCommentDiv.innerHTML = `
-        <p class="text-sm font-semibold text-green-400">${comment.user_name} <span class="text-gray-500 ml-2 font-normal text-xs"> (Şimdi)</span></p>
-        <p class="text-gray-300 mt-1">${comment.content}</p>
-    `;
-    
-    list.prepend(newCommentDiv);
-}
-
-/** Yorum gönderme simülasyonu */
-async function sendComment(pageSlug, userId, userName, content) {
-    try {
-        // Bu kısım normalde Render API'sine POST atar. Şimdi sadece UI güncellemesi yapıyoruz.
-        renderNewComment({
-            user_name: userName,
-            content: content,
-            created_at: new Date().toISOString()
-        });
-        
-        showAlert('Yorumunuz başarıyla gönderildi!', 'green');
-        return true; 
-    } catch (error) {
-        showAlert(`Yorum gönderme hatası: ${error.message}`, 'red');
-        return false;
-    }
-}
-
-// =========================================================================
-// ANA İŞLEVLER (DOM YÜKLENDİĞİNDE ÇALIŞIR)
-// =========================================================================
-
-document.addEventListener('DOMContentLoaded', async () => {
-
-    // A. Oturum Kontrolü ve UI Güncellemesi
-    const { data: { session } } = await supabase.auth.getSession();
-    updateUIForAuth(session);
-    
-    // B. Oturum Değişikliklerini Dinleme
-    supabase.auth.onAuthStateChange((event, session) => {
-        updateUIForAuth(session);
-        // Oturum açılıp kapanınca formu temizle
-        const authForm = document.getElementById('auth-form');
-        if (authForm) authForm.reset();
-    });
-
-    // C. Auth Formu Listener'ları
-    const authForm = document.getElementById('auth-form');
-    if (authForm) {
-        authForm.addEventListener('submit', handleAuthFormSubmit);
-    }
-    
-    // D. Giriş/Kayıt Modu Değiştirme
-    const toggleAuthModeBtn = document.getElementById('toggle-auth-mode');
-    if (toggleAuthModeBtn) {
-        toggleAuthModeBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            // isSignUpMode'un tersine ayarlar
-            setAuthMode(!isSignUpMode);
-            // Mod değişince formu temizle
-            if (authForm) authForm.reset(); 
-        });
-    }
-
-    // E. Çıkış Yap Butonu Listener'ı (Navbar)
-    const logoutCta = document.getElementById('logout-button');
-    if (logoutCta) {
-        logoutCta.addEventListener('click', signOut);
-    }
-    
-    // F. Yorum Gönderme Formu Listener'ı
-    const commentForm = document.getElementById('yorum-gonder-formu');
-    if (commentForm && window.CURRENT_PAGE_SLUG) { 
-        commentForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const commentText = document.getElementById('comment-content').value;
-            if (!commentText.trim()) {
-                 showAlert('Lütfen yorumunuzu yazın.', 'red');
-                 return;
-            }
-            
-            const { data: { user } } = await supabase.auth.getSession();
-            
-            if (!user) {
-                showAlert('Yorum göndermek için lütfen önce giriş yapın.', 'red');
-                return;
-            }
-            
-            const userId = user.id;
-            // Kullanıcı adını, e-posta isminden alıyoruz
-            const userName = user.user_metadata?.full_name || user.email.split('@')[0];
-
-            const result = await sendComment(window.CURRENT_PAGE_SLUG, userId, userName, commentText);
-            
-            if (result) {
-                // Başarılıysa form temizlenir (sendComment içinde zaten showAlert çalıştı)
-                commentForm.reset();
-            }
-        });
-    }
-    
-    // G. Yorumları Yükleme Simülasyonu
+// Yorumları Supabase'den çekme
+async function fetchComments() {
     const commentsList = document.getElementById('comments-list');
-    if (commentsList) {
-        // Geçici olarak statik yorumları yükle
-        setTimeout(() => {
-             const loadingMessage = document.getElementById('loading-message');
-             if (loadingMessage) loadingMessage.remove(); 
-             
-             commentsList.innerHTML = `
-                <div class="p-5 primary-light rounded-xl border border-slate-700 section-animate">
-                    <p class="text-sm font-semibold text-green-400">Ahmet Yılmaz <span class="text-gray-500 ml-2 font-normal text-xs"> (1 gün önce)</span></p>
-                    <p class="text-gray-300 mt-1">Hizmet kalitesi gerçekten harika! Destek ekibi çok hızlı. 5 yıldız.</p>
-                </div>
-                <div class="p-5 primary-light rounded-xl border border-slate-700 section-animate" style="animation-delay: 0.1s;">
-                    <p class="text-sm font-semibold text-green-400">Gizem Demir <span class="text-gray-500 ml-2 font-normal text-xs"> (3 gün önce)</span></p>
-                    <p class="text-gray-300 mt-1">Fiyatlar piyasaya göre çok uygun. Instagram takipçileri anında yüklendi. Teşekkürler!</p>
-                </div>
-             `;
-        }, 1000);
+    if (!commentsList) return; // Yorumlar listesi olmayan sayfaları atla
+    
+    const loadingMessage = document.getElementById('loading-message');
+    if (loadingMessage) loadingMessage.textContent = "Yorumlar yükleniyor...";
+    
+    const pageSlug = window.CURRENT_PAGE_SLUG; 
+    
+    try {
+        const { data: comments, error } = await supabase
+            .from('comments') // 'comments' tablosu varsayılıyor
+            .select('content, user_email, created_at')
+            .eq('page_slug', pageSlug) // Sadece mevcut sayfanın yorumlarını getir
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Fiyatlar.html'deki mevcut yorumları koru, sadece dinamik alanı güncelle
+        if (pageSlug === 'fiyatlar') {
+            const staticComments = commentsList.querySelectorAll('.primary-dark:not(.dynamic-comment)');
+            commentsList.innerHTML = '';
+            staticComments.forEach(comment => commentsList.appendChild(comment));
+        } else {
+             commentsList.innerHTML = '';
+        }
+        
+        if (comments.length === 0 && pageSlug !== 'fiyatlar') {
+             commentsList.innerHTML = '<p class="text-center text-gray-500">Henüz yorum yapılmamış.</p>';
+             return;
+        }
+
+        comments.forEach(comment => {
+            const commentDiv = document.createElement('div');
+            commentDiv.className = 'p-5 primary-dark rounded-xl border border-slate-700 dynamic-comment';
+            
+            const userPart = comment.user_email ? comment.user_email.split('@')[0] : 'Anonim';
+            const timeAgo = new Date(comment.created_at).toLocaleDateString('tr-TR');
+
+            commentDiv.innerHTML = `
+                <p class="text-sm font-semibold text-green-400">${userPart}</p>
+                <p class="text-gray-500 text-xs mt-1">${timeAgo}</p>
+                <p class="text-gray-300 mt-2">${comment.content}</p>
+            `;
+            commentsList.appendChild(commentDiv);
+        });
+        
+    } catch (error) {
+        console.error('Yorumları çekerken hata:', error.message);
+        commentsList.innerHTML = '<p class="text-center text-red-400">Yorumlar yüklenemedi.</p>';
+    }
+}
+
+// ==============================================================================
+// 🔑 Auth İşlevleri
+// ==============================================================================
+
+// Oturum Açma / Kayıt Olma Modalı (Fiyatlar.html için)
+async function handleAuthModal(event) {
+    event.preventDefault();
+    const email = document.getElementById('auth-email').value;
+
+    try {
+        const { error } = await supabase.auth.signInWithOtp({ 
+            email,
+            options: {
+                emailRedirectTo: window.location.href, // Giriş sonrası mevcut sayfaya yönlendir
+            } 
+        });
+
+        if (error) throw error;
+
+        showGlobalAlert('Giriş bağlantınız e-posta adresinize gönderildi! Lütfen kontrol edin.', 'green');
+        document.getElementById('auth-modal').classList.add('hidden'); // Modalı kapat
+
+    } catch (error) {
+        showGlobalAlert('Hata: ' + error.message, 'red');
+        console.error('Giriş Hatası:', error);
+    }
+}
+
+// Oturum Açma / Kayıt Olma Formu (Sosyal.html için)
+async function handleAuthFormSosyal(event) {
+    event.preventDefault();
+    const form = event.target;
+    const email = form.querySelector('#auth-email').value;
+    const password = form.querySelector('#auth-password').value;
+    const isSignUpMode = form.querySelector('#auth-submit-btn').textContent.includes('Kayıt Ol');
+
+    try {
+        let response;
+        if (isSignUpMode) {
+            response = await supabase.auth.signUp({ email, password });
+        } else {
+            response = await supabase.auth.signInWithPassword({ email, password });
+        }
+        
+        const { data, error } = response;
+
+        if (error) throw error;
+        
+        if (isSignUpMode) {
+             showGlobalAlert('Kayıt başarılı! E-posta adresinizi onaylamak için bir bağlantı gönderildi.', 'green');
+        } else {
+             showGlobalAlert('Başarıyla giriş yapıldı!', 'green');
+        }
+        
+        // Şifre alanını temizle
+        form.querySelector('#auth-password').value = '';
+
+    } catch (error) {
+        showGlobalAlert('Hata: ' + error.message, 'red');
+        console.error('Auth Hatası:', error);
+    }
+}
+
+// Oturum Kapatma
+async function handleLogout() {
+    try {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        showGlobalAlert('Başarıyla çıkış yapıldı.', 'green');
+        updateUI(null);
+    } catch (error) {
+        showGlobalAlert('Çıkış yaparken hata oluştu: ' + error.message, 'red');
+        console.error('Çıkış Hatası:', error);
+    }
+}
+
+// Yorum Gönderme İşlevi
+async function handleCommentSubmit(event) {
+    event.preventDefault();
+    const content = event.target.querySelector('#comment-content').value;
+    const user = (await supabase.auth.getSession()).data.session?.user;
+
+    if (!user) {
+        showGlobalAlert('Yorum göndermek için lütfen önce giriş yapın.', 'red');
+        return;
+    }
+
+    try {
+        const { error } = await supabase
+            .from('comments')
+            .insert([
+                { 
+                    content: content, 
+                    user_id: user.id, 
+                    user_email: user.email,
+                    page_slug: window.CURRENT_PAGE_SLUG 
+                },
+            ]);
+
+        if (error) throw error;
+
+        showGlobalAlert('Yorumunuz başarıyla gönderildi!', 'green');
+        event.target.reset(); 
+        fetchComments(); // Yorum listesini yenile
+        
+    } catch (error) {
+        showGlobalAlert('Yorum gönderilirken hata oluştu: ' + error.message, 'red');
+        console.error('Yorum Gönderme Hatası:', error);
+    }
+}
+
+// ==============================================================================
+// 📌 Event Dinleyicileri
+// ==============================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // Oturum Durumu Kontrolü ve UI Güncellemesi
+    supabase.auth.getSession().then(({ data: { session } }) => {
+        updateUI(session?.user || null);
+    });
+    
+    supabase.auth.onAuthStateChange((event, session) => {
+        updateUI(session?.user || null);
+    });
+    
+    // --- Fiyatlar.html için Element Dinleyicileri ---
+    
+    // Auth Modal Açma
+    const loginCta = document.getElementById('login-cta');
+    const authModal = document.getElementById('auth-modal');
+    if (loginCta && authModal) {
+        loginCta.addEventListener('click', () => {
+            authModal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden'); // Sayfa kaydırmasını engelle
+        });
+    }
+    
+    // Auth Modal Kapatma
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    if (closeModalBtn && authModal) {
+        closeModalBtn.addEventListener('click', () => {
+            authModal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        });
+    }
+
+    // Auth Modal Formu Gönderimi
+    const authFormModal = document.getElementById('auth-form');
+    if (authFormModal) {
+        authFormModal.addEventListener('submit', handleAuthModal);
+    }
+    
+    // Oturum Kapatma (Fiyatlar.html)
+    const logoutCta = document.getElementById('logout-cta');
+    if (logoutCta) {
+        logoutCta.addEventListener('click', handleLogout);
+    }
+    
+    // Yorum Gönderme Formu (Fiyatlar.html)
+    const yorumGonderFormuFiyatlar = document.getElementById('yorum-gonder-formu');
+    if (yorumGonderFormuFiyatlar) {
+        yorumGonderFormuFiyatlar.addEventListener('submit', handleCommentSubmit);
+    }
+    
+    // --- Sosyal.html için Element Dinleyicileri ---
+    
+    // Auth Formu Gönderimi (Sosyal.html)
+    const authFormSosyal = document.getElementById('auth-form');
+    const authSubmitBtn = document.getElementById('auth-submit-btn');
+    const toggleAuthMode = document.getElementById('toggle-auth-mode');
+    const authTitle = document.getElementById('auth-title');
+    
+    if (authFormSosyal) {
+        authFormSosyal.addEventListener('submit', handleAuthFormSosyal);
+    }
+
+    // Oturum Kapatma (Sosyal.html)
+    const logoutButtonSosyal = document.getElementById('logout-button');
+    if (logoutButtonSosyal) {
+        logoutButtonSosyal.addEventListener('click', handleLogout);
+    }
+
+    // Kayıt Ol / Giriş Yap Modu Değiştirme (Sosyal.html)
+    if (toggleAuthMode && authSubmitBtn && authTitle) {
+        toggleAuthMode.addEventListener('click', () => {
+            const isSignUp = authSubmitBtn.textContent.includes('Kayıt Ol');
+            
+            authSubmitBtn.textContent = isSignUp ? 'Giriş Yap' : 'Kayıt Ol';
+            toggleAuthMode.textContent = isSignUp ? 'Kayıt Ol' : 'Giriş Yap';
+            authTitle.textContent = isSignUp ? 'Giriş Yap' : 'Kayıt Ol';
+        });
+    }
+
+    // Yorum Gönderme Formu (Sosyal.html)
+    const yorumGonderFormuSosyal = document.getElementById('yorum-gonder-formu');
+    if (yorumGonderFormuSosyal) {
+        yorumGonderFormuSosyal.addEventListener('submit', handleCommentSubmit);
+    }
+    
+    // Yorumlar sayfasının ilk yüklenişinde yorumları çek
+    if (document.getElementById('comments-list')) {
+        fetchComments();
     }
 });
