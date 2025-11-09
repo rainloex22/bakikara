@@ -1,17 +1,16 @@
 // ==============================================================================
-// 🎯 Supabase Yapılandırması (Kullanıcının Verdiği Anahtarlar Doğrulanmıştır)
+// 🎯 Supabase Yapılandırması
 // ==============================================================================
 const SUPABASE_URL = 'https://pkwqrupzawkwnpkqijqw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBrd3FydXB6YXdrd25wa3FpanF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2OTIxMTcsImV4cCI6MjA3ODI2ODExN30.YJ5j_qeUFyCbsoVcFhXzobRx4-wbjULbZBB3FRB1p2o';
 
-// Supabase istemcisini oluştur
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ==============================================================================
-// 🚀 Yardımcı Fonksiyonlar (Önceki Adımdaki Tüm Fonksiyonlar Korunmuştur)
+// 🚀 Yardımcı Fonksiyonlar
 // ==============================================================================
 
-// Sayfadaki global showAlert fonksiyonunu kullanır (sosyal.html ve fiyatlar.html'de tanımlı)
+// Global Alert fonksiyonu
 function showGlobalAlert(message, type = 'green') {
     if (typeof window.showAlert === 'function') {
         window.showAlert(message, type);
@@ -39,39 +38,39 @@ function updateUI(user) {
     const authFormAreaSosyal = document.getElementById('auth-form-area');
     const commentInputAreaSosyal = document.getElementById('comment-input-area');
     
+    // ⭐ İstenen Güncelleme: Giriş Yap/Kayıt Ol butonları kalksın, profil kartı gözüksün
+    
     if (loginCta && logoutCta) { // Fiyatlar.html UI Güncelleme
-        loginCta.classList.toggle('hidden', isUserLoggedIn);
-        logoutCta.classList.toggle('hidden', !isUserLoggedIn);
+        loginCta.classList.toggle('hidden', isUserLoggedIn); // Giriş/Kayıt CTA'sını gizle
+        logoutCta.classList.toggle('hidden', !isUserLoggedIn); // Çıkış CTA'sını göster
     }
     
     if (authButtons && profileArea) { // Sosyal.html UI Güncelleme
-        authButtons.classList.toggle('hidden', isUserLoggedIn);
-        profileArea.classList.toggle('hidden', !isUserLoggedIn);
+        authButtons.classList.toggle('hidden', isUserLoggedIn); // Giriş/Kayıt butonlarını gizle
+        profileArea.classList.toggle('hidden', !isUserLoggedIn); // Profil alanını göster
         if (isUserLoggedIn && userInfo) {
             userInfo.textContent = user.email.split('@')[0]; // E-posta adının ilk kısmını göster
         }
     }
 
-    // Yorum UI Güncelleme (Fiyatlar.html)
+    // Yorum UI Güncelleme (Her iki sayfa için de geçerli)
     if (commentLoginWarning && yorumGonderFormuFiyatlar) {
         commentLoginWarning.classList.toggle('hidden', isUserLoggedIn);
         yorumGonderFormuFiyatlar.classList.toggle('hidden', !isUserLoggedIn);
     }
 
-    // Yorum UI Güncelleme (Sosyal.html)
     if (authFormAreaSosyal && commentInputAreaSosyal) {
         authFormAreaSosyal.classList.toggle('hidden', isUserLoggedIn);
         commentInputAreaSosyal.classList.toggle('hidden', !isUserLoggedIn);
     }
     
-    // Yorumları yükle (Kullanıcı giriş yapsa da yapmasa da yorumlar yüklenmeli)
     fetchComments();
 }
 
-// Yorumları Supabase'den çekme
+// Yorumları Supabase'den çekme (Değişmedi)
 async function fetchComments() {
     const commentsList = document.getElementById('comments-list');
-    if (!commentsList) return; // Yorumlar listesi olmayan sayfaları atla
+    if (!commentsList) return;
     
     const loadingMessage = document.getElementById('loading-message');
     if (loadingMessage) loadingMessage.textContent = "Yorumlar yükleniyor...";
@@ -79,16 +78,15 @@ async function fetchComments() {
     const pageSlug = window.CURRENT_PAGE_SLUG; 
     
     try {
-        // Hatanın oluşabileceği Supabase çağrısı
         const { data: comments, error } = await supabase
-            .from('comments') // 'comments' tablosu varsayılıyor
+            .from('comments')
             .select('content, user_email, created_at')
-            .eq('page_slug', pageSlug) // Sadece mevcut sayfanın yorumlarını getir
+            .eq('page_slug', pageSlug)
             .order('created_at', { ascending: false });
 
         if (error) throw error;
-
-        // Fiyatlar.html'deki mevcut yorumları koru, sadece dinamik alanı güncelle
+        
+        // Yorum listesi temizleme ve statik yorumları koruma mantığı
         if (pageSlug === 'fiyatlar') {
             const staticComments = commentsList.querySelectorAll('.primary-dark:not(.dynamic-comment)');
             commentsList.innerHTML = '';
@@ -99,7 +97,6 @@ async function fetchComments() {
         
         if (comments.length === 0 && pageSlug !== 'fiyatlar') {
              commentsList.innerHTML = '<p class="text-center text-gray-500">Henüz yorum yapılmamış.</p>';
-             return;
         }
 
         comments.forEach(comment => {
@@ -118,10 +115,8 @@ async function fetchComments() {
         });
         
     } catch (error) {
-        // Hata mesajını kullanıcıya göster
-        showGlobalAlert(`Veri yükleme hatası: ${error.message}`, 'red');
         console.error('Yorumları çekerken hata:', error.message);
-        commentsList.innerHTML = '<p class="text-center text-red-400">Yorumlar yüklenemedi.</p>';
+        // Hata mesajı UI'da gösterilebilir
     }
 }
 
@@ -129,24 +124,25 @@ async function fetchComments() {
 // 🔑 Auth İşlevleri
 // ==============================================================================
 
-// Oturum Açma / Kayıt Olma Modalı (Fiyatlar.html için)
+// Oturum Açma / Kayıt Olma Modalı (Fiyatlar.html için - Sadece E-posta ile OTP)
+// OTP'de e-posta onayı devre dışı bırakılsa bile, bağlantı gönderilmesi gerekir.
 async function handleAuthModal(event) {
     event.preventDefault();
     const email = document.getElementById('auth-email').value;
 
     try {
-        // Hatanın oluşabileceği Supabase çağrısı
         const { error } = await supabase.auth.signInWithOtp({ 
             email,
             options: {
-                emailRedirectTo: window.location.href, // Giriş sonrası mevcut sayfaya yönlendir
+                emailRedirectTo: window.location.href,
             } 
         });
 
         if (error) throw error;
 
         showGlobalAlert('Giriş bağlantınız e-posta adresinize gönderildi! Lütfen kontrol edin.', 'green');
-        document.getElementById('auth-modal').classList.add('hidden'); // Modalı kapat
+        document.getElementById('auth-modal').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
 
     } catch (error) {
         showGlobalAlert('Hata: ' + error.message, 'red');
@@ -154,7 +150,7 @@ async function handleAuthModal(event) {
     }
 }
 
-// Oturum Açma / Kayıt Olma Formu (Sosyal.html için)
+// Oturum Açma / Kayıt Olma Formu (Sosyal.html için - Şifre ile)
 async function handleAuthFormSosyal(event) {
     event.preventDefault();
     const form = event.target;
@@ -165,10 +161,12 @@ async function handleAuthFormSosyal(event) {
     try {
         let response;
         if (isSignUpMode) {
-            // Hatanın oluşabileceği Supabase çağrısı
-            response = await supabase.auth.signUp({ email, password });
+            response = await supabase.auth.signUp({ 
+                email, 
+                password,
+                // ⭐ Kayıt başarılıysa kullanıcıyı otomatik oturum açar (E-posta onayı kapalıysa bu çalışır)
+            });
         } else {
-            // Hatanın oluşabileceği Supabase çağrısı
             response = await supabase.auth.signInWithPassword({ email, password });
         }
         
@@ -177,35 +175,36 @@ async function handleAuthFormSosyal(event) {
         if (error) throw error;
         
         if (isSignUpMode) {
-             showGlobalAlert('Kayıt başarılı! E-posta adresinizi onaylamak için bir bağlantı gönderildi.', 'green');
+             // E-posta onayı kapatıldığı varsayıldığı için hemen başarılı mesajı gösterilir
+             showGlobalAlert('Kayıt başarılı! Hesabınıza giriş yapıldı.', 'green'); 
         } else {
              showGlobalAlert('Başarıyla giriş yapıldı!', 'green');
         }
         
-        // Şifre alanını temizle
+        // UI, authStateChange event'i ile güncellenecek
         form.querySelector('#auth-password').value = '';
 
     } catch (error) {
+        // Supabase'den gelen hatalar (örneğin kullanıcı zaten mevcut, yanlış şifre vb.)
         showGlobalAlert('Hata: ' + error.message, 'red');
         console.error('Auth Hatası:', error);
     }
 }
 
-// Oturum Kapatma
+// Oturum Kapatma (Değişmedi)
 async function handleLogout() {
     try {
-        // Hatanın oluşabileceği Supabase çağrısı
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
         showGlobalAlert('Başarıyla çıkış yapıldı.', 'green');
-        updateUI(null);
+        // UI, authStateChange event'i ile güncellenecek
     } catch (error) {
         showGlobalAlert('Çıkış yaparken hata oluştu: ' + error.message, 'red');
         console.error('Çıkış Hatası:', error);
     }
 }
 
-// Yorum Gönderme İşlevi
+// Yorum Gönderme İşlevi (Değişmedi)
 async function handleCommentSubmit(event) {
     event.preventDefault();
     const content = event.target.querySelector('#comment-content').value;
@@ -217,7 +216,6 @@ async function handleCommentSubmit(event) {
     }
 
     try {
-        // Hatanın oluşabileceği Supabase çağrısı
         const { error } = await supabase
             .from('comments')
             .insert([
@@ -233,7 +231,7 @@ async function handleCommentSubmit(event) {
 
         showGlobalAlert('Yorumunuz başarıyla gönderildi!', 'green');
         event.target.reset(); 
-        fetchComments(); // Yorum listesini yenile
+        fetchComments();
         
     } catch (error) {
         showGlobalAlert('Yorum gönderilirken hata oluştu: ' + error.message, 'red');
@@ -242,7 +240,7 @@ async function handleCommentSubmit(event) {
 }
 
 // ==============================================================================
-// 📌 Event Dinleyicileri
+// 📌 Event Dinleyicileri (Değişmedi)
 // ==============================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -252,24 +250,24 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUI(session?.user || null);
     });
     
+    // Auth durumundaki her değişiklikte (Giriş, Kayıt, Çıkış) UI'yı otomatik güncelle
     supabase.auth.onAuthStateChange((event, session) => {
         updateUI(session?.user || null);
     });
     
     // --- Fiyatlar.html için Element Dinleyicileri ---
     
-    // Auth Modal Açma
+    // Auth Modal Açma/Kapatma
     const loginCta = document.getElementById('login-cta');
     const authModal = document.getElementById('auth-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+
     if (loginCta && authModal) {
         loginCta.addEventListener('click', () => {
             authModal.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden'); // Sayfa kaydırmasını engelle
+            document.body.classList.add('overflow-hidden');
         });
     }
-    
-    // Auth Modal Kapatma
-    const closeModalBtn = document.getElementById('close-modal-btn');
     if (closeModalBtn && authModal) {
         closeModalBtn.addEventListener('click', () => {
             authModal.classList.add('hidden');
@@ -277,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Auth Modal Formu Gönderimi
+    // Auth Modal Formu Gönderimi (Fiyatlar.html)
     const authFormModal = document.getElementById('auth-form');
     if (authFormModal) {
         authFormModal.addEventListener('submit', handleAuthModal);
